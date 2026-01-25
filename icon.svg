@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="caseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0E0E0"/>
+      <stop offset="50%" stop-color="#B0B0B0"/>
+      <stop offset="100%" stop-color="#808080"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" fill="#18181b" rx="80"/>
+  <!-- Watch case -->
+  <circle cx="256" cy="256" r="220" fill="url(#caseGrad)"/>
+  <!-- Bezel -->
+  <circle cx="256" cy="256" r="200" fill="#333"/>
+  <!-- Dial -->
+  <circle cx="256" cy="256" r="160" fill="#FAFAFA"/>
+  <!-- Night section -->
+  <path d="M256 256 L256 96 A160 160 0 1 1 136 376 Z" fill="#222"/>
+  <!-- Hour markers -->
+  <text x="256" y="120" text-anchor="middle" font-size="28" font-weight="700" fill="#111" font-family="Arial">12</text>
+  <text x="256" y="405" text-anchor="middle" font-size="28" font-weight="700" fill="#FFF" font-family="Arial">00</text>
+  <!-- Brand -->
+  <text x="256" y="180" text-anchor="middle" font-size="16" font-weight="600" fill="#333" font-family="Arial" letter-spacing="3">AL DHAFAR 3</text>
+  <!-- Hour hand -->
+  <path d="M250 256 L253 150 L256 120 L259 150 L262 256 Z" fill="#C41E3A"/>
+  <path d="M252 256 L254 290 L256 310 L258 290 L260 256 Z" fill="#C41E3A"/>
+  <!-- Minute hand -->
+  <path d="M252 256 L254 180 L256 150 L258 180 L260 256 Z" fill="#C41E3A"/>
+  <!-- Center -->
+  <circle cx="256" cy="256" r="12" fill="#C41E3A"/>
+  <circle cx="256" cy="256" r="5" fill="#8B0000"/>
+</svg>
