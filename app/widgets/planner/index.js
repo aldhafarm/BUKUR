@@ -7,6 +7,7 @@ import {
   INTERESTS, activeProjects, archive, archivedProjects, filterTasks, interestsOf, makeProject, projectOf,
   projectProgress, projectRange, restore, taskColor,
 } from './projects.js';
+import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
   CATEGORIES, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
   periodAt, rangeFor, rangeProgress, shift, tasksIn,
@@ -38,7 +39,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal', projects: [], project: null, lastProject: '' }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal', projects: [], project: null, lastProject: '', goals: [] }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -130,12 +131,53 @@ export default {
 
     // ── المشاريع: مشروع ← خطته (جانت) ← مهامه؛ الاهتمامات وسوم؛ والمنتهي إلى الأرشيف
     let showProjects = false;
+    let showGoals = true;
+    /** إنجاز المشروع: درجة أهدافه الموزونة إن كانت له أهداف، وإلا نسبة مهامه (موزونة بالأيام). */
+    const scoreOf = (all, p) => projectScore(p, all.goals ?? [], all.tasks)?.score ?? projectProgress(all.tasks, p.id);
+
+    // ── أهداف المشروع المفتوح: أوزان مجموعها ١٠٠٪، وقياس لكل هدف، والدرجة مقابل الحد الأدنى للرضا
+    function goalsPanel(all, p) {
+      if (!showGoals) return '';
+      const sc = projectScore(p, all.goals ?? [], all.tasks);
+      const gs = goalsOf(all.goals, p.id);
+      const { weights } = effectiveWeights(gs);
+      const row = ({ goal: g, progress }) => `<li>
+        <b>${esc(g.name)}</b>
+        <label class="pl-gw" ${tip('الوزن ٪ — اتركه فارغاً ليتقاسم الباقي بالتساوي')}><input type="number" min="0" max="100" step="1" data-gweight="${esc(g.id)}" value="${g.weight ?? ''}" placeholder="${Math.round(weights[g.id] * 10) / 10}">٪</label>
+        <span class="pl-gm">${g.kind === 'done'
+          ? `<label ${tip('تمّ؟')}><input type="checkbox" data-gdone="${esc(g.id)}" ${g.current ? 'checked' : ''}> تمّ</label>`
+          : g.kind === 'tasks'
+            ? `<small>${all.tasks.filter((t) => t.goal === g.id).length} مهمة</small>`
+            : `<input type="number" step="any" data-gcur="${esc(g.id)}" value="${g.current}" aria-label="القيمة الحالية"><small>/ ${g.target} ${esc(g.unit)}</small>`}</span>
+        <span class="pl-meter" style="--p:${progress ?? 0}%;--c:var(--green-700)"><i></i></span>
+        <em>${progress == null ? '—' : `${progress}٪`}</em>
+        <button type="button" class="pl-btn" data-gdel="${esc(g.id)}" ${tip('احذف الهدف')}>${icon('delete')}</button>
+      </li>`;
+      return `<div class="pl-goals">
+        <div class="pl-gohead">
+          ${icon('flag')}<b>الأهداف</b>
+          ${sc ? `<span class="pl-score ${sc.status}" ${tip(`الإنجاز الموزون ${sc.score}٪ — الحد الأدنى للرضا ${sc.threshold}٪`)}><span style="--p:${sc.score}%;--t:${sc.threshold}%"><i></i><u></u></span>${sc.score}٪</span>` : ''}
+          <label class="pl-gth" ${tip('الحد الأدنى للرضا عن إنجاز المشروع')}>${icon('ads_click')}<input type="number" min="0" max="100" step="5" data-pthreshold="${esc(p.id)}" value="${p.threshold ?? 70}">٪</label>
+        </div>
+        ${sc && !sc.weightsOk ? `<div class="pl-gwarn">${esc(sc.msg)} <button type="button" data-act="eq-weights">${icon('balance')} وزّع بالتساوي</button></div>` : ''}
+        <ul class="pl-glist">${sc ? sc.rows.map(row).join('') : '<li class="pl-empty">لا أهداف بعد — أضف أهداف المشروع، ولكلٍّ وزنه وقياسه. الأوزان تُوزَّع بالتساوي ما لم تحدّدها.</li>'}</ul>
+        <form class="pl-gadd">
+          <input name="gname" maxlength="60" placeholder="هدف جديد…" aria-label="اسم الهدف" required>
+          <select name="kind" aria-label="طريقة القياس">${Object.entries(GOAL_KINDS).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+          <input name="baseline" type="number" step="any" placeholder="من" aria-label="قيمة البداية" ${tip('قيمة البداية (للرقم)')}>
+          <input name="target" type="number" step="any" placeholder="إلى" aria-label="المستهدف" ${tip('المستهدف (للرقم) — أصغر من البداية إن كان المطلوب خفضاً')}>
+          <input name="unit" maxlength="12" placeholder="الوحدة" aria-label="الوحدة">
+          <input name="weight" type="number" min="0" max="100" placeholder="الوزن ٪" aria-label="الوزن" ${tip('اتركه فارغاً ليتقاسم الباقي بالتساوي')}>
+          <button type="submit" ${tip('أضف الهدف')}>${icon('add')}</button>
+        </form>
+      </div>`;
+    }
     function projectsPanel(all) {
       if (!showProjects) return '';
       const fmt = (k) => `${parse(k).getDate()} ${MONTHS[parse(k).getMonth()].slice(0, 3)} ${parse(k).getFullYear()}`;
       const row = (p) => {
         const rg = projectRange(all.tasks, p.id);
-        const pr = projectProgress(all.tasks, p.id);
+        const pr = scoreOf(all, p);
         const n = all.tasks.filter((t) => t.project === p.id).length;
         return `<li class="${all.project === p.id ? 'on' : ''}">
           <button type="button" class="pl-pname" data-popen="${esc(p.id)}" ${tip('افتح خطة المشروع (جانت)')}>${esc(p.name)}</button>
@@ -239,6 +281,7 @@ export default {
     }
 
     function editor(s) {
+      const all = s;
       const t = s.tasks.find((x) => x.id === editing);
       if (!t) return '';
       return `<form class="pl-edit" data-edit="${esc(t.id)}">
@@ -246,6 +289,7 @@ export default {
         <label>${icon('date_range')}<input type="date" name="start" value="${t.start ?? ''}" aria-label="البداية"><input type="date" name="end" value="${t.end ?? ''}" aria-label="النهاية"></label>
         <label class="pl-prog">${icon('check')}<input type="range" name="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="نسبة الإنجاز"><output>${t.progress}٪</output></label>
         <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(s.projects).concat(projectOf(t, s.projects)?.status === 'archived' ? [projectOf(t, s.projects)] : []).map((p) => `<option value="${esc(p.id)}" ${p.id === t.project ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+        ${goalsOf(all.goals, t.project).length ? `<select name="goal" aria-label="الهدف"><option value="">بلا هدف</option>${goalsOf(all.goals, t.project).map((g) => `<option value="${esc(g.id)}" ${g.id === t.goal ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select>` : ''}
         <div class="pl-colors" role="radiogroup" aria-label="اهتمام المهمة الحرّة">${CATEGORIES.map((c) => `<label ${tip(`${c.label} (للمهمة بلا مشروع)`)}><input type="radio" name="category" value="${c.id}" ${c.id === t.category ? 'checked' : ''}><i style="background:${c.color}"></i></label>`).join('')}</div>
         <div class="pl-row">
           <button type="submit" ${tip('حفظ')}>${icon('check')}</button>
@@ -256,7 +300,16 @@ export default {
       </form>`;
     }
 
+    // حارس إعادة الدخول: استبدال innerHTML يُفقد الحقلَ المحرَّر تركيزه فيطلق «change» أثناء الرسم
+    // (تعديل وزن هدف أو قيمته) — فيُؤجَّل الرسم المتداخل ويُعاد بعد انتهاء الحالي بأحدث حالة.
+    let rendering = false, again = false;
     function render() {
+      if (rendering) { again = true; return; }
+      rendering = true;
+      try { draw(); } finally { rendering = false; }
+      if (again) { again = false; render(); }
+    }
+    function draw() {
       const all = store.get();
       all.projects = all.projects ?? [];
       currentProjects = all.projects;
@@ -305,10 +358,11 @@ export default {
         ${projectsPanel(all)}
         ${openProject ? `<div class="pl-pbanner" style="--c:${INTERESTS.find((c) => c.id === openProject.interests[0])?.color ?? 'var(--green-700)'}">
           ${icon('folder_open')}<b>${esc(openProject.name)}</b>${openProject.status === 'archived' ? '<small>(مؤرشف)</small>' : ''}
-          <em>${projectProgress(all.tasks, openProject.id) ?? 0}٪</em>
+          <em>${scoreOf(all, openProject) ?? 0}٪</em>
+          <button type="button" class="pl-btn" data-act="goals-toggle" aria-expanded="${showGoals}" ${tip('الأهداف ومؤشرات القياس')}>${icon('flag')}<span>${goalsOf(all.goals, openProject.id).length}</span></button>
           ${narrow ? '' : `<button type="button" class="pl-btn" data-act="plan-toggle" ${tip(planMode ? 'اعرض المشروع في التقويم' : 'اعرض خطة المشروع (جانت)')}>${icon(planMode ? 'calendar_month' : 'view_timeline')}</button>`}
           <button type="button" class="pl-btn" data-act="pclose" ${tip('أغلق المشروع — اعرض كل المشاريع')}>${icon('close')}</button>
-        </div>` : catsBar({ ...s, tasks: filterTasks(all.tasks, all.projects, {}) }, r, all.projects)}
+        </div>${goalsPanel(all, openProject)}` : catsBar({ ...s, tasks: filterTasks(all.tasks, all.projects, {}) }, r, all.projects)}
         <div class="pl-body">${body}</div>
         ${laterBox(s)}
         ${editor(all)}
@@ -317,6 +371,7 @@ export default {
           <input type="date" name="start" value="${t0}" aria-label="البداية">
           <input type="date" name="end" value="${addDays(t0, 6)}" aria-label="النهاية">
           <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(all.projects).map((p) => `<option value="${esc(p.id)}" ${p.id === (openProject?.id ?? all.lastProject) ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+          ${openProject ? goalsOf(all.goals, openProject.id).length ? `<select name="goal" aria-label="الهدف"><option value="">بلا هدف</option>${goalsOf(all.goals, openProject.id).map((g) => `<option value="${esc(g.id)}" ${g.id === '' ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select>` : '' : ''}
           <select name="category" aria-label="اهتمام المهمة الحرّة" ${tip('اهتمام المهمة إن كانت بلا مشروع')}>${CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === all.lastCat ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
           <button type="submit" name="when" value="dated" ${tip('أضف المهمة بتاريخيها')}>${icon('add')}</button>
           <button type="submit" name="when" value="later" class="pl-later-btn" ${tip('أضفها إلى «لاحقاً» بلا موعد')}>${icon('inbox')}</button>
@@ -330,6 +385,11 @@ export default {
       const st = store.get();
       const projects = st.projects ?? [];
       const setP = (id, fn) => store.set({ projects: projects.map((p) => (p.id === id ? fn(p) : p)) });
+      if (pick('data-gdel') && confirm('حذف الهدف؟ (مهامه تبقى)')) {
+        const id = pick('data-gdel');
+        store.set({ goals: (st.goals ?? []).filter((g) => g.id !== id), tasks: st.tasks.map(({ goal, ...t }) => (goal === id ? t : { ...t, ...(goal ? { goal } : {}) })) });
+        return;
+      }
       if (pick('data-popen')) { store.set({ project: pick('data-popen'), planView: true }); return; }
       if (pick('data-parchive')) { const id = pick('data-parchive'); setP(id, (p) => archive(p, today())); if (st.project === id) store.set({ project: null }); return; }
       if (pick('data-prestore')) { setP(pick('data-prestore'), restore); return; }
@@ -361,6 +421,8 @@ export default {
       if (act === 'scope') store.set({ scope: nextScope(scopeFor(s.scope, NARROW.matches), NARROW.matches) });
       if (act === 'settings') { showSettings = !showSettings; render(); }
       if (act === 'projects') { showProjects = !showProjects; render(); }
+      if (act === 'goals-toggle') { showGoals = !showGoals; render(); }
+      if (act === 'eq-weights') { const mine = new Set(goalsOf(s.goals, s.project).map((g) => g.id)); store.set({ goals: (s.goals ?? []).map((g) => (mine.has(g.id) ? equalize([g])[0] : g)) }); }
       if (act === 'pclose') store.set({ project: null });
       if (act === 'plan-toggle') store.set({ planView: s.planView === false });
       const curGrid = () => gridOf(s);
@@ -390,18 +452,32 @@ export default {
     el.addEventListener('change', (e) => {
       if (e.target.matches('[data-weekend-preset]') && WEEKEND_PRESETS[e.target.value]) store.set({ weekend: [...WEEKEND_PRESETS[e.target.value].days] });
       if (e.target.matches('[data-week-start]')) store.set({ weekStart: Number(e.target.value) });
+      const st = store.get();
+      const setG = (id, patch) => store.set({ goals: (st.goals ?? []).map((g) => (g.id === id ? makeGoal({ ...g, ...patch }, id) : g)) });
+      if (e.target.dataset.gweight) setG(e.target.dataset.gweight, { weight: e.target.value });
+      if (e.target.dataset.gcur) setG(e.target.dataset.gcur, { current: e.target.value });
+      if (e.target.dataset.gdone) setG(e.target.dataset.gdone, { current: e.target.checked });
+      if (e.target.dataset.pthreshold) store.set({ projects: (st.projects ?? []).map((p) => (p.id === e.target.dataset.pthreshold ? makeProject({ ...p, threshold: e.target.value }, p.id) : p)) });
     });
     el.addEventListener('input', (e) => {
       if (e.target.name === 'progress') e.target.nextElementSibling.textContent = `${e.target.value}٪`;
     });
     /** ربط المهمة بمشروعها: مهمة المشروع تأخذ اهتماماته (فلا تحمل اهتماماً خاصاً)، والحرّة تبقى باهتمامها. */
-    const withProject = (t, pid) => {
+    const withProject = (t, pid, goal) => {
       if (!pid) return t;
       const { category, color, ...rest } = t;
-      return { ...rest, project: pid };
+      const g = goal && (store.get().goals ?? []).some((x) => x.id === goal && x.project === pid) ? goal : undefined; // الهدف من المشروع نفسه فقط
+      return { ...rest, project: pid, ...(g ? { goal: g } : {}) };
     };
     el.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (e.target.matches('.pl-gadd')) {
+        const fd = Object.fromEntries(new FormData(e.target));
+        const st = store.get();
+        const g = makeGoal({ name: fd.gname, project: st.project, kind: fd.kind, weight: fd.weight, baseline: fd.baseline, target: fd.target, unit: fd.unit }, `g${uid()}`);
+        store.set({ goals: [...(st.goals ?? []), g] });
+        return;
+      }
       if (e.target.matches('.pl-padd')) {
         const fd = new FormData(e.target);
         const st = store.get();
@@ -413,12 +489,12 @@ export default {
       const s = store.get();
       if (e.target.matches('.pl-add')) {
         const later = e.submitter?.value === 'later';
-        const nt = withProject(makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid()), f.project);
+        const nt = withProject(makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid()), f.project, f.goal);
         store.set({ tasks: [...s.tasks, nt], lastCat: f.category, lastProject: f.project ?? '',
           hidden: (s.hidden ?? []).filter((x) => x !== f.category) }); // التصنيف المضاف إليه يظهر
       } else if (e.target.dataset.edit) {
         const id = e.target.dataset.edit;
-        store.set({ tasks: s.tasks.map((t) => (t.id === id ? withProject(makeTask(f, id), f.project) : t)) });
+        store.set({ tasks: s.tasks.map((t) => (t.id === id ? withProject(makeTask(f, id), f.project, f.goal) : t)) });
         editing = null;
         render();
       }
