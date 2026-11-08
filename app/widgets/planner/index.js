@@ -4,7 +4,11 @@
 // المرحلة الأولى: مهام بمدة وتصنيف ونسبة إنجاز، وفرز بالتصنيف (كـ AnuCal)، و«لاحقاً» للمهام بلا موعد تُسحب إلى يوم؛ والخطط والأهداف (عشرية ← سنوية ← يومية) لاحقاً فوقها.
 import { icon, tip } from '../../icons.js';
 import {
-  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
+  INTERESTS, activeProjects, archive, archivedProjects, filterTasks, interestsOf, makeProject, projectOf,
+  projectProgress, projectRange, restore, taskColor,
+} from './projects.js';
+import {
+  CATEGORIES, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
   periodAt, rangeFor, rangeProgress, shift, tasksIn,
 } from './plan.js';
 
@@ -18,6 +22,9 @@ function gridOf(state) {
   const g0 = state.grid ?? legacy ?? GRID_PRESETS.date;
   return { ...normalizeGrid(g0), months: Boolean(g0.months) };
 }
+// المشاريع الحالية (تُحدَّث في كل رسم) — لون المهمة من أول اهتمام لمشروعها
+let currentProjects = [];
+const colorOf = (t) => taskColor(t, currentProjects);
 const DOW1 = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']; // حرف اليوم داخل خانة السنة (كـ AnuCal)
 
 /** شريط مهمة: لونها، والجزء المنجز ممتلئ من بدايتها (اليمين). */
@@ -31,7 +38,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal' }, // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal', projects: [], project: null, lastProject: '' }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -109,14 +116,48 @@ export default {
       </span>`;
     }
 
-    // أزرار الفرز بالتصنيف: كل زر يُظهر أو يخفي مهام تصنيفه، وعليه عددها في النطاق المعروض
-    function catsBar(s, r) {
-      const n = countByCategory(s.tasks, r);
+    // أزرار الفرز بالاهتمامات (وسوم المشاريع): كل زر يُظهر أو يخفي مهام اهتمامه، وعليه عددها في النطاق المعروض
+    function catsBar(s, r, projects) {
+      const n = Object.fromEntries(INTERESTS.map((c) => [c.id, 0]));
+      for (const t of tasksIn(s.tasks, r)) for (const i of interestsOf(t, projects)) if (i in n) n[i] += 1;
       const allOn = !s.hidden.length;
-      return `<div class="pl-cats" role="group" aria-label="فرز حسب التصنيف">${CATEGORIES.map((c) => `
+      return `<div class="pl-cats" role="group" aria-label="فرز حسب الاهتمام">${INTERESTS.map((c) => `
         <button type="button" class="pl-cat" data-cat="${c.id}" aria-pressed="${!s.hidden.includes(c.id)}" style="--c:${c.color}" ${tip(`${c.label}: ${n[c.id]} في هذا النطاق — اضغط للإظهار أو الإخفاء`)}>
           <i></i>${c.label}${n[c.id] ? `<em>${n[c.id]}</em>` : ''}</button>`).join('')}
-        <button type="button" class="pl-btn" data-act="cats-all" ${tip(allOn ? 'أخفِ كل التصنيفات' : 'أظهر كل التصنيفات')}>${icon(allOn ? 'visibility_off' : 'visibility')}</button>
+        <button type="button" class="pl-btn" data-act="cats-all" ${tip(allOn ? 'أخفِ كل الاهتمامات' : 'أظهر كل الاهتمامات')}>${icon(allOn ? 'visibility_off' : 'visibility')}</button>
+      </div>`;
+    }
+
+    // ── المشاريع: مشروع ← خطته (جانت) ← مهامه؛ الاهتمامات وسوم؛ والمنتهي إلى الأرشيف
+    let showProjects = false;
+    function projectsPanel(all) {
+      if (!showProjects) return '';
+      const fmt = (k) => `${parse(k).getDate()} ${MONTHS[parse(k).getMonth()].slice(0, 3)} ${parse(k).getFullYear()}`;
+      const row = (p) => {
+        const rg = projectRange(all.tasks, p.id);
+        const pr = projectProgress(all.tasks, p.id);
+        const n = all.tasks.filter((t) => t.project === p.id).length;
+        return `<li class="${all.project === p.id ? 'on' : ''}">
+          <button type="button" class="pl-pname" data-popen="${esc(p.id)}" ${tip('افتح خطة المشروع (جانت)')}>${esc(p.name)}</button>
+          <span class="pl-ptags">${INTERESTS.map((c) => `<button type="button" data-ptag="${esc(p.id)}" data-tag="${c.id}" aria-pressed="${p.interests.includes(c.id)}" style="--c:${c.color}" ${tip(`${c.label} — اضغط لإضافة الوسم أو إزالته`)}>${c.label}</button>`).join('')}</span>
+          <small>${n} مهمة${rg ? ` · ${fmt(rg.start)} ← ${fmt(rg.end)}` : ''}</small>
+          ${pr == null ? '' : `<span class="pl-meter" style="--p:${pr}%;--c:var(--green-700)"><i></i></span><em>${pr}٪</em>`}
+          ${p.status === 'archived'
+            ? `<button type="button" class="pl-btn" data-prestore="${esc(p.id)}" ${tip('أعده إلى المشاريع النشطة')}>${icon('unarchive')}</button>`
+            : `<button type="button" class="pl-btn" data-parchive="${esc(p.id)}" ${tip('انتهى المشروع — انقله إلى الأرشيف')}>${icon('archive')}</button>`}
+        </li>`;
+      };
+      const act = activeProjects(all.projects);
+      const arc = archivedProjects(all.projects);
+      return `<div class="pl-projects">
+        <form class="pl-padd">
+          <input name="pname" maxlength="60" placeholder="مشروع جديد…" aria-label="اسم المشروع" required>
+          <span class="pl-ptags">${INTERESTS.map((c) => `<label style="--c:${c.color}"><input type="checkbox" name="interest" value="${c.id}"><span>${c.label}</span></label>`).join('')}</span>
+          <button type="submit" ${tip('أنشئ المشروع')}>${icon('add')}</button>
+        </form>
+        <ul class="pl-plist">${act.map(row).join('') || '<li class="pl-empty">لا مشاريع بعد — أنشئ مشروعاً، ثم أضف إليه مهام.</li>'}</ul>
+        <details class="pl-archive" ${arc.length ? '' : 'hidden'}><summary>${icon('inventory_2')} الأرشيف <em>${arc.length}</em></summary>
+          <ul class="pl-plist">${arc.map(row).join('')}</ul></details>
       </div>`;
     }
 
@@ -204,7 +245,8 @@ export default {
         <input name="name" value="${esc(t.name)}" maxlength="60" aria-label="اسم المهمة">
         <label>${icon('date_range')}<input type="date" name="start" value="${t.start ?? ''}" aria-label="البداية"><input type="date" name="end" value="${t.end ?? ''}" aria-label="النهاية"></label>
         <label class="pl-prog">${icon('check')}<input type="range" name="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="نسبة الإنجاز"><output>${t.progress}٪</output></label>
-        <div class="pl-colors" role="radiogroup" aria-label="التصنيف">${CATEGORIES.map((c) => `<label ${tip(c.label)}><input type="radio" name="category" value="${c.id}" ${c.id === t.category ? 'checked' : ''}><i style="background:${c.color}"></i></label>`).join('')}</div>
+        <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(s.projects).concat(projectOf(t, s.projects)?.status === 'archived' ? [projectOf(t, s.projects)] : []).map((p) => `<option value="${esc(p.id)}" ${p.id === t.project ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+        <div class="pl-colors" role="radiogroup" aria-label="اهتمام المهمة الحرّة">${CATEGORIES.map((c) => `<label ${tip(`${c.label} (للمهمة بلا مشروع)`)}><input type="radio" name="category" value="${c.id}" ${c.id === t.category ? 'checked' : ''}><i style="background:${c.color}"></i></label>`).join('')}</div>
         <div class="pl-row">
           <button type="submit" ${tip('حفظ')}>${icon('check')}</button>
           ${t.start ? `<button type="button" data-act="unschedule" ${tip('أعدها إلى «لاحقاً» (بلا موعد)')}>${icon('move_to_inbox')}</button>` : ''}
@@ -216,7 +258,11 @@ export default {
 
     function render() {
       const all = store.get();
-      const s = { ...all, tasks: visibleTasks(all.tasks, all.hidden ?? []), hidden: all.hidden ?? [] }; // الفرز يسري على كل العروض والنسبة
+      all.projects = all.projects ?? [];
+      currentProjects = all.projects;
+      const openProject = all.project ? all.projects.find((p) => p.id === all.project) ?? null : null;
+      // الفرز يسري على كل العروض والنسبة: المشروع المفتوح وحده، أو كل المشاريع النشطة بفرز الاهتمامات
+      const s = { ...all, tasks: filterTasks(all.tasks, all.projects, { hidden: all.hidden ?? [], project: openProject?.id ?? null }), hidden: all.hidden ?? [] };
       s.weekend = Array.isArray(all.weekend) ? all.weekend : [5, 6];
       s.weekStart = Number.isInteger(all.weekStart) ? all.weekStart : 0;
       s.grid = gridOf(all);
@@ -230,7 +276,13 @@ export default {
       // دمج التقويم في الشهر والموسم والأسبوع (طلب المالك): شبكة أسابيع × أيام بالمحرّك نفسه، أو جانت
       const calScope = !narrow && ['month', 'season', 'week'].includes(s.scope);
       const asCal = calScope && (all.view ?? 'cal') === 'cal';
-      const body = s.scope === 'year' ? calView(s, r, today()) : asCal ? calView(s, r, today(), { rows: 'week', cols: 'weekday' }) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
+      // خطة المشروع: جانت على مدى مهامه (أو الشهر الحالي إن لم تُجدول بعد)
+      const planMode = openProject && all.planView !== false && !narrow;
+      if (planMode) {
+        const pr = projectRange(all.tasks, openProject.id) ?? rangeFor('month', today());
+        Object.assign(r, { start: pr.start, end: pr.end, label: `خطة: ${openProject.name}` });
+      }
+      const body = planMode ? ganttView(s, r) : s.scope === 'year' ? calView(s, r, today()) : asCal ? calView(s, r, today(), { rows: 'week', cols: 'weekday' }) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
         : s.scope === 'week' && narrow ? weekDaysView(s, r) : ganttView(s, r);
       const t0 = today();
       el.innerHTML = `<div class="pl">
@@ -244,12 +296,19 @@ export default {
             <b>${esc(r.label)}</b>
             <button type="button" class="pl-btn" data-act="next" ${tip('التالي')}>${icon('chevron_left')}</button>
             <button type="button" class="pl-btn" data-act="today" ${tip('اليوم')}>${icon('today')}</button>
+            <button type="button" class="pl-btn" data-act="projects" aria-expanded="${showProjects}" ${tip('المشاريع والأرشيف')}>${icon('folder')}<span>${activeProjects(all.projects).length}</span></button>
             <button type="button" class="pl-btn" data-act="settings" aria-expanded="${showSettings}" ${tip('الإعدادات: عطلة نهاية الأسبوع')}>${icon('settings')}</button>
           </span>
           ${prog == null ? '' : `<span class="pl-chip" ${tip('إنجاز المهام في هذا النطاق (موزون بالأيام)')}>${prog}٪</span>`}
         </div>
         ${settings(s)}
-        ${catsBar({ ...s, tasks: all.tasks }, r)}
+        ${projectsPanel(all)}
+        ${openProject ? `<div class="pl-pbanner" style="--c:${INTERESTS.find((c) => c.id === openProject.interests[0])?.color ?? 'var(--green-700)'}">
+          ${icon('folder_open')}<b>${esc(openProject.name)}</b>${openProject.status === 'archived' ? '<small>(مؤرشف)</small>' : ''}
+          <em>${projectProgress(all.tasks, openProject.id) ?? 0}٪</em>
+          ${narrow ? '' : `<button type="button" class="pl-btn" data-act="plan-toggle" ${tip(planMode ? 'اعرض المشروع في التقويم' : 'اعرض خطة المشروع (جانت)')}>${icon(planMode ? 'calendar_month' : 'view_timeline')}</button>`}
+          <button type="button" class="pl-btn" data-act="pclose" ${tip('أغلق المشروع — اعرض كل المشاريع')}>${icon('close')}</button>
+        </div>` : catsBar({ ...s, tasks: filterTasks(all.tasks, all.projects, {}) }, r, all.projects)}
         <div class="pl-body">${body}</div>
         ${laterBox(s)}
         ${editor(all)}
@@ -257,7 +316,8 @@ export default {
           <input name="name" maxlength="60" placeholder="مهمة جديدة…" aria-label="اسم المهمة" required>
           <input type="date" name="start" value="${t0}" aria-label="البداية">
           <input type="date" name="end" value="${addDays(t0, 6)}" aria-label="النهاية">
-          <select name="category" aria-label="التصنيف">${CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === all.lastCat ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
+          <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(all.projects).map((p) => `<option value="${esc(p.id)}" ${p.id === (openProject?.id ?? all.lastProject) ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+          <select name="category" aria-label="اهتمام المهمة الحرّة" ${tip('اهتمام المهمة إن كانت بلا مشروع')}>${CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === all.lastCat ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
           <button type="submit" name="when" value="dated" ${tip('أضف المهمة بتاريخيها')}>${icon('add')}</button>
           <button type="submit" name="when" value="later" class="pl-later-btn" ${tip('أضفها إلى «لاحقاً» بلا موعد')}>${icon('inbox')}</button>
         </form>
@@ -266,6 +326,18 @@ export default {
     }
 
     el.addEventListener('click', (e) => {
+      const pick = (attr) => e.target.closest(`[${attr}]`)?.getAttribute(attr);
+      const st = store.get();
+      const projects = st.projects ?? [];
+      const setP = (id, fn) => store.set({ projects: projects.map((p) => (p.id === id ? fn(p) : p)) });
+      if (pick('data-popen')) { store.set({ project: pick('data-popen'), planView: true }); return; }
+      if (pick('data-parchive')) { const id = pick('data-parchive'); setP(id, (p) => archive(p, today())); if (st.project === id) store.set({ project: null }); return; }
+      if (pick('data-prestore')) { setP(pick('data-prestore'), restore); return; }
+      if (pick('data-ptag')) {
+        const tag = e.target.closest('[data-tag]').dataset.tag;
+        setP(pick('data-ptag'), (p) => makeProject({ ...p, interests: p.interests.includes(tag) ? p.interests.filter((x) => x !== tag) : [...p.interests, tag] }, p.id));
+        return;
+      }
       const cat = e.target.closest('[data-cat]');
       if (cat) {
         const h = store.get().hidden ?? [];
@@ -288,6 +360,9 @@ export default {
       const s = store.get();
       if (act === 'scope') store.set({ scope: nextScope(scopeFor(s.scope, NARROW.matches), NARROW.matches) });
       if (act === 'settings') { showSettings = !showSettings; render(); }
+      if (act === 'projects') { showProjects = !showProjects; render(); }
+      if (act === 'pclose') store.set({ project: null });
+      if (act === 'plan-toggle') store.set({ planView: s.planView === false });
       const curGrid = () => gridOf(s);
       if (act === 'preset') {
         const G = curGrid();
@@ -319,17 +394,31 @@ export default {
     el.addEventListener('input', (e) => {
       if (e.target.name === 'progress') e.target.nextElementSibling.textContent = `${e.target.value}٪`;
     });
+    /** ربط المهمة بمشروعها: مهمة المشروع تأخذ اهتماماته (فلا تحمل اهتماماً خاصاً)، والحرّة تبقى باهتمامها. */
+    const withProject = (t, pid) => {
+      if (!pid) return t;
+      const { category, color, ...rest } = t;
+      return { ...rest, project: pid };
+    };
     el.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (e.target.matches('.pl-padd')) {
+        const fd = new FormData(e.target);
+        const st = store.get();
+        const p = makeProject({ name: fd.get('pname'), interests: fd.getAll('interest') }, `p${uid()}`);
+        store.set({ projects: [...(st.projects ?? []), p], lastProject: p.id });
+        return;
+      }
       const f = Object.fromEntries(new FormData(e.target));
       const s = store.get();
       if (e.target.matches('.pl-add')) {
         const later = e.submitter?.value === 'later';
-        store.set({ tasks: [...s.tasks, makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid())], lastCat: f.category,
+        const nt = withProject(makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid()), f.project);
+        store.set({ tasks: [...s.tasks, nt], lastCat: f.category, lastProject: f.project ?? '',
           hidden: (s.hidden ?? []).filter((x) => x !== f.category) }); // التصنيف المضاف إليه يظهر
       } else if (e.target.dataset.edit) {
         const id = e.target.dataset.edit;
-        store.set({ tasks: s.tasks.map((t) => (t.id === id ? makeTask(f, id) : t)) });
+        store.set({ tasks: s.tasks.map((t) => (t.id === id ? withProject(makeTask(f, id), f.project) : t)) });
         editing = null;
         render();
       }
