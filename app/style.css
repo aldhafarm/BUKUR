@@ -374,3 +374,4 @@ button { font: inherit; cursor: pointer; }
 .ft-toast { margin: 0; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; color: #1d2a22;
   background: color-mix(in srgb, var(--pulse) 30%, #fff); border: 1px solid var(--pulse); }
 @media (prefers-reduced-motion: reduce) { .ft-face.ft-pulse { animation: none; } }
+.ft-labels text.ft-inf { font-size: 15px; font-weight: 700; fill: #e0393e; font-family: system-ui, sans-serif; } /* ∞ في القمة كساعة البكور */

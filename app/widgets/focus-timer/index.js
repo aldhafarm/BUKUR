@@ -116,6 +116,8 @@ function segmentsMarkup() {
 
 const labelsMarkup = (unit) => (unit === 'percent' ? PERCENT_LABELS : RING[unit].labels).map((n, i, arr) => {
   const [x, y] = pt(104, i / arr.length);
+  // الصفر في القمة يُكتب ∞ كما في ساعة البكور (طلب المالك) — في الدقائق والساعات؛ وفي النسبة تبقى ١٠٠٪
+  if (i === 0 && unit !== 'percent') return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="central" class="ft-inf">∞</text>`;
   return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="central">${unit === 'percent' ? `${n}%` : n}</text>`;
 }).join('');
 
