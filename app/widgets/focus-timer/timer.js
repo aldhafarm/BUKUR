@@ -162,3 +162,28 @@ export function catchUp(s, cfg, now, chain) {
   }
   return { state: st, ended };
 }
+
+/**
+ * لون القطاع بحسب المتبقي من المرحلة (اقتراح لطلب المالك «ألوان تميّز الوقت المتبقي»):
+ * التركيز كإشارة المرور — أخضر (> ٥٠٪) ← أصفر (> ٢٥٪) ← برتقالي (> ١٠٪) ← أحمر؛ والراحة أزرق هادئ.
+ */
+export const PALETTE = { green: '#2e9e6b', yellow: '#e2b33a', orange: '#e8742c', red: '#d9483b', blue: '#3b82c4' };
+export function remainingColor(phase, frac) {
+  if (phase !== 'focus') return PALETTE.blue;
+  if (frac > 0.5) return PALETTE.green;
+  if (frac > 0.25) return PALETTE.yellow;
+  if (frac > 0.1) return PALETTE.orange;
+  return PALETTE.red;
+}
+
+/**
+ * السحب المتصل حول الحلقة: في وحدة الدقائق، عبور القمة مع عقارب الساعة (من آخر الدائرة إلى أولها)
+ * يحوّل إلى الساعات تلقائياً؛ وعبورها عكسياً في الساعات يعيد إلى الدقائق. prevDeg/deg بين ٠ و٣٦٠.
+ */
+export function wrapUnit(unit, prevDeg, deg) {
+  const crossedForward = prevDeg > 270 && deg < 90;
+  const crossedBack = prevDeg < 90 && deg > 270;
+  if (unit === 'minutes' && crossedForward) return 'hours';
+  if (unit === 'hours' && crossedBack) return 'minutes';
+  return unit;
+}
