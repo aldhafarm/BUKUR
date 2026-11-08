@@ -8,6 +8,7 @@ export default embedWidget({
   id: 'vocab',
   name: 'كلمات إنجليزية',
   src: './vocab/index.html',
+  minWidth: 400, // يُصغَّر في القائمة الجانبية بدل أن يُقصّ
   heights: { s: 560, m: 900, l: 1400 },
   note: '١٤ قائمة · بطاقات · نطق · كتابة',
   defaultWidth: 3, // كامل العرض في التبويب الكامل: صفحتها عمودان (التدريب + البطاقة)
