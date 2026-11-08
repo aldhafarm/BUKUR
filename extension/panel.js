@@ -30,3 +30,15 @@ document.getElementById('retry').addEventListener('click', load);
 window.addEventListener('online', load);
 window.addEventListener('offline', () => showProblem('لا يوجد اتصال بالإنترنت.'));
 load();
+
+// ── الجسر إلى شارة الإضافة: البكور (داخل الإطار) يرسل حالة المؤقت، فنمرّرها لخلفية الإضافة.
+// نقبل فقط رسائل الإطار نفسه ومن نطاق البكور.
+const APP_ORIGIN = new URL(APP_URL).origin;
+window.addEventListener('message', (e) => {
+  if (e.origin !== APP_ORIGIN || e.source !== frame.contentWindow || e.data?.type !== 'bukur:timer') return;
+  chrome.runtime.sendMessage({ type: 'timer', state: e.data.state }).catch(() => {});
+});
+// نعطي البكور معرّف الإضافة ليرسل إليها أيضاً حين يُفتح في تبويب كامل
+frame.addEventListener('load', () => {
+  frame.contentWindow?.postMessage({ type: 'bukur:ext', id: chrome.runtime.id }, APP_ORIGIN);
+});

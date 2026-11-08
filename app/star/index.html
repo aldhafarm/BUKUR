@@ -1503,7 +1503,7 @@ function tick(force){
   if(force){render(new Date(),true); return;}
   if(Date.now()>simUntil){const n=new Date(); sl.value=n.getHours()*60+n.getMinutes(); render(n,true);}
 }
-tick(); (function loop(){tick(); requestAnimationFrame(loop);})();
+tick(); setInterval(()=>{ if(!document.hidden) tick(); },1000); /* البكور: مرة كل ثانية بدل ٦٠ مرة/ث (المحتوى يتغيّر بالدقيقة)، ولا رسم والصفحة مخفية — موافقة المالك */
 })();
 </script>
 </body>
