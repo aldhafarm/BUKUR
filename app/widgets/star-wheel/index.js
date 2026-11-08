@@ -6,6 +6,7 @@ export default embedWidget({
   id: 'star-wheel',
   name: 'خارطة النجوم',
   src: './star/index.html',
+  minWidth: 600, // يُصغَّر في القائمة الجانبية بدل أن يُقصّ
   heights: { s: 480, m: 760, l: 1100 },
   note: 'السنة النجمية — ٢٨ منزلة',
 });

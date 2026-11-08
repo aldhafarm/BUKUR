@@ -7,6 +7,7 @@ export default embedWidget({
   id: 'pro-clock',
   name: 'الساعة الاحترافية',
   src: './pro/index.html',
+  minWidth: 420, // يُصغَّر في القائمة الجانبية بدل أن يُقصّ
   heights: { s: 470, m: 760, l: 1400 },
   note: 'تجريبية — النسخة الثانية كما هي',
 });
