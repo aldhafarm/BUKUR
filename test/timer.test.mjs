@@ -60,11 +60,11 @@ test('المرحلة التالية لا تبدأ تلقائياً، والإع�
   assert.equal(r.status, 'idle');
 });
 
-test('المخصص: مدتان من المستخدم بين ١ و١٨٠ دقيقة', () => {
+test('المخصص: مدتان من المستخدم بين ١٠ ثوانٍ و١٢ ساعة (حلقة الساعات)', () => {
   assert.deepEqual([configFor('custom', { focus: 40, short: 8 }).focus, configFor('custom', { focus: 40, short: 8 }).short], [40, 8]);
-  assert.equal(configFor('custom', { focus: 999 }).focus, 180);
-  assert.equal(configFor('custom', { focus: 0 }).focus, 1);
-  assert.equal(configFor('custom', { focus: 'abc' }).focus, 1);
+  assert.equal(configFor('custom', { focus: 999 }).focus, 720);
+  assert.equal(configFor('custom', { focus: 0 }).focus * 60, 10);
+  assert.equal(configFor('custom', { focus: 'abc' }).focus * 60, 10);
 });
 
 test('القطاع يتناقص من ١ إلى ٠', () => {
@@ -93,4 +93,54 @@ test('صيغ العرض', () => {
   assert.equal(formatMinutes(45), '45د');
   assert.equal(formatMinutes(200), '3س 20د');
   assert.equal(formatMinutes(120), '2س');
+});
+
+import { RING, angleToMs, autoUnit, catchUp, customWith, fromHMS, ringFraction, splitHMS } from '../app/widgets/focus-timer/timer.js';
+
+test('الحلقة: سحب ٩٠° = ١٥ دقيقة (دقائق) أو ٣ ساعات (ساعات)، مقرّبة لخطوة', () => {
+  assert.equal(angleToMs(90, 'minutes'), 15 * MIN);
+  assert.equal(angleToMs(90, 'hours'), 3 * 60 * MIN);
+  assert.equal(angleToMs(92, 'minutes'), 15 * MIN);           // تقريب لأقرب دقيقة
+  assert.equal(angleToMs(1, 'minutes'), MIN);                 // لا تقل عن خطوة
+  assert.equal(angleToMs(359.9, 'minutes'), 60 * MIN);        // الالتفاف عند القمة = حلقة كاملة
+  assert.equal(angleToMs(-90, 'minutes'), 45 * MIN);          // زوايا سالبة تُطبَّع
+});
+
+test('القطاع نسبة من الحلقة، وما زاد عليها حلقة كاملة؛ والوحدة تتبع المدة', () => {
+  assert.equal(ringFraction(30 * MIN, 'minutes'), 0.5);
+  assert.equal(ringFraction(90 * MIN, 'minutes'), 1);
+  assert.equal(ringFraction(6 * 60 * MIN, 'hours'), 0.5);
+  assert.equal(autoUnit(60 * MIN), 'minutes');
+  assert.equal(autoUnit(61 * MIN), 'hours');
+  assert.equal(RING.minutes.labels.length, 12);
+});
+
+test('عجلات الساعات/الدقائق/الثواني: تفكيك وتركيب', () => {
+  assert.deepEqual(splitHMS(fromHMS({ h: 1, m: 25, s: 30 })), { h: 1, m: 25, s: 30 });
+  assert.equal(fromHMS({ m: 25 }), 25 * MIN);
+});
+
+test('تعديل المدة يحفظ مدة المرحلة الأخرى، والمخصص بالثواني بين ١٠ث و١٢س', () => {
+  const c = configFor('classic');
+  assert.deepEqual(customWith(c, 'focus', 40 * MIN), { focusSec: 2400, breakSec: 300 });
+  assert.deepEqual(customWith(c, 'short', 7 * MIN), { focusSec: 1500, breakSec: 420 });
+  assert.equal(configFor('custom', { focusSec: 90 }).focus, 1.5);
+  assert.equal(configFor('custom', { focusSec: 1 }).focus * 60, 10);
+  assert.equal(configFor('custom', { focusSec: 99999 }).focus, 720);
+  assert.equal(configFor('custom', { focus: 40, short: 8 }).focus, 40);  // الصيغة القديمة
+});
+
+test('بلا سلسلة: تنتهي المرحلة وتنتظر؛ مع السلسلة: تتوالى من لحظة الانتهاء ولو كانت الصفحة مغلقة', () => {
+  const cfg = PRESETS.classic;
+  const s = start(initial(cfg), T0);
+  const off = catchUp(s, cfg, T0 + 40 * MIN, false);
+  assert.equal(off.ended.length, 1);
+  assert.equal(off.state.status, 'idle');
+  assert.equal(off.state.phase, 'short');
+  // مع السلسلة بعد ٤٠ دقيقة: تركيز ٢٥ ← راحة ٥ (حتى ٣٠) ← تركيز يجري منذ ١٠ دقائق
+  const on = catchUp(s, cfg, T0 + 40 * MIN, true);
+  assert.deepEqual(on.ended.map((e) => e.phase), ['focus', 'short']);
+  assert.equal(on.state.phase, 'focus');
+  assert.equal(on.state.status, 'running');
+  assert.equal(remaining(on.state, T0 + 40 * MIN), 15 * MIN);
 });
