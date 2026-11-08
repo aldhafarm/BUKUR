@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>السنة النجمية — منظومة أبو سلمان</title>
+<style>
+  :root{
+    --ink:#0B1226;
+    --ink-2:#131C36;
+    --brass:#C9A227;
+    --brass-dim:#8A6F1C;
+    --parch:#EDE6D6;
+    --muted:#9AA3BC;
+    --kharif:#C4703A;
+    --shita:#4E7C9B;
+    --rabee:#5E8C61;
+    --saif:#A83C3C;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 50% 22%, #1B2647 0%, var(--ink) 55%, #070C1A 100%);
+    color:var(--parch);
+    font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif;
+    min-height:100vh;
+    padding:18px 12px 40px;
+  }
+  header{max-width:760px;margin:0 auto 6px;text-align:center}
+  h1{
+    font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif;
+    font-size:clamp(22px,6vw,34px);
+    font-weight:600;
+    margin:0 0 4px;
+    color:var(--parch);
+  }
+  .sub{color:var(--muted);font-size:clamp(12px,3.4vw,15px);margin:0}
+  .modes{display:flex;gap:8px;justify-content:center;margin:10px auto 0;max-width:600px}
+  .modebtn{font-family:inherit;font-size:14px;color:#D6DAE8;background:rgba(255,255,255,.05);
+    border:1px solid rgba(201,162,39,.35);border-radius:20px;padding:6px 14px;cursor:pointer}
+  .modebtn.on{background:var(--brass);color:#0B1226;border-color:var(--brass)}
+  select.modebtn{appearance:none;padding-left:26px;
+    background-image:linear-gradient(45deg,transparent 50%,#C9A227 50%),linear-gradient(135deg,#C9A227 50%,transparent 50%);
+    background-position:calc(11px) calc(50% - 2px),calc(16px) calc(50% - 2px);
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  select.modebtn option{background:#131C36;color:#EDE6D6}
+  .hijriwrap{max-width:600px;margin:12px auto 0;text-align:center;font-size:14px;color:#D6DAE8}
+  .hijriwrap input{width:100%;max-width:420px;margin:8px 0 2px;accent-color:#C9A227}
+  .hijriwrap b{color:#C9A227}
+  .hnote{font-size:12.5px;color:#9AA3BC;line-height:1.8}
+  .draftnote{max-width:600px;margin:10px auto 0;text-align:center;font-size:12.5px;
+    color:#D8B96A;line-height:1.8;padding:8px 12px;border:1px dashed rgba(201,162,39,.45);border-radius:10px}
+  .modebtn:focus-visible{outline:2px solid #EDE6D6;outline-offset:2px}
+  .wheel-wrap{max-width:760px;margin:6px auto 0}
+  svg{width:100%;height:auto;display:block;overflow:visible}
+  .seg{cursor:pointer;transition:opacity .18s ease, filter .18s ease}
+  .seg:hover{filter:brightness(1.35)}
+  .seg.active{filter:brightness(1.6)}
+  .lbl{font-size:24px;fill:var(--parch);pointer-events:none;font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif}
+  .lbl-rng{font-size:14px;pointer-events:none;font-weight:600}
+  .lbl-crop{font-size:13.5px;pointer-events:none;font-weight:600}
+  .lbl-idx{font-size:13px;pointer-events:none;fill:#F0DFA6;fill-opacity:.75}
+  .lbl-sm{font-size:14px;fill:#C7CEE2;pointer-events:none}
+  .lbl-tal{font-size:26px;fill:#F2ECDC;pointer-events:none;font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif}
+  .lbl-fas{font-size:33px;fill:#FFF6E2;pointer-events:none;font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro",Tahoma,"FreeSerif",sans-serif}
+  .lbl-fas-d{font-size:19px;fill:#E3DAC2;pointer-events:none}
+  .ring-line{fill:none;stroke:var(--brass);stroke-opacity:.55}
+  .tick{stroke:var(--brass);stroke-opacity:.35;stroke-width:1}
+  .core-n{font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif;font-size:62px;fill:var(--brass);text-anchor:middle}
+  .core-l{font-size:24px;fill:#B9BFD2;text-anchor:middle}
+  .core-t{font-size:18px;fill:var(--brass-dim);text-anchor:middle;margin:14px auto 0;
+    background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+    border:1px solid rgba(201,162,39,.35);
+    border-radius:14px;padding:14px 16px;
+  }
+  .panel .top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .panel .name{font-size:28px;font-weight:700;color:#FFF3D8}
+  .panel .idx{font-size:14px;color:var(--brass);border:1px solid rgba(201,162,39,.5);border-radius:20px;padding:1px 9px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+  .cell{background:rgba(0,0,0,.28);border-radius:9px;padding:8px 10px}
+  .cell b{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-bottom:2px;font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif}
+  .cell span{font-size:17px;color:#F0E9D8}
+  .today-tag{font-size:12.5px;color:#0B1226;background:var(--brass);border-radius:20px;padding:2px 10px;font-family:"Segoe UI","Noto Sans Arabic","Geeza Pro","Arial Unicode MS",Tahoma,"FreeSerif",Arial,sans-serif}
+
+  .cyclewrap{max-width:920px;margin:22px auto 0;padding:0 4px}
+  #cycle{min-width:620px;width:100%;height:auto;display:block}
+  .chartwrap{max-width:1100px;margin:22px auto 0;padding:0 4px}
+  #chart{min-width:900px;width:100%;height:auto;display:block}
+  .ax{stroke:rgba(255,255,255,.22);stroke-width:1}
+  .axlbl{fill:#9AA3BC;font-size:12px}
+  .ptitle{fill:#F0E4C4;font-size:16px}
+  .punit{fill:#8B95B0;font-size:12px}
+  .tablewrap{max-width:1100px;margin:22px auto 0;padding:0 4px}
+  .th2{font-size:19px;color:#F0E4C4;margin:0 0 4px;text-align:center;font-weight:400}
+  .thint{font-size:12.5px;color:#8B95B0;margin:0 0 10px;text-align:center;line-height:1.7}
+  .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(201,162,39,.25);border-radius:12px}
+  #mtable{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+  #mtable th{background:#16203C;color:#F0E4C4;font-weight:400;padding:9px 8px;position:sticky;top:0;
+    border-bottom:1px solid rgba(201,162,39,.4);white-space:nowrap;font-size:12.5px}
+  #mtable td{padding:8px;border-bottom:1px solid rgba(255,255,255,.07);color:#DDE3F0;vertical-align:top}
+  #mtable td.num{color:#FFE9AE;white-space:nowrap;font-size:12px}
+  #mtable td.nm{font-size:15px;color:#FFF3D8;white-space:nowrap}
+  #mtable tr.k td:first-child{border-right:4px solid var(--kharif)}
+  #mtable tr.s td:first-child{border-right:4px solid var(--shita)}
+  #mtable tr.r td:first-child{border-right:4px solid var(--rabee)}
+  #mtable tr.f td:first-child{border-right:4px solid var(--saif)}
+  #mtable tr.now td{background:rgba(201,162,39,.14)}
+  #mtable td.crop{min-width:150px;color:#AEB8CF;font-size:12.5px;line-height:1.65}
+  #mtable td.crop.has{color:#E6EDFB}
+  .legend{max-width:600px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+  .chip{display:flex;align-items:center;gap:6px;font-size:14px;color:#D6DAE8;background:rgba(255,255,255,.05);border-radius:20px;padding:4px 11px}
+  .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+  footer{max-width:600px;margin:18px auto 0;color:#7C86A3;font-size:12.5px;line-height:1.85;text-align:center}
+  footer b{color:#A9B2CB;font-weight:400}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  .tabs{max-width:760px;margin:14px auto 0;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+  .tab{font-family:inherit;font-size:14.5px;color:#D6DAE8;background:rgba(255,255,255,.05);
+    border:1px solid rgba(201,162,39,.3);border-radius:20px;padding:8px 18px;cursor:pointer}
+  .tab.on{background:var(--brass);color:#0B1226;border-color:var(--brass);font-weight:600}
+  .pane{display:none}
+  .pane.on{display:block}
+
+  
+  
+  
+  
+  #tab-clock .bk-head{max-width:640px;margin:0 auto 4px;text-align:center}
+  #tab-clock .bk-head h1{font-size:clamp(22px,6vw,32px);margin:0 0 4px;font-weight:600}
+  .bk-sub{color:var(--muted);font-size:clamp(12px,3.4vw,14.5px);margin:0;line-height:1.9}
+  .bk-wrap{max-width:640px;margin:8px auto 0}
+  #tab-clock svg{width:100%;height:auto;display:block;overflow:visible}
+  .bk-readout{max-width:520px;margin:12px auto 0;display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
+  .bk-cell{background:rgba(255,255,255,.05);border:1px solid rgba(201,162,39,.28);
+    border-radius:11px;padding:9px 11px;text-align:center}
+  .bk-cell b{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-bottom:3px}
+  .bk-cell span{font-size:18px;color:#FFF3D8}
+  .bk-ctrl{max-width:520px;margin:14px auto 0;text-align:center;font-size:13.5px;color:#D6DAE8}
+  .bk-ctrl input{width:100%;max-width:400px;margin:8px 0 2px;accent-color:var(--brass)}
+  .bk-ctrl b{color:var(--brass)}
+  .bk-btn{font-family:inherit;font-size:13px;color:#D6DAE8;background:rgba(255,255,255,.05);
+    border:1px solid rgba(201,162,39,.35);border-radius:20px;padding:6px 13px;cursor:pointer;margin:3px}
+  .bk-btn.on{background:var(--brass);color:#0B1226;border-color:var(--brass)}
+  .bk-ctrl input[type=number]{background:rgba(255,255,255,.06);border:1px solid rgba(201,162,39,.3);
+    color:#EDE6D6;border-radius:8px;padding:4px 6px;font-family:inherit}
+  #tab-clock .bk-foot{max-width:560px;margin:16px auto 0;color:#7C86A3;font-size:12.5px;
+    line-height:1.9;text-align:center}
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>السنة النجمية</h1>
+  <p class="sub">تقويم المنازل على منظومة أبو سلمان — ٢٨ منزلة، ١٢ طالعاً، ٤ فصول، ٣٦٥ يوماً<br>
+  تبدأ السنة بالجبهة ومطلع الخريف، والدوران عكس عقارب الساعة</p>
+</header>
+
+<div class="modes">
+  <button class="modebtn" data-m="seasons">بداية الخريف شرقاً ٩٠°</button>
+  <button class="modebtn" data-m="kaaba">زاوية بدء الطواف ١١٠°</button>
+  <button class="modebtn" data-m="today">تثبيت اليوم في القمة</button>
+  <button class="modebtn" id="coverbtn">غطاء بفتحة</button>
+  <button class="modebtn" id="axesbtn">محاور الكعبة</button>
+  <button class="modebtn" id="hijribtn">الأشهر الهجرية</button>
+  <select class="modebtn" id="cropsel" aria-label="اختر المحصول">
+    <option value="">بدون حلقات المحصول</option>
+    <option value="palm">النخيل</option>
+    <option value="citrus">الحمضيات — الليمون</option>
+  </select>
+</div>
+
+<script src="farm_data.js" onerror="void 0"></script>
+
+<nav class="tabs">
+  <button class="tab on" data-t="wheel">العجلة</button>
+  <button class="tab" data-t="clock">بُكور — الساعة</button>
+  <button class="tab" data-t="chart">المنحنى والدورة</button>
+  <button class="tab" data-t="table">الجدول</button>
+</nav>
+
+<div class="pane on" id="tab-wheel">
+
+<div class="wheel-wrap">
+  <svg id="wheel" viewBox="-145 -145 1290 1290" role="img" aria-label="رسم حلقي لمنازل السنة النجمية"></svg>
+</div>
+
+<div class="panel" id="panel"></div>
+
+<div class="hijriwrap" id="coverwrap" hidden>
+  <label for="aper">اتساع الفتحة <b id="aperlabel"></b></label>
+  <input type="range" id="aper" min="7" max="90" step="1">
+  <div class="hnote">الفتحة تُظهر ما حول اليوم فقط. ٧° ≈ نصف منزلة، ٤٦° ≈ ثلاث منازل، ٩٠° ≈ فصل كامل.</div>
+</div>
+<div class="hijriwrap" id="hijriwrap" hidden>
+  <label for="hyear">السنة الهجرية <b id="hylabel"></b></label>
+  <input type="range" id="hyear" min="1400" max="1500" step="1">
+  <div class="hnote" id="hnote"></div>
+</div>
+<div class="draftnote" id="draftnote" hidden></div>
+<div class="legend" id="legend"></div>
+
+<div class="cyclewrap">
+  <h2 class="th2">دورة الأربع سنوات — ١٤٦١ يوماً</h2>
+  <p class="thint">لولب من أربع لفّات، كل لفّة سنة. اللون لون الفصل، والذهبي هو اليوم الزائد على الطرف في السنة الرابعة.<br>
+  كل سنة تبدأ متأخرة ست ساعات عن سابقتها، فتكتمل الأربع وعشرون ساعة في اليوم الزائد وتعود الدورة إلى نقطة الصفر.</p>
+  <div class="tscroll"><svg id="cycle" viewBox="0 0 920 1170"></svg></div>
+</div>
+
+</div>
+
+<div class="pane" id="tab-clock">
+<div class="bk-head">
+  <h1>بُكور</h1>
+  <p class="bk-sub">حلقتان متحدتا المركز: الساعة في الداخل والتقويم في الخارج<br>
+  الساعة ٢٤ بالصفر جنوباً، والتقويم ٢٨ منزلة باليوم في القمة — وكلتاهما عكس عقارب الساعة</p>
+</div>
+
+<div class="bk-wrap"><svg id="dial" viewBox="-175 -175 1350 1350"></svg></div>
+
+<div class="bk-readout" id="out"></div>
+
+<div class="bk-ctrl" style="margin-bottom:10px">
+  <button class="bk-btn" data-loc="ahsa">الأحساء</button>
+  <button class="bk-btn" data-loc="makkah">مكة المكرمة</button>
+  <button class="bk-btn" id="geo">تحديد موقعي</button>
+  <button class="bk-btn on" id="altbtn">أوتار ارتفاع الشمس</button>
+  <button class="bk-btn on" id="azbtn">مشرق الشمس ومغربها</button>
+  <div id="place" style="font-size:12.5px;color:#8B95B0;margin-top:8px"></div>
+  <label style="font-size:13px">الارتفاع عن سطح البحر
+    <input type="number" id="elev" min="0" max="5000" step="10" style="width:88px"> متر</label>
+</div>
+
+<div class="bk-ctrl">
+  <label for="tsim">معاينة الساعة <b id="tlab"></b></label>
+  <input type="range" id="tsim" min="0" max="1439" step="1">
+  <div style="font-size:12px;color:#8B95B0;margin-top:4px">
+    حرّك المؤشر لترى العقرب يدور، أو اتركه فيعود للوقت الحقيقي بعد ثوانٍ.
+  </div>
+</div>
+
+<div class="bk-foot">
+  ٠٦ شرقاً و١٨ غرباً كما في الواقع — أثر الدوران عكس العقارب. القوس المظلَّل هو الليل،
+  محسوباً من الشروق والغروب الفعليين مع انكسار الجو وانخفاض الأفق بالارتفاع.
+</div>
+</div>
+
+<div class="pane" id="tab-chart">
+<div class="cyclewrap">
+  <h2 class="th2">انزياح التقاويم عبر القرون</h2>
+  <p class="thint">كم يوماً يبتعد كل تقويم عن السنة المدارية (٣٦٥.٢٤٢٢ يوماً) بمرور الزمن؟<br>
+  الخط الأفقي عند ١٣ يوماً يعني منزلة كاملة، وعند ٩١ يوماً فصلاً كاملاً.</p>
+  <div class="tscroll"><svg id="drift" viewBox="0 0 920 530"></svg></div>
+</div>
+
+<div class="chartwrap">
+  <h2 class="th2">المنحنى الزمني — الأحساء</h2>
+  <p class="thint">المحور الأفقي: أيام السنة النجمية من الجبهة إلى الطرف، ثلاثة مقاييس: أيام متساوية (أعلى)، الطوالع ١–١٢، المنازل ١–٢٨ — كلٌّ مرقَّم عند أول يوم لدخوله.<br>
+  ثلاث لوحات فلكية محسوبة لخط عرض ٢٥.٤°، وخمس لوحات مناخية.<br>
+  <b style="color:#8FD19E">عند وضع ملف farm_data.js بجوار الصفحة</b> تتحول اللوحات المناخية تلقائياً إلى بيانات مزرعتك:
+  أربع سلاسل: <b>متصل سميك</b> السنة الجارية · <b>متصل رفيع</b> السنة الماضية ·
+  <b>متقطع</b> الدورة الكاملة السابقة (٤ سنوات) · <b>منقّط</b> خط الأساس الطويل (لا يشمل الدورة الجارية) وحوله ظلّ النطاق ١٠–٩٠٪ ·
+  <b>أخضر متقطع</b> أقدم دورة كاملة — والفرق بينها وبين الدورة السابقة هو <b>الاتجاه الصافي</b> بلا ابتلاع. وبدونه تُعرض معدلات محطة الهفوف ١٩٩١–٢٠٢١.<br><b style="color:#C9A227">شرائط النخيل مسودة:</b> ● منقول من كلام أبو سلمان · ○ ممارسة شائعة تحتاج مراجعتك قبل الاعتماد.</p>
+  <div class="tscroll"><svg id="chart" viewBox="0 0 1020 1268"></svg></div>
+</div>
+
+</div>
+
+<div class="pane" id="tab-table">
+<div class="tablewrap">
+  <h2 class="th2">جدول المنازل الثمانية والعشرين</h2>
+  <p class="thint">الأعمدة الزراعية مسودة: المعلَّم بـ ● منقول من كلام أبو سلمان، والفارغ يُملأ بخبرتك أو بمرجع تذكره.</p>
+  <div class="tscroll"><table id="mtable"></table></div>
+</div>
+
+</div>
+
+<footer>
+  <b>بنية التقويم:</b> الجبهة ١٤ يوماً وبقية المنازل ١٣، فيكتمل العام ٣٦٥،
+  ويُزاد يوم على الطرف في السنة الرابعة المتممة للدورة (١٤٦١ يوماً).<br>
+  <b>التواريخ الميلادية</b> تقريبية ±يوم، مثبّتة على بدء الجبهة في ٦ سبتمبر — ولم يرد هذا التثبيت في المصدر.<br>
+  <b>أوضاع التوجيه:</b> «بداية الخريف شرقاً» و«زاوية بدء الطواف» يثبّتان الحلقات وتدور علامة اليوم،
+  أما «تثبيت اليوم في القمة» فيعكس ذلك — تدور الحلقات كل يوم وتبقى العلامة ثابتة.<br>
+  <b>حلقتا المحصول</b> تُفعَّلان من القائمة أعلاه، ومحتواهما مسودة لا مرجع.<br>
+  <b>الإسناد الفلكي:</b> مطالع المنازل والطوالع تُقابَل بتقويم مركز العجيري (الكويت) —
+  alojeiri.com — ودار التقويم القطري — qatarch.com. الحسابات هنا مستقلة، والمقابلة قيد الإنجاز.<br>
+  <b>مصدر اللوحات المناخية:</b> معدلات محطة الهفوف ١٩٩١–٢٠٢١ من Climate-Data.org — معدلات شهرية مُنعَّمة إلى قيم يومية، لا أرصاداً يومية حقيقية.
+</footer>
+
+<script>
+const CX=500, CY=500;
+const R_OUT=478, R_IN=386, R_TAL=304, R_FAS=222, R_CORE=222;
+
+const SEASONS={
+  "الخريف":{c:"#C4703A", d:92},
+  "الشتاء":{c:"#4E7C9B", d:91},
+  "الربيع":{c:"#5E8C61", d:91},
+  "الصيف" :{c:"#A83C3C", d:91}
+};
+
+// counterclockwise from الجبهة at top
+const M=[
+ ["الجبهة",14,"سهيل","الخريف"],
+ ["الزبرة",13,"سهيل","الخريف"],
+ ["الصرفة",13,"سهيل","الخريف"],
+ ["العواء",13,"الوسم","الخريف"],
+ ["السماك",13,"الوسم","الخريف"],
+ ["الغفر",13,"الوسم","الخريف"],
+ ["الزبانا",13,"الوسم","الخريف"],
+ ["الإكليل",13,"المربعانية","الشتاء"],
+ ["القلب",13,"المربعانية","الشتاء"],
+ ["الشولة",13,"المربعانية","الشتاء"],
+ ["النعائم",13,"الشبط","الشتاء"],
+ ["البلدة",13,"الشبط","الشتاء"],
+ ["سعد الذابح",13,"العقارب","الشتاء"],
+ ["سعد بلع",13,"العقارب","الشتاء"],
+ ["سعد السعود",13,"العقارب","الربيع"],
+ ["سعد الأخبية",13,"الحميمين","الربيع"],
+ ["المقدم",13,"الحميمين","الربيع"],
+ ["المؤخر",13,"الذراعين","الربيع"],
+ ["الرشا",13,"الذراعين","الربيع"],
+ ["الشرطين",13,"الثريا","الربيع"],
+ ["البطين",13,"الثريا","الربيع"],
+ ["الثريا",13,"الثريا","الصيف"],
+ ["الدبران",13,"التويبع","الصيف"],
+ ["الهقعة",13,"الجوزاء","الصيف"],
+ ["الهنعة",13,"الجوزاء","الصيف"],
+ ["الذراع",13,"المرزم","الصيف"],
+ ["النثرة",13,"الكليبين","الصيف"],
+ ["الطرف",13,"سهيل","الصيف"]
+];
+
+const AR="٠١٢٣٤٥٦٧٨٩";
+const ar=n=>String(n).replace(/\d/g,d=>AR[+d]);
+const MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+
+// build day offsets from Sep 6
+let cum=0;
+const items=M.map((m,i)=>{
+  const o={i:i+1,name:m[0],days:m[1],tal:m[2],fas:m[3],from:cum,to:cum+m[1]};
+  cum+=m[1]; return o;
+});
+const TOTAL=cum; // 365
+
+const ANCHOR=new Date(2025,8,6); // 6 Sep, reference year
+function dstr(off){
+  const d=new Date(ANCHOR); d.setDate(d.getDate()+off);
+  return ar(d.getDate())+" "+MONTHS[d.getMonth()];
+}
+
+// today's offset from 6 Sep
+function todayOffset(){
+  const now=new Date();
+  let start=new Date(now.getFullYear(),8,6);
+  if(now<start) start=new Date(now.getFullYear()-1,8,6);
+  return Math.floor((now-start)/86400000)%TOTAL;
+}
+const TOFF=todayOffset();
+const todayItem=items.find(o=>TOFF>=o.from&&TOFF<o.to)||items[0];
+
+const rad=d=>d*Math.PI/180;
+const P=(r,th)=>[CX+r*Math.cos(rad(th)), CY-r*Math.sin(rad(th))];
+const KH=items.filter(o=>o.fas==="الخريف");
+const KH_MID=(KH[0].from+KH.at(-1).to)/2;
+const ROT_SEASONS=0;  // بداية الخريف عند سمت ٩٠° (الشرق تماماً)
+const AZ_HAJAR=110;                       // سمت ركن الحجر الأسود تقريباً (شرق/جنوب شرق)
+const ROT_KAABA=90-AZ_HAJAR;              // بداية السنة عند زاوية بدء الطواف
+function rotToday(){ return 90-((TOFF+0.5)/TOTAL)*360; }   // اليوم مثبّت في القمة
+let ROT=ROT_SEASONS, MODE="seasons", AXES=false, SEL="", HIJRI=0, COVER=0, APER=21;
+
+// التقويم الهجري الحسابي (الجدولي) — يفرق عن أم القرى بيوم أو يومين
+const HMON=["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة",
+            "رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"];
+const hijriToJD=(y,m,d)=>Math.floor((11*y+3)/30)+354*y+30*m-Math.floor((m-1)/2)+d+1948440-385;
+function jdToGreg(jd){
+  let a=jd+32044, b=Math.floor((4*a+3)/146097), c=a-Math.floor(146097*b/4);
+  let dd=Math.floor((4*c+3)/1461), e=c-Math.floor(1461*dd/4), mm=Math.floor((5*e+2)/153);
+  return {y:100*b+dd-4800+Math.floor(mm/10), m:mm+(mm<10?3:-9), d:e-Math.floor((153*mm+2)/5)+1};
+}
+// يوم السنة النجمية لتاريخ ميلادي
+function starDayOf(y,m,d){
+  const t=Date.UTC(y,m-1,d);
+  let anc=Date.UTC(y,8,6); if(t<anc) anc=Date.UTC(y-1,8,6);
+  return Math.round((t-anc)/86400000)%TOTAL+1;
+}
+
+// تقويم المحاصيل — الأيام بترقيم السنة النجمية (١ = أول الجبهة)
+// ● منقول من كلام أبو سلمان   ○ مسودة من الممارسة الشائعة، تحتاج مراجعة
+const CROPCAL={
+ palm:{name:"النخيل",
+  ops:[
+   {t:"التكريب والتنظيف",s:"تكريب",a:26,b:86},
+   {t:"خدمة التربة والتسميد",s:"تسميد",a:57,b:117},
+   {t:"خف الثمار وتقويس العذوق",s:"خف وتقويس",a:210,b:255},
+   {t:"● غرس الفسائل — نافذة البوارح",s:"● غرس الفسائل",a:262,b:326,src:1},
+   {t:"التكميم وتغطية العذوق",s:"تكميم",a:275,b:305},
+   {t:"ذروة الري",s:"ذروة الري",a:269,b:360},
+   {t:"الجني",s:"الجني",a:305,b:365}],
+  pheno:[
+   {t:"طلوع الطلع (الإغريض)",s:"الطلع",a:149,b:191},
+   {t:"التلقيح (التأبير)",s:"التلقيح",a:168,b:217},
+   {t:"الحبابوك — عقد الثمار",s:"الحبابوك",a:191,b:227},
+   {t:"الكمري",s:"الكمري",a:227,b:288},
+   {t:"الخلال (البسر)",s:"الخلال",a:288,b:318},
+   {t:"● الرطب",s:"● الرطب",a:308,b:354,src:1},
+   {t:"التمر",s:"التمر",a:349,b:365}]},
+ citrus:{name:"الحمضيات — الليمون",
+  ops:[
+   {t:"الجني",s:"الجني",a:57,b:176},
+   {t:"التقليم بعد الجني",s:"التقليم",a:149,b:191},
+   {t:"التسميد الربيعي",s:"تسميد",a:177,b:222},
+   {t:"تبييض الجذوع والكاولين",s:"تبييض",a:238,b:299},
+   {t:"ذروة الري",s:"ذروة الري",a:269,b:360}],
+  pheno:[
+   {t:"التزهير الرئيسي",s:"التزهير",a:177,b:237},
+   {t:"عقد الثمار",s:"العقد",a:208,b:268},
+   {t:"نمو الثمرة",s:"نمو الثمرة",a:238,b:355},
+   {t:"التلوين والنضج",s:"التلوين والنضج",a:26,b:117}]}
+};
+// نوافذ متعاقبة لا تتداخل — للعجلة فقط (حلقتان اثنتان)
+const CROPRING={
+ palm:{
+  ops:[{s:"التكريب والتنظيف",a:1,b:60},{s:"خدمة التربة والتسميد",a:61,b:120},
+       {s:"التلقيح",a:168,b:210},{s:"خف الثمار والتقويس",a:211,b:261},
+       {s:"● غرس الفسائل",a:262,b:326,src:1},{s:"الجني",a:327,b:365}],
+  pheno:[{s:"سكون بعد الجني",a:1,b:148},{s:"الطلع",a:149,b:177},{s:"التلقيح",a:178,b:210},
+       {s:"الحبابوك",a:211,b:232},{s:"الكمري",a:233,b:288},{s:"الخلال",a:289,b:312},
+       {s:"● الرطب",a:313,b:348,src:1},{s:"التمر",a:349,b:365}]},
+ citrus:{
+  ops:[{s:"الجني",a:57,b:148},{s:"التقليم",a:149,b:191},{s:"التسميد",a:192,b:237},
+       {s:"تبييض الجذوع",a:238,b:275},{s:"ذروة الري",a:276,b:360}],
+  pheno:[{s:"التلوين والنضج",a:1,b:117},{s:"ثمار ناضجة",a:118,b:176},{s:"التزهير",a:177,b:237},
+       {s:"عقد الثمار",a:238,b:268},{s:"نمو الثمرة",a:269,b:365}]}
+};
+function packLanes(list){
+  const lanes=[];
+  list.slice().sort((x,y)=>x.a-y.a).forEach(it=>{
+    let L=lanes.find(ln=>ln.every(x=>it.a>x.b||it.b<x.a));
+    if(!L){L=[];lanes.push(L);} L.push(it);
+  });
+  return lanes;
+}
+const ang=off=>ROT+(off/TOTAL)*360; // CCW
+
+function sector(r1,r2,a1,a2){
+  const [x1,y1]=P(r2,a1),[x2,y2]=P(r2,a2),[x3,y3]=P(r1,a2),[x4,y4]=P(r1,a1);
+  const big=(a2-a1)>180?1:0;
+  return `M${x1} ${y1} A${r2} ${r2} 0 ${big} 0 ${x2} ${y2} L${x3} ${y3} A${r1} ${r1} 0 ${big} 1 ${x4} ${y4} Z`;
+}
+function tanRot(th){
+  let r=-th+90; while(r>180)r-=360; while(r<-180)r+=360;
+  if(r>90||r<-90) r+=180;
+  return r;
+}
+const NS="http://www.w3.org/2000/svg";
+const svg=document.getElementById("wheel");
+const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+function draw(){
+while(svg.firstChild) svg.removeChild(svg.firstChild);
+const M=SEL?185:145;
+svg.setAttribute("viewBox",`${-M} ${-M} ${1000+2*M} ${1000+2*M}`);
+// ---- rings ----
+[R_OUT,R_IN,R_TAL,R_FAS].forEach(r=>svg.appendChild(el("circle",{cx:CX,cy:CY,r,class:"ring-line","stroke-width":r===R_OUT?2:1})));
+
+// ---- curved text helper: labels follow the ring, never sideways ----
+const defs=el("defs",{}); svg.appendChild(defs);
+let pid=0;
+function arcId(r,mid,span){
+  const flip = Math.sin(rad(mid))<0;            // lower half -> reverse so text stays upright
+  const a1=mid-span, a2=mid+span;
+  const [xs,ys]=P(r, flip?a1:a2);
+  const [xe,ye]=P(r, flip?a2:a1);
+  const sweep = flip?0:1;
+  const id="ap"+(pid++);
+  defs.appendChild(el("path",{id,d:`M${xs} ${ys} A${r} ${r} 0 0 ${sweep} ${xe} ${ye}`}));
+  return id;
+}
+function putArc(r,mid,txt,cls,fill,fs){
+  const flip = Math.sin(rad(mid))<0;
+  const id=arcId(flip?r+fs*0.78:r, mid, 42);
+  const t=el("text",{class:cls});
+  if(fill) t.setAttribute("fill",fill);
+  const tp=el("textPath",{href:"#"+id,startOffset:"50%","text-anchor":"middle"});
+  tp.setAttributeNS("http://www.w3.org/1999/xlink","xlink:href","#"+id);
+  tp.textContent=txt; t.appendChild(tp); svg.appendChild(t);
+  return t;
+}
+
+// horizontal stacked label, used wherever the segment is wide enough
+function putStack(r,mid,lines){
+  const [x,y]=P(r,mid);
+  const total=lines.reduce((a,l)=>a+l.fs*1.25,0);
+  let cy=y-total/2;
+  lines.forEach(l=>{
+    cy+=l.fs*1.05;
+    const t=el("text",{x,y:cy,class:l.cls,"text-anchor":"middle"});
+    if(l.fill) t.setAttribute("fill",l.fill);
+    t.textContent=l.txt; svg.appendChild(t);
+    cy+=l.fs*0.2;
+  });
+}
+const WIDE=25; // درجات: أوسع من ذلك تُكتب أفقياً
+
+// ---- seasons ring ----
+const fasGroups=[];
+items.forEach(o=>{const g=fasGroups.at(-1); if(g&&g.k===o.fas){g.to=o.to;}else fasGroups.push({k:o.fas,from:o.from,to:o.to});});
+fasGroups.forEach(g=>{
+  const a1=ang(g.from),a2=ang(g.to),mid=(a1+a2)/2;
+  svg.appendChild(el("path",{d:sector(R_FAS,R_TAL,a1,a2),fill:SEASONS[g.k].c,"fill-opacity":.85,stroke:"#0B1226","stroke-width":2}));
+  putStack((R_FAS+R_TAL)/2,mid,[
+    {txt:g.k,cls:"lbl-fas",fs:33},
+    {txt:ar(g.to-g.from)+" يوماً",cls:"lbl-fas-d",fs:19},
+    {txt:ar(g.from+1)+" \u2013 "+ar(g.to),cls:"lbl-rng",fill:"#FFE9AE",fs:14}
+  ]);
+});
+
+// ---- tawali ring ----
+const talGroups=[];
+items.forEach(o=>{const g=talGroups.at(-1); if(g&&g.k===o.tal){g.to=o.to;}else talGroups.push({k:o.tal,from:o.from,to:o.to});});
+talGroups.forEach(g=>{
+  const a1=ang(g.from),a2=ang(g.to),mid=(a1+a2)/2;
+  svg.appendChild(el("path",{d:sector(R_TAL,R_IN,a1,a2),fill:SEASONS[items.find(o=>o.from===g.from).fas].c,"fill-opacity":.34,stroke:"#0B1226","stroke-width":1.5}));
+  const lines=[
+    {txt:g.k,cls:"lbl-tal",fs:26},
+    {txt:ar(g.to-g.from)+" يوماً",cls:"lbl-sm",fs:14},
+    {txt:ar(g.from+1)+" \u2013 "+ar(g.to),cls:"lbl-rng",fill:"#FFE9AE",fs:14}
+  ];
+  if((a2-a1)>=WIDE){ putStack((R_TAL+R_IN)/2,mid,lines); }
+  else{
+    putArc(R_TAL+48,mid,g.k,"lbl-tal",null,26);
+    putArc(R_TAL+27,mid,ar(g.to-g.from)+" يوماً","lbl-sm",null,14);
+    putArc(R_TAL+9,mid,ar(g.from+1)+" \u2013 "+ar(g.to),"lbl-rng","#FFE9AE",14);
+  }
+});
+
+// ---- manazil ring ----
+items.forEach(o=>{
+  const a1=ang(o.from),a2=ang(o.to),mid=(a1+a2)/2;
+  const g=el("g",{class:"seg"});
+  g.appendChild(el("path",{d:sector(R_IN,R_OUT,a1,a2),fill:SEASONS[o.fas].c,"fill-opacity":.62,stroke:"#0B1226","stroke-width":1.5}));
+  svg.appendChild(g);
+  const t0=putArc(R_IN+78,mid,ar(o.i),"lbl-idx",null,13);
+  const t1=putArc(R_IN+54,mid,o.name,"lbl",null,23);
+  const t2=putArc(R_IN+33,mid,ar(o.days)+" يوماً","lbl-sm",null,14);
+  const t3=putArc(R_IN+12,mid,ar(o.from+1)+" \u2013 "+ar(o.to),"lbl-rng","#FFE9AE",14);
+  [t0,t1,t2,t3].forEach(t=>g.appendChild(t));
+  g.addEventListener("click",()=>select(o,g));
+  g.dataset.i=o.i;
+});
+
+// ---- crop rings: operations then phenology ----
+let R_EDGE=R_OUT;
+if(SEL && CROPRING[SEL]){
+  const TH=46;   // سماكة الحلقة الواحدة
+  [{key:"ops",base:"#4E7C9B"},{key:"pheno",base:"#6FA36B"}].forEach((RG,ri)=>{
+    const a0=R_OUT+8+ri*(TH+8), a1=a0+TH;
+    svg.appendChild(el("path",{d:sector(a0,a1,ang(0),ang(TOTAL)-0.001),
+      fill:"#FFFFFF","fill-opacity":.05}));
+    CROPRING[SEL][RG.key].forEach(it=>{
+      const A1=ang(it.a-1), A2=ang(it.b);
+      svg.appendChild(el("path",{d:sector(a0,a1,A1,A2),fill:RG.base,
+        "fill-opacity":it.src?.9:.55,stroke:"#0B1226","stroke-width":1.2}));
+      const arcLen=(A2-A1)/360*2*Math.PI*((a0+a1)/2);
+      if(arcLen>56) putArc(a0+15,(A1+A2)/2,it.s,"lbl-crop",it.src?"#FFF8E0":"#EAF1FF",13.5);
+    });
+    svg.appendChild(el("circle",{cx:CX,cy:CY,r:a1,class:"ring-line","stroke-width":1}));
+  });
+  R_EDGE=R_OUT+8+2*(TH+8);
+}
+// ---- Hijri months ring ----
+if(HIJRI){
+  const TH=40, a0=R_EDGE+10, a1=a0+TH;
+  svg.appendChild(el("path",{d:sector(a0,a1,ang(0),ang(TOTAL)-0.001),
+    fill:"#FFFFFF","fill-opacity":.05}));
+  const starts=[];
+  for(let m=1;m<=13;m++){
+    const g=jdToGreg(hijriToJD(HIJRI+(m>12?1:0),(m>12?1:m),1));
+    starts.push(starDayOf(g.y,g.m,g.d));
+  }
+  for(let m=0;m<12;m++){
+    let A=starts[m], B=starts[m+1];
+    const segs = B>A ? [[A,B]] : [[A,TOTAL],[1,B]];   // الشهر الذي يعبر رأس السنة
+    segs.forEach(([x,y])=>{
+      if(y<=x) return;
+      const A1=ang(x-1), A2=ang(y-1);
+      svg.appendChild(el("path",{d:sector(a0,a1,A1,A2),
+        fill: m===8?"#C9A227":(m%2?"#5A6B8C":"#46536E"),
+        "fill-opacity": m===8?.9:.75, stroke:"#0B1226","stroke-width":1}));
+      const len=(A2-A1)/360*2*Math.PI*((a0+a1)/2);
+      if(len>62) putArc(a0+13,(A1+A2)/2,HMON[m],"lbl-crop",m===8?"#0B1226":"#EAF1FF",12.5);
+    });
+  }
+  svg.appendChild(el("circle",{cx:CX,cy:CY,r:a1,class:"ring-line","stroke-width":1}));
+  R_EDGE=a1;
+}
+// ---- cover plate with a wedge aperture ----
+if(COVER){
+  const rIn=R_FAS, rOut=R_EDGE+4, a1=90-APER, a2=90+APER;
+  const circ=(r)=>{
+    const [x0,y0]=P(r,0), [x1,y1]=P(r,180);
+    return `M${x0} ${y0} A${r} ${r} 0 1 0 ${x1} ${y1} A${r} ${r} 0 1 0 ${x0} ${y0} Z`;
+  };
+  const [w1x,w1y]=P(rIn,a1), [w2x,w2y]=P(rOut,a1), [w3x,w3y]=P(rOut,a2), [w4x,w4y]=P(rIn,a2);
+  const wedge=`M${w1x} ${w1y} L${w2x} ${w2y} A${rOut} ${rOut} 0 0 0 ${w3x} ${w3y} `+
+              `L${w4x} ${w4y} A${rIn} ${rIn} 0 0 1 ${w1x} ${w1y} Z`;
+  svg.appendChild(el("path",{d:circ(rOut)+" "+circ(rIn)+" "+wedge,"fill-rule":"evenodd",
+    fill:"#101833","fill-opacity":.97}));
+  svg.appendChild(el("path",{d:circ(rOut)+" "+circ(rIn)+" "+wedge,"fill-rule":"evenodd",
+    fill:"none",stroke:"#C9A227","stroke-opacity":.35,"stroke-width":1}));
+  // حافتا الفتحة
+  [a1,a2].forEach(a=>{
+    const [p1x,p1y]=P(rIn,a), [p2x,p2y]=P(rOut,a);
+    svg.appendChild(el("line",{x1:p1x,y1:p1y,x2:p2x,y2:p2y,
+      stroke:"#C9A227","stroke-width":1.6,"stroke-opacity":.75}));
+  });
+}
+// ---- fixed head marker (today mode) ----
+if(MODE==="today"){
+  const [hx1,hy1]=P(R_EDGE+22,90), [hx2,hy2]=P(R_EDGE+58,90);
+  svg.appendChild(el("path",{d:`M${hx1} ${hy1} L${hx2-14} ${hy2} L${hx2+14} ${hy2} Z`,
+    fill:"#C9A227","fill-opacity":.95}));
+  const ht=el("text",{x:CX,y:hy2-16,"text-anchor":"middle",fill:"#C9A227","font-size":21});
+  ht.textContent="اليوم"; svg.appendChild(ht);
+  const hs=el("text",{x:CX,y:hy2-38,"text-anchor":"middle",fill:"#9AA3BC","font-size":14});
+  hs.textContent=todayItem.name+" · اليوم "+ar(TOFF+1)+" من السنة النجمية"; svg.appendChild(hs);
+}
+// ---- year-start marker (الجبهة) ----
+const sA=ang(0);
+const [sx1,sy1]=P(R_IN-2,sA), [sx2,sy2]=P(R_OUT+34,sA);
+svg.appendChild(el("line",{x1:sx1,y1:sy1,x2:sx2,y2:sy2,stroke:"#EDE6D6","stroke-width":2,"stroke-opacity":.55,"stroke-dasharray":"7 5"}));
+const [sxL,syL]=P(R_EDGE+50,sA-7);
+const st=el("text",{x:sxL,y:syL,"text-anchor":"middle",fill:"#EDE6D6","font-size":19,"fill-opacity":.8,transform:`rotate(${tanRot(sA-7)} ${sxL} ${syL})`});
+st.textContent="بداية السنة"; svg.appendChild(st);
+
+// ---- today needle ----
+const tA=ang(TOFF+.5);
+const [nx1,ny1]=P(R_FAS-6,tA), [nx2,ny2]=P(R_OUT+16,tA);
+svg.appendChild(el("line",{x1:nx1,y1:ny1,x2:nx2,y2:ny2,stroke:"#C9A227","stroke-width":3,"stroke-linecap":"round","stroke-opacity":.95}));
+svg.appendChild(el("circle",{cx:nx2,cy:ny2,r:9,fill:"#C9A227"}));
+const [tx,ty]=P(R_EDGE+42,tA);
+const tt=el("text",{x:tx,y:ty,"text-anchor":"middle",fill:"#C9A227","font-size":22,"fill-opacity":MODE==="today"?0:1,"font-family":"Segoe UI, Noto Sans Arabic, Geeza Pro, Tahoma, FreeSerif, sans-serif",transform:`rotate(${tanRot(tA)} ${tx} ${ty})`});
+tt.textContent="اليوم"; svg.appendChild(tt);
+
+// ---- core ----
+svg.appendChild(el("circle",{cx:CX,cy:CY,r:R_CORE,fill:"#0D1531",stroke:"#C9A227","stroke-width":2,"stroke-opacity":.7}));
+const c1=el("text",{x:CX,y:CY-14,class:"core-n"}); c1.textContent="٣٦٥"; svg.appendChild(c1);
+const c2=el("text",{x:CX,y:CY+22,class:"core-l"}); c2.textContent="يوماً"; svg.appendChild(c2);
+const c3=el("text",{x:CX,y:CY+64,class:"core-t"}); c3.textContent="٤ فصول، ١٢ طالعاً، ٢٨ منزلة"; svg.appendChild(c3);
+const c4=el("text",{x:CX,y:CY-62,class:"core-t"}); c4.textContent="عكس عقارب الساعة"; svg.appendChild(c4);
+{
+  if(AXES){
+    const AZ=a=>90-a;                       // سمت بوصلة -> زاوية الرسم
+    const axis=(a,col,dash)=>{
+      const [x1,y1]=P(140,AZ(a)), [x2,y2]=P(R_EDGE+26,AZ(a));
+      svg.appendChild(el("line",{x1,y1,x2,y2,stroke:col,"stroke-width":2.5,
+        "stroke-dasharray":dash,"stroke-opacity":.9,"stroke-linecap":"round"}));
+    };
+    axis(156,"#F2C14E","0"); axis(336,"#F2C14E","0");        // المحور الأكبر
+    axis(65,"#7FC7E8","9 7"); axis(245,"#7FC7E8","9 7");     // المحور الأصغر
+    axis(110,"#E8E2D2","3 6");                               // ركن الحجر الأسود
+    [[156,"مطلع سهيل ١٥٦°","#F2C14E"],[336,"مغيب بنات نعش ٣٣٦°","#F2C14E"],
+     [65,"شروق الصيف ٦٥°","#7FC7E8"],[245,"غروب الشتاء ٢٤٥°","#7FC7E8"],
+     [110,"ركن الحجر الأسود ١١٠°","#E8E2D2"]].forEach(([a,w,col])=>{
+      const th=AZ(a); const [x,y]=P(R_EDGE+58,th);
+      const t=el("text",{x,y,"text-anchor":"middle",fill:col,"font-size":17,
+        transform:`rotate(${tanRot(th)} ${x} ${y})`});
+      t.textContent=w; svg.appendChild(t);
+    });
+  }
+  if(MODE!=="today") [["شمال",90],["شرق",0],["جنوب",270],["غرب",180]].forEach(([w,a])=>{
+    const [x,y]=P(R_EDGE+104,a);
+    const t=el("text",{x,y,"text-anchor":"middle",fill:"#8FA0C6","font-size":20});
+    t.textContent=w; svg.appendChild(t);
+  });
+}
+}
+
+// ---- panel ----
+const panel=document.getElementById("panel");
+function select(o,node){
+  document.querySelectorAll(".seg.active").forEach(n=>n.classList.remove("active"));
+  if(node) node.classList.add("active");
+  panel.innerHTML=`
+    <div class="top">
+      <span class="name">${o.name}</span>
+      <span class="idx">المنزلة ${ar(o.i)}</span>
+      ${o===todayItem?'<span class="today-tag">اليوم</span>':''}
+    </div>
+    <div class="grid">
+      <div class="cell"><b>الفصل</b><span>${o.fas}</span></div>
+      <div class="cell"><b>الطالع</b><span>${o.tal}</span></div>
+      <div class="cell"><b>المدة</b><span>${ar(o.days)} يوماً</span></div>
+      <div class="cell"><b>من</b><span>${dstr(o.from)}</span></div>
+      <div class="cell"><b>إلى</b><span>${dstr(o.to-1)}</span></div>
+      <div class="cell"><b>يوم السنة</b><span>${ar(o.from+1)}–${ar(o.to)}</span></div>
+    </div>`;
+}
+function refresh(){
+  draw(); drawChart();
+  const dn=document.getElementById("draftnote");
+  document.getElementById("coverbtn").classList.toggle("on",!!COVER);
+  const cw=document.getElementById("coverwrap"); cw.hidden=!COVER;
+  if(COVER) document.getElementById("aperlabel").textContent="±"+ar(APER)+"°  ("+
+    ar((APER*2/360*365).toFixed(0))+" يوماً)";
+  const hw=document.getElementById("hijriwrap");
+  document.getElementById("hijribtn").classList.toggle("on",!!HIJRI);
+  hw.hidden=!HIJRI;
+  if(HIJRI){
+    document.getElementById("hylabel").textContent=ar(HIJRI)+" هـ";
+    const g1=jdToGreg(hijriToJD(HIJRI,1,1)), g9=jdToGreg(hijriToJD(HIJRI,9,1));
+    const sd9=starDayOf(g9.y,g9.m,g9.d);
+    let mz=items.find(o=>sd9>o.from&&sd9<=o.to)||items[0];
+    document.getElementById("hnote").innerHTML=
+      "١ محرم يوافق "+ar(g1.d)+"/"+ar(g1.m)+"/"+ar(g1.y)+" م · "+
+      "<b>رمضان يبدأ في منزلة "+mz.name+"</b> (اليوم "+ar(sd9)+" من السنة النجمية)<br>"+
+      "حرّك المؤشر ٣٣ سنة لترى الأشهر تُتمّ دورة كاملة حول العجلة — تقويم حسابي، يفرق عن أم القرى بيوم أو يومين.";
+  }
+  if(SEL){ dn.hidden=false;
+    dn.innerHTML="حلقتا <b>"+CROPCAL[SEL].name+"</b> مُضافتان خارج المنازل. "+
+      "المعلَّم بـ ● منقول من كلام أبو سلمان، وما عداه <b>مسودة</b> تحتاج مراجعتك. "+
+      "حلقتا العجلة نوافذ <b>متعاقبة لا تتداخل</b>؛ البنود المتزامنة (كذروة الري والتكميم) تظهر في المنحنى أسفل الصفحة لا في العجلة.";
+  } else dn.hidden=true;
+  select(todayItem, document.querySelector(`.seg[data-i="${todayItem.i}"]`));
+  document.querySelectorAll(".modebtn[data-m]").forEach(b=>b.classList.toggle("on", b.dataset.m===MODE));
+}
+document.querySelectorAll(".modebtn[data-m]").forEach(b=>b.addEventListener("click",()=>{
+  MODE=b.dataset.m; ROT = MODE==="kaaba"?ROT_KAABA:(MODE==="today"?rotToday():ROT_SEASONS); refresh();
+}));
+document.getElementById("cropsel").addEventListener("change",e=>{ SEL=e.target.value; refresh(); });
+const hySlider=document.getElementById("hyear");
+hySlider.addEventListener("input",e=>{ HIJRI=+e.target.value; refresh(); });
+const apSlider=document.getElementById("aper");
+apSlider.value=APER;
+apSlider.addEventListener("input",e=>{ APER=+e.target.value; refresh(); });
+document.getElementById("coverbtn").addEventListener("click",()=>{
+  COVER=COVER?0:1;
+  if(COVER && MODE!=="today"){ MODE="today"; ROT=rotToday(); }
+  refresh();
+});
+document.getElementById("hijribtn").addEventListener("click",()=>{
+  if(HIJRI){ HIJRI=0; } else {
+    // السنة الهجرية الجارية تقريباً
+    const now=new Date();
+    let hy=1400; while(jdToGreg(hijriToJD(hy+1,1,1)).y<=now.getFullYear()) hy++;
+    HIJRI=hy; hySlider.value=hy;
+  }
+  refresh();
+});
+document.getElementById("axesbtn").addEventListener("click",()=>{
+  AXES=!AXES;
+  document.getElementById("axesbtn").classList.toggle("on",AXES);
+  refresh();
+});
+refresh();
+
+// ---- chart: astronomy of the year at Al-Ahsa (25.38 N) ----
+function drawChart(){
+  const sv0=document.getElementById("chart"); while(sv0.firstChild) sv0.removeChild(sv0.firstChild);
+  const PHI=25.38*Math.PI/180, GSC=0.0820;
+  const J_OF=d=>{ const dt=new Date(ANCHOR); dt.setDate(dt.getDate()+d-1);
+    return Math.round((dt-new Date(dt.getFullYear(),0,0))/86400000); };
+  // معدلات الهفوف الشهرية ١٩٩١–٢٠٢١ (Climate-Data.org)
+  const MON={tmax:[20.7,23.8,29,35,41,43.8,45.1,44.9,41.5,36.4,27.8,22],
+             tmin:[8.8,10.6,14.3,19.6,24.8,27.2,28.5,27.8,24.5,20.5,15.3,10.3],
+             rh:[48,39,29,25,18,14,17,23,25,30,42,49],
+             rain:[13,14,14,7,1,0,0,0,0,0,8,16]};
+  const DIM=[31,28,31,30,31,30,31,31,30,31,30,31];
+  function interp(v,M,D){                    // M:1-12  D:1-..
+    const x=(M-1)+(D-1)/DIM[M-1]-0.5;
+    const i0=Math.floor((x+12)%12), f=((x+12)%12)-i0;
+    return v[i0]*(1-f)+v[(i0+1)%12]*f;
+  }
+  const es=T=>0.6108*Math.exp(17.27*T/(T+237.3));
+  let gdd=0;
+  const rows=[];
+  for(let d=1;d<=TOTAL;d++){
+    const J=J_OF(d);
+    const dec=0.409*Math.sin(2*Math.PI*J/365-1.39);
+    const ws=Math.acos(Math.max(-1,Math.min(1,-Math.tan(PHI)*Math.tan(dec))));
+    const dr=1+0.033*Math.cos(2*Math.PI*J/365);
+    const dt=new Date(ANCHOR); dt.setDate(dt.getDate()+d-1);
+    const M=dt.getMonth()+1, DD=dt.getDate();
+    const tx=interp(MON.tmax,M,DD), tn=interp(MON.tmin,M,DD);
+    const rh=interp(MON.rh,M,DD), rn=MON.rain[M-1]/DIM[M-1];
+    const esm=(es(tx)+es(tn))/2;
+    gdd+=Math.max(0,(tx+tn)/2-10);
+    rows.push({d,tmax:tx,tmin:tn,tavg:(tx+tn)/2,rh,rain:rn*30,vpd:esm*(1-rh/100),gdd,
+      len:24/Math.PI*ws,
+      alt:90-25.38+dec*180/Math.PI,
+      ra:(24*60/Math.PI)*GSC*dr*(ws*Math.sin(PHI)*Math.sin(dec)+Math.cos(PHI)*Math.cos(dec)*Math.sin(ws))
+    });
+  }
+  const FG=[]; items.forEach(o=>{const g=FG.at(-1); if(g&&g.k===o.fas){g.to=o.to;}else FG.push({k:o.fas,from:o.from,to:o.to});});
+  const sv=document.getElementById("chart");
+  const E=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const X0=58,X1=990,W=X1-X0;
+  const px =d=>X0+(d-1)/TOTAL*W;   // حافة بداية اليوم d
+  const pxE=d=>X0+d/TOTAL*W;       // حافة نهاية اليوم d
+  const pc =d=>X0+(d-0.5)/TOTAL*W; // منتصف اليوم d
+  const PAN=[
+    {k:"len",t:"طول النهار — ساعة",c:"#F2C14E",fx:1},
+    {k:"alt",t:"ارتفاع الشمس وقت الظهيرة — درجة",c:"#7FC7E8",fx:0},
+    {k:"ra",t:"الإشعاع الشمسي الفلكي — ميجاجول/م²/يوم",c:"#8FD19E",fx:1},
+    {k:"tmax",t:"الحرارة العظمى والوسطى والصغرى — °م",c:"#E4553F",fx:0,
+      multi:[{k:"tmax",c:"#E4553F",f:"T2M_MAX"},{k:"tavg",c:"#E8A33D",f:"T2M"},
+             {k:"tmin",c:"#6FA8DC",f:"T2M_MIN"}]},
+    {k:"rh",t:"الرطوبة النسبية — ٪",c:"#5FBFD6",fx:0,f:"RH2M"},
+    {k:"vpd",t:"العجز البخاري VPD — كيلوباسكال",c:"#C78BD6",fx:2,f:"VPD"},
+    {k:"rain",t:"الأمطار — ملم/شهر",c:"#4E7C9B",fx:0,zero:1,f:"PRECTOTCORR"},
+    {k:"gdd",t:"الوحدات الحرارية المتراكمة GDD — قاعدة ١٠°م",c:"#9BD17A",fx:0,zero:1,f:"GDDc"}
+  ];
+  const TOP=114, PH=132, PGAP=46;
+  PAN.forEach((P,i)=>{ P.y=TOP+i*(PH+PGAP); P.h=PH; });
+  PAN.forEach(P=>{
+    const keys=(P.multi||[{k:P.k,c:P.c,f:P.f}]);
+    const FD=window.FARM_DATA||null;
+    const useFD = FD && keys.every(K=>K.f && FD.clim.some(x=>x[K.f]!=null));
+    const at=(arr,K,suf)=>arr.map(x=>x[(suf?K.f+suf:K.f)]).filter(v=>v!=null);
+    let vs=[];
+    if(useFD){
+      keys.forEach(K=>{
+        vs=vs.concat(at(FD.clim,K));
+        if(FD.band) vs=vs.concat(at(FD.band,K,"_lo"),at(FD.band,K,"_hi"));
+        ["cur","prevYear","prevCycle","oldCycle"].forEach(n=>{ if(FD[n]) vs=vs.concat(at(FD[n],K)); });
+      });
+    } else {
+      vs=[].concat(...keys.map(K=>rows.map(r=>r[K.k])));
+    }
+    let lo=Math.min(...vs), hi=Math.max(...vs);
+    const pad=(hi-lo)*0.14; lo-=pad; hi+=pad; if(P.zero&&lo<0) lo=0;
+    const py=v=>P.y+P.h-(v-lo)/(hi-lo)*P.h;
+    // season bands
+    FG.forEach(g=>{
+      sv.appendChild(E("rect",{x:px(g.from+1),y:P.y,width:pxE(g.to)-px(g.from+1),height:P.h,
+        fill:SEASONS[g.k].c,"fill-opacity":.13}));
+    });
+    // manzila boundaries
+    items.forEach(o=>sv.appendChild(E("line",{x1:px(o.from+1),y1:P.y,x2:px(o.from+1),y2:P.y+P.h,
+      stroke:"#FFFFFF","stroke-opacity":.09,"stroke-width":1})));
+    sv.appendChild(E("line",{x1:X0,y1:P.y+P.h,x2:X1,y2:P.y+P.h,class:"ax"}));
+    sv.appendChild(E("line",{x1:X0,y1:P.y,x2:X0,y2:P.y+P.h,class:"ax"}));
+    // y ticks
+    for(let i=0;i<=3;i++){
+      const v=lo+(hi-lo)*i/3, yy=py(v);
+      sv.appendChild(E("line",{x1:X0-5,y1:yy,x2:X0,y2:yy,class:"ax"}));
+      const t=E("text",{x:X0-9,y:yy+4,class:"axlbl","text-anchor":"end"});
+      t.textContent=ar(v.toFixed(P.fx)); sv.appendChild(t);
+    }
+    const line=(arr,key,col,wdt,dash)=>{
+      const pts=arr.filter(x=>x[key]!=null);
+      if(!pts.length) return;
+      const dp=pts.map((x,i)=>(i?"L":"M")+pc(x.d).toFixed(1)+" "+py(x[key]).toFixed(1)).join(" ");
+      const o={d:dp,fill:"none",stroke:col,"stroke-width":wdt,"stroke-linejoin":"round"};
+      if(dash) o["stroke-dasharray"]=dash;
+      sv.appendChild(E("path",o));
+    };
+    if(useFD){
+      keys.forEach(K=>{
+        if(FD.band){                                   // نطاق ١٠–٩٠٪ حول خط الأساس
+          const lo=FD.band.filter(x=>x[K.f+"_lo"]!=null);
+          if(lo.length){
+            const up=lo.map((x,i)=>(i?"L":"M")+pc(x.d).toFixed(1)+" "+py(x[K.f+"_hi"]).toFixed(1)).join(" ");
+            const dn=lo.slice().reverse().map(x=>"L"+pc(x.d).toFixed(1)+" "+py(x[K.f+"_lo"]).toFixed(1)).join(" ");
+            sv.appendChild(E("path",{d:up+" "+dn+" Z",fill:K.c,"fill-opacity":.12,stroke:"none"}));
+          }
+        }
+        if(FD.oldCycle) line(FD.oldCycle,K.f,"#6FA36B",1.8,"3 3");     // أقدم دورة
+        line(FD.clim,K.f,"#8B95B0",1.6,"2 5");         // خط الأساس الطويل — منقّط
+        if(FD.prevCycle) line(FD.prevCycle,K.f,"#7FC7E8",1.8,"9 5");   // الدورة السابقة
+        if(FD.prevYear)  line(FD.prevYear ,K.f,"#C78BD6",1.8,null);    // السنة الماضية
+        if(FD.cur)       line(FD.cur      ,K.f,K.c,3.4,null);          // السنة الجارية
+      });
+    } else {
+      keys.forEach(K=>line(rows,K.k,K.c,2.6));
+    }
+    const ti=E("text",{x:(X0+X1)/2,y:P.y-7,class:"ptitle","text-anchor":"middle"}); ti.textContent=P.t; sv.appendChild(ti);
+    if(useFD){
+      if(P.k==="tmax"||PAN.indexOf(P)===3){
+        const key=[["السنة الجارية "+FD.currentYear,K0=>K0,"#E4553F",3.4,null],
+                   ["السنة الماضية "+(FD.prevYearLabel||""),0,"#C78BD6",1.8,null],
+                   ["الدورة السابقة "+((FD.prevCycleLabel||[]).join("–")),0,"#7FC7E8",1.8,"9 5"],
+                   ["الأساس "+FD.years[0]+"–"+FD.years[1]+" ("+FD.cycles+" دورات)",0,"#8B95B0",1.6,"2 5"],
+                   ["أقدم دورة "+((FD.oldCycleLabel||[]).join("–")),0,"#6FA36B",1.8,"3 3"]];
+        key.forEach((k,i)=>{
+          const yy=P.y-10+i*15, x0=X0+6;
+          const o={x1:x0,y1:yy,x2:x0+26,y2:yy,stroke:k[2],"stroke-width":k[3]};
+          if(k[4])o["stroke-dasharray"]=k[4];
+          sv.appendChild(E("line",o));
+          const t=E("text",{x:x0+34+70,y:yy+4,class:"punit","text-anchor":"middle","font-size":11});
+          t.textContent=k[0]; sv.appendChild(t);
+        });
+      }
+      if(P.k==="gdd" && FD.gddShiftDays!=null){
+        const sh=E("text",{x:X0+92,y:P.y-7,"text-anchor":"middle","font-size":12,fill:"#FFE9AE"});
+        sh.textContent = FD.gddShiftDays>0 ? "الموسم متقدّم "+ar(FD.gddShiftDays)+" يوماً"
+                        : FD.gddShiftDays<0 ? "الموسم متأخر "+ar(-FD.gddShiftDays)+" يوماً"
+                        : "مطابق للمعدل";
+        sv.appendChild(sh);
+      }
+    }
+    // today
+    sv.appendChild(E("line",{x1:pc(TOFF+1),y1:P.y,x2:pc(TOFF+1),y2:P.y+P.h,
+      stroke:"#C9A227","stroke-width":2,"stroke-dasharray":"5 4"}));
+    if(P.k==="len"){
+      const lt=E("text",{x:pc(TOFF+1)-6,y:P.y+14,fill:"#C9A227","font-size":12,"text-anchor":"middle"});
+      lt.textContent="اليوم"; sv.appendChild(lt);
+    }
+  });
+  // ---- upper scale: uniform day axis ----
+  sv.appendChild(E("line",{x1:X0,y1:44,x2:X1,y2:44,class:"ax"}));
+  const TG0=[]; items.forEach(o=>{const g=TG0.at(-1); if(g&&g.k===o.tal){g.to=o.to;}else
+    TG0.push({k:o.tal,from:o.from,to:o.to});});
+  TG0.forEach((g,i)=>{
+    const d=g.from+1;
+    sv.appendChild(E("line",{x1:px(d),y1:44,x2:px(d),y2:52,stroke:"#FFE9AE","stroke-width":1.6}));
+    const t=E("text",{x:px(d),y:(i%2?26:38),class:"axlbl","text-anchor":"middle","font-size":11,
+      fill:"#FFE9AE"});
+    t.textContent=ar(d); sv.appendChild(t);
+  });
+  const te=E("text",{x:X1,y:38,class:"axlbl","text-anchor":"middle","font-size":11,fill:"#FFE9AE"});
+  te.textContent=ar(TOTAL); sv.appendChild(te);
+  sv.appendChild(E("line",{x1:X1,y1:44,x2:X1,y2:52,stroke:"#FFE9AE","stroke-width":1.6}));
+  const dt=E("text",{x:(X0+X1)/2,y:18,class:"punit","text-anchor":"middle","font-size":13});
+  dt.textContent="يوم السنة النجمية — التدريج عند أول يوم من كل طالع"; sv.appendChild(dt);
+
+  // ---- middle scale: tawali numbered at first day (band) ----
+  const TG=[]; items.forEach(o=>{const g=TG.at(-1); if(g&&g.k===o.tal){g.to=o.to;}else
+    TG.push({k:o.tal,from:o.from,to:o.to,fas:o.fas});});
+  const BY=62, BH=26;
+  TG.forEach((g,i)=>{
+    const x1=px(g.from+1), x2=pxE(g.to), w=x2-x1;
+    sv.appendChild(E("rect",{x:x1,y:BY,width:w,height:BH,fill:SEASONS[g.fas].c,
+      "fill-opacity":.4,stroke:"#0B1226","stroke-width":1}));
+    sv.appendChild(E("line",{x1,y1:BY-6,x2:x1,y2:BY,stroke:"#FFE9AE","stroke-width":2}));
+    const num = i===TG.length-1 ? "\u0661" : ar(i+1);   // سهيل يعود برقمه
+    const fits = w > 58;
+    const t=E("text",{x:x1+w/2,y:BY+18,"text-anchor":"middle",
+      "font-size": w>95 ? 12.5 : (fits ? 10.5 : 12), fill:"#FFF3D8"});
+    t.textContent = fits ? num+"، "+g.k : num;
+    sv.appendChild(t);
+  });
+  const bt=E("text",{x:X0-6,y:BY+18,class:"punit","text-anchor":"end","font-size":12});
+  bt.textContent="الطوالع"; sv.appendChild(bt);
+
+  // ---- phenology + operations lanes (date palm) ----
+  // ● = ورد في كلام أبو سلمان   ○ = مسودة من الممارسة الشائعة، تحتاج مراجعتك
+  const CC=CROPCAL[SEL];
+  const LANES=!CC?[]:[{h:"العمليات الزراعية — "+CC.name}]
+    .concat(CC.ops.map(o=>({t:(o.src?"● ":"○ ")+o.t,a:o.a,b:o.b,c:o.src?"#C9A227":"#5E7EA6"})))
+    .concat([{h:"المراحل الفينولوجية — "+CC.name}])
+    .concat(CC.pheno.map((o,i)=>({t:(o.src?"● ":"○ ")+o.t,a:o.a,b:o.b,
+      c:["#6FBF73","#8FD19E","#B8D96B","#E2C84C","#E9A23B","#D9743B","#B4553A"][i%7]})));
+  const OLD=[
+   {t:"○ طلوع الطلع (الإغريض)",a:149,b:191,c:"#6FBF73"},
+   {t:"○ التلقيح (التأبير)",a:168,b:217,c:"#8FD19E"},
+   {t:"○ الحبابوك — عقد الثمار",a:191,b:227,c:"#B8D96B"},
+   {t:"○ الكمري",a:227,b:288,c:"#E2C84C"},
+   {t:"○ الخلال (البسر)",a:288,b:318,c:"#E9A23B"},
+   {t:"● الرطب",a:308,b:354,c:"#D9743B"},
+   {t:"○ التمر",a:349,b:365,c:"#B4553A"}];
+  const OLD2=[
+   {t:"○ التكريب والتنظيف بعد الجني",a:26,b:86,c:"#5E7EA6"},
+   {t:"○ خدمة التربة والتسميد العضوي",a:57,b:117,c:"#5E7EA6"},
+   {t:"○ خف الثمار وتقويس العذوق",a:210,b:255,c:"#5E7EA6"},
+   {t:"● غرس الفسائل — نافذة البوارح",a:262,b:326,c:"#C9A227"},
+   {t:"○ التكميم وتغطية العذوق",a:275,b:305,c:"#5E7EA6"},
+   {t:"○ ذروة الري",a:269,b:360,c:"#4E7C9B"},
+   {t:"○ الجني",a:305,b:365,c:"#5E7EA6"}];
+  let LY=PAN[PAN.length-1].y+PAN[PAN.length-1].h+56;
+  LANES.forEach(L=>{
+    if(L.h){
+      const t=E("text",{x:X1,y:LY+13,class:"ptitle","text-anchor":"middle","font-size":14,
+        fill:"#F0E4C4"}); t.setAttribute("x",(X0+X1)/2);
+      t.textContent=L.h; sv.appendChild(t); LY+=24; return;
+    }
+    FG.forEach(g=>sv.appendChild(E("rect",{x:px(g.from+1),y:LY,width:pxE(g.to)-px(g.from+1),
+      height:20,fill:SEASONS[g.k].c,"fill-opacity":.10})));
+    const x1=px(L.a), w=pxE(L.b)-px(L.a);
+    sv.appendChild(E("rect",{x:x1,y:LY,width:w,height:20,rx:4,fill:L.c,"fill-opacity":.85}));
+    const t=E("text",{x:x1+w/2,y:LY+14,"text-anchor":"middle","font-size":11.5,fill:"#0B1226"});
+    t.textContent=L.t; sv.appendChild(t);
+    const tl=t.getComputedTextLength();
+    if(tl>w-10){                       // لا يتسع داخل الشريط -> اكتبه بجواره
+      t.setAttribute("fill","#DDE3F0");
+      t.setAttribute("x", Math.min(x1+w+8+tl/2, X1-tl/2-2));
+    }
+    sv.appendChild(E("line",{x1:pc(TOFF+1),y1:LY,x2:pc(TOFF+1),y2:LY+20,
+      stroke:"#C9A227","stroke-width":2,"stroke-dasharray":"4 3"}));
+    LY+=25;
+  });
+
+  // ---- lower scale: manzila numbered at its first day ----
+  const AY=LY+22;
+  sv.setAttribute("viewBox",`0 0 1020 ${AY+136}`);
+  sv.appendChild(E("line",{x1:X0,y1:AY,x2:X1,y2:AY,class:"ax"}));
+  items.forEach(o=>{
+    const x=px(o.from+1);
+    sv.appendChild(E("line",{x1:x,y1:AY-7,x2:x,y2:AY+7,
+      stroke:SEASONS[o.fas].c,"stroke-width":2.5}));
+    const n=E("text",{x,y:AY+26,"text-anchor":"middle","font-size":13,fill:"#FFE9AE"});
+    n.textContent=ar(o.i); sv.appendChild(n);
+    const nm=E("text",{x,y:AY+74,"text-anchor":"middle","font-size":11,fill:"#AEB8CF",
+      transform:`rotate(-90 ${x} ${AY+74})`});
+    nm.textContent=o.name; sv.appendChild(nm);
+  });
+}
+
+// ---- four-year cycle spiral ----
+(function(){
+  const sv=document.getElementById("cycle");
+  const E=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const CX2=460, CY2=470, R0=132, R1=404, DEG=360/365.25, N=1461;
+  const YSTART=[1,366,731,1096];
+  const YINFO=[["السنة الأولى","تبدأ بعد الزوال","٣٦٥ يوماً"],
+               ["السنة الثانية","تبدأ بعد الغروب","٣٦٥ يوماً"],
+               ["السنة الثالثة","تبدأ بعد منتصف الليل","٣٦٥ يوماً"],
+               ["السنة الرابعة","تبدأ بعد طلوع الشمس","٣٦٦ يوماً"]];
+  const th=c=>c*DEG, rr=c=>R0+(c/N)*(R1-R0);
+  const PT=(r,t)=>[CX2+r*Math.cos(rad(t)), CY2-r*Math.sin(rad(t))];
+  const dayOf=c=>{ let k=c%365; if(c>=1095) k=c-1095; return (k%365)+1; };  // اليوم داخل السنة
+  const seasonOf=c=>{
+    let k=dayOf(c); if(c>=1095 && k>365) k=365;
+    const o=items.find(x=>k>x.from&&k<=x.to)||items[27]; return o.fas;
+  };
+  // اللولب: قطاع صغير لكل يوم
+  for(let c=0;c<N;c++){
+    const t1=th(c), t2=th(c+1)+0.02, r=rr(c), w=13;
+    const [x1,y1]=PT(r,t1),[x2,y2]=PT(r,t2),[x3,y3]=PT(r+w,t2),[x4,y4]=PT(r+w,t1);
+    const extra=(c===N-1);
+    sv.appendChild(E("path",{d:`M${x1} ${y1} L${x2} ${y2} L${x3} ${y3} L${x4} ${y4} Z`,
+      fill: extra?"#C9A227":SEASONS[seasonOf(c)].c, "fill-opacity":extra?1:.8}));
+  }
+  // علامات بداية كل سنة
+  YSTART.forEach((d0,i)=>{
+    const c=d0-1, t=th(c), r=rr(c);
+    const [ax,ay]=PT(r-16,t), [bx,by]=PT(r+30,t);
+    sv.appendChild(E("line",{x1:ax,y1:ay,x2:bx,y2:by,stroke:"#EDE6D6","stroke-width":2,"stroke-opacity":.85}));
+    const [lx,ly]=PT(r+46,t);
+    const g=E("text",{x:lx,y:ly,"text-anchor":"middle","font-size":13,fill:"#FFF3D8"});
+    g.textContent=ar(i+1); sv.appendChild(g);
+  });
+  // نداء لليوم الزائد
+  {
+    const c=N-1, t=th(c), r=rr(c);
+    const [ax,ay]=PT(r+14,t), bx=CX2+250, by=CY2-330;
+    sv.appendChild(E("line",{x1:ax,y1:ay,x2:bx,y2:by,stroke:"#C9A227","stroke-width":1.6,"stroke-dasharray":"5 4"}));
+    const t1=E("text",{x:bx,y:by-8,"text-anchor":"middle","font-size":14,fill:"#C9A227"});
+    t1.textContent="اليوم ١٤٦١ — الزائد على الطرف"; sv.appendChild(t1);
+  }
+  // المركز
+  sv.appendChild(E("circle",{cx:CX2,cy:CY2,r:R0-14,fill:"#0D1531",stroke:"#C9A227","stroke-width":2,"stroke-opacity":.7}));
+  const n1=E("text",{x:CX2,y:CY2-8,"text-anchor":"middle","font-size":52,fill:"#C9A227"});
+  n1.textContent="١٤٦١"; sv.appendChild(n1);
+  const n2=E("text",{x:CX2,y:CY2+26,"text-anchor":"middle","font-size":20,fill:"#B9BFD2"});
+  n2.textContent="يوماً"; sv.appendChild(n2);
+  const n3=E("text",{x:CX2,y:CY2+54,"text-anchor":"middle","font-size":15,fill:"#8A6F1C"});
+  n3.textContent="٤ سنوات"; sv.appendChild(n3);
+
+  // ---- المنشار: الساعات المتراكمة ----
+  const SX0=70, SX1=880, SY=930, SH=150;
+  sv.appendChild(E("line",{x1:SX0,y1:SY+SH,x2:SX1,y2:SY+SH,class:"ax"}));
+  sv.appendChild(E("line",{x1:SX0,y1:SY,x2:SX0,y2:SY+SH,class:"ax"}));
+  const sx=c=>SX0+(c/N)*(SX1-SX0), sy=h=>SY+SH-(h/24)*SH;
+  // العجز يتراكم ٦ ساعات لكل سنة (٣٦٥ يوماً) حتى يبلغ ٢٤، فيُصفّره اليوم ١٤٦١
+  const pts=[];
+  for(let c=0;c<=1460;c++) pts.push([sx(c),sy(c*6/365)]);
+  pts.push([sx(1460),sy(0)]); pts.push([sx(N),sy(0)]);
+  sv.appendChild(E("path",{d:pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" "),
+    fill:"none",stroke:"#F2C14E","stroke-width":2.4}));
+  [0,6,12,18,24].forEach(v=>{
+    sv.appendChild(E("line",{x1:SX0-5,y1:sy(v),x2:SX1,y2:sy(v),stroke:"#FFFFFF","stroke-opacity":.08}));
+    const t=E("text",{x:SX0-10,y:sy(v)+4,class:"axlbl","text-anchor":"end","font-size":11});
+    t.textContent=ar(v); sv.appendChild(t);
+  });
+  const st=E("text",{x:(SX0+SX1)/2,y:SY-12,class:"ptitle","text-anchor":"middle","font-size":15});
+  st.textContent="فارق الساعات المتراكم عن السنة الشمسية — يُصفَّر باليوم الزائد"; sv.appendChild(st);
+  YSTART.concat([N+1]).forEach((d0,i)=>{
+    const x=sx(d0-1);
+    sv.appendChild(E("line",{x1:x,y1:SY,x2:x,y2:SY+SH,stroke:"#EDE6D6","stroke-opacity":.35,"stroke-dasharray":"4 4"}));
+    if(i<4){
+      const hv=E("text",{x:x+2,y:SY-2,"text-anchor":"middle","font-size":11.5,fill:"#F2C14E"});
+      hv.textContent=ar(i*6)+" س"; sv.appendChild(hv);
+      const mid=(sx(d0-1)+sx(d0-1+(i===3?366:365)))/2;
+      const a=E("text",{x:mid,y:SY+SH+22,"text-anchor":"middle","font-size":13,fill:"#F0E4C4"});
+      a.textContent=YINFO[i][0]; sv.appendChild(a);
+      const b=E("text",{x:mid,y:SY+SH+40,"text-anchor":"middle","font-size":11.5,fill:"#9AA3BC"});
+      b.textContent=YINFO[i][1]; sv.appendChild(b);
+      const cc=E("text",{x:mid,y:SY+SH+57,"text-anchor":"middle","font-size":11.5,
+        fill:i===3?"#C9A227":"#9AA3BC"});
+      cc.textContent=YINFO[i][2]; sv.appendChild(cc);
+    }
+  });
+})();
+
+// ---- calendar drift over centuries ----
+(function(){
+  const sv=document.getElementById("drift");
+  const E=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const T=365.2422, YRS=400;
+  const CAL=[{n:"٣٦٥ يوماً ثابتة (بلا يوم زائد)",L:365.0,c:"#E4553F",w:3.2},
+             {n:"١٤٦١ ÷ ٤ = ٣٦٥.٢٥ — منظومة أبو سلمان",L:365.25,c:"#C9A227",w:3.2},
+             {n:"الميلادي ٣٦٥.٢٤٢٥",L:365.2425,c:"#7FC7E8",w:2.2}];
+  const X0=72,X1=880,Y0=44,Y1=360;
+  const lo=-100, hi=20;
+  const px=y=>X0+(y/YRS)*(X1-X0), py=v=>Y1-((v-lo)/(hi-lo))*(Y1-Y0);
+  // مناطق مرجعية
+  [[13,"منزلة كاملة ١٣ يوماً","#8FD19E"],[-13,null,"#8FD19E"],
+   [91,null,"#E9A23B"],[-91,"فصل كامل ٩١ يوماً","#E9A23B"]].forEach(([v,lab,col])=>{
+    sv.appendChild(E("line",{x1:X0,y1:py(v),x2:X1,y2:py(v),stroke:col,
+      "stroke-opacity":.45,"stroke-width":1,"stroke-dasharray":"6 5"}));
+    if(lab){ const t=E("text",{x:X0+92,y:py(v)-7,"font-size":11.5,fill:col,"text-anchor":"middle"});
+      t.textContent=lab; sv.appendChild(t); }
+  });
+  sv.appendChild(E("line",{x1:X0,y1:py(0),x2:X1,y2:py(0),stroke:"#FFFFFF","stroke-opacity":.35,"stroke-width":1.5}));
+  sv.appendChild(E("line",{x1:X0,y1:Y0,x2:X0,y2:Y1,class:"ax"}));
+  [-100,-75,-50,-25,0,20].forEach(v=>{
+    if(v<lo||v>hi) return;
+    const t=E("text",{x:X0-10,y:py(v)+4,class:"axlbl","text-anchor":"end","font-size":11});
+    t.textContent=(v<0?"\u2212":"")+ar(Math.abs(v)); sv.appendChild(t);
+    sv.appendChild(E("line",{x1:X0-5,y1:py(v),x2:X0,y2:py(v),class:"ax"}));
+  });
+  for(let y=0;y<=YRS;y+=50){
+    sv.appendChild(E("line",{x1:px(y),y1:Y1,x2:px(y),y2:Y1+5,class:"ax"}));
+    const t=E("text",{x:px(y),y:Y1+20,class:"axlbl","text-anchor":"middle","font-size":11});
+    t.textContent=ar(y); sv.appendChild(t);
+  }
+  const xl=E("text",{x:(X0+X1)/2,y:Y1+42,class:"punit","text-anchor":"middle","font-size":12.5});
+  xl.textContent="عدد السنوات المنقضية"; sv.appendChild(xl);
+  const yl=E("text",{x:X0-46,y:(Y0+Y1)/2,class:"punit","text-anchor":"middle","font-size":12.5,
+    transform:`rotate(-90 ${X0-46} ${(Y0+Y1)/2})`});
+  yl.textContent="الانزياح بالأيام"; sv.appendChild(yl);
+
+  CAL.forEach((C,i)=>{
+    const d=C.L-T;
+    const dp=`M${px(0)} ${py(0)} L${px(YRS)} ${py(Math.max(lo,Math.min(hi,d*YRS)))}`;
+    sv.appendChild(E("path",{d:dp,fill:"none",stroke:C.c,"stroke-width":C.w}));
+    const yv2=d*YRS, ye2=Math.max(lo,Math.min(hi,yv2));
+    const t=E("text",{x:X1-72,y:py(ye2)+(i===0?20:(i===1?-9:15)),"text-anchor":"middle",
+      "font-size":12.5,fill:C.c});
+    t.textContent=(yv2>0?"+":"\u2212")+ar(Math.abs(yv2).toFixed(1))+" يوم"; sv.appendChild(t);
+    const ky=Y1+66+i*24;
+    sv.appendChild(E("line",{x1:X0,y1:ky-4,x2:X0+34,y2:ky-4,stroke:C.c,"stroke-width":C.w}));
+    const k=E("text",{x:X0+44+140,y:ky,"text-anchor":"middle","font-size":12.5,fill:"#DDE3F0"});
+    k.textContent=C.n; sv.appendChild(k);
+  });
+})();
+
+// ---- table ----
+// ● = وارد في كلام أبو سلمان؛ ما عداه فراغ يُملأ
+const CROPS={
+ 12:{veg:"● البلدة: ٧ أيام محرقة و٦ مورقة — «زرع الست»"},
+ 19:{tree:"● بواكير الرطب تبدأ من الجنوب (عُمان)"},
+ 20:{tree:"● بواكير الرطب في الأحساء — صنف الطيار"},
+ 21:{palm:"● بداية البوارح — نافذة غرس الفسائل",tree:"● بواكير الرطب في نجد"},
+ 22:{palm:"● داخل نافذة البوارح",tree:"● بواكير الرطب في الشمال"},
+ 23:{palm:"● داخل نافذة البوارح"},
+ 24:{palm:"● داخل نافذة البوارح"},
+ 25:{palm:"● نهاية نافذة غرس الفسائل"}
+};
+const tbl=document.getElementById("mtable");
+const FCLS={"الخريف":"k","الشتاء":"s","الربيع":"r","الصيف":"f"};
+tbl.innerHTML="<thead><tr>"+
+ ["#","المنزلة","الأيام","يوم السنة","الميلادي","الطالع","الفصل",
+  "النخيل","أشجار وفواكه","الخضار","البعلية"].map(h=>`<th>${h}</th>`).join("")+
+ "</tr></thead><tbody>"+
+ items.map(o=>{
+   const c=CROPS[o.i]||{};
+   const cell=v=>`<td class="crop${v?" has":""}">${v||""}</td>`;
+   return `<tr class="${FCLS[o.fas]}${o===todayItem?" now":""}">`+
+     `<td class="num">${ar(o.i)}</td>`+
+     `<td class="nm">${o.name}</td>`+
+     `<td class="num">${ar(o.days)}</td>`+
+     `<td class="num">${ar(o.from+1)} – ${ar(o.to)}</td>`+
+     `<td class="num">${dstr(o.from)} – ${dstr(o.to-1)}</td>`+
+     `<td>${o.tal}</td><td>${o.fas}</td>`+
+     cell(c.palm)+cell(c.tree)+cell(c.veg)+cell(c.rain)+
+   `</tr>`;
+ }).join("")+"</tbody>";
+
+// ---- legend ----
+const lg=document.getElementById("legend");
+Object.entries(SEASONS).forEach(([k,v])=>{
+  const d=document.createElement("div"); d.className="chip";
+  d.innerHTML=`<span class="dot" style="background:${v.c}"></span>${k} · ${ar(v.d)} يوماً`;
+  lg.appendChild(d);
+});
+</script>
+<script>
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id==="tab-"+b.dataset.t));
+  window.scrollTo({top:0,behavior:"smooth"});
+}));
+</script>
+
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg", sv=document.getElementById("dial");
+const E=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const CX=500,CY=500;
+const R_TXT=150, R_H0=162, R_H1=300, R_T0=316, R_T1=360, R_M0=360, R_M1=452;
+const rd=d=>d*Math.PI/180, P=(r,t)=>[CX+r*Math.cos(rd(t)), CY-r*Math.sin(rd(t))];
+const AR="٠١٢٣٤٥٦٧٨٩", ar=n=>String(n).replace(/\d/g,d=>AR[+d]), pad=n=>String(n).padStart(2,"0");
+const angH = h => 270 + (h/24)*360;                       // الساعة: الصفر جنوباً
+
+const MZ=[["الجبهة",14,"سهيل","الخريف"],["الزبرة",13,"سهيل","الخريف"],["الصرفة",13,"سهيل","الخريف"],
+["العواء",13,"الوسم","الخريف"],["السماك",13,"الوسم","الخريف"],["الغفر",13,"الوسم","الخريف"],
+["الزبانا",13,"الوسم","الخريف"],["الإكليل",13,"المربعانية","الشتاء"],["القلب",13,"المربعانية","الشتاء"],
+["الشولة",13,"المربعانية","الشتاء"],["النعائم",13,"الشبط","الشتاء"],["البلدة",13,"الشبط","الشتاء"],
+["سعد الذابح",13,"العقارب","الشتاء"],["سعد بلع",13,"العقارب","الشتاء"],["سعد السعود",13,"العقارب","الربيع"],
+["سعد الأخبية",13,"الحميمين","الربيع"],["المقدم",13,"الحميمين","الربيع"],["المؤخر",13,"الذراعين","الربيع"],
+["الرشا",13,"الذراعين","الربيع"],["الشرطين",13,"الثريا","الربيع"],["البطين",13,"الثريا","الربيع"],
+["الثريا",13,"الثريا","الصيف"],["الدبران",13,"التويبع","الصيف"],["الهقعة",13,"الجوزاء","الصيف"],
+["الهنعة",13,"الجوزاء","الصيف"],["الذراع",13,"المرزم","الصيف"],["النثرة",13,"الكليبين","الصيف"],
+["الطرف",13,"سهيل","الصيف"]];
+const SEA={"الخريف":"#C4703A","الشتاء":"#4E7C9B","الربيع":"#5E8C61","الصيف":"#A83C3C"};
+let c=0; const items=MZ.map((m,i)=>{const o={i:i+1,name:m[0],days:m[1],tal:m[2],fas:m[3],from:c,to:c+m[1]};c+=m[1];return o;});
+const TOTAL=c;
+function starDay(d){let a=new Date(d.getFullYear(),8,6); if(d<a) a=new Date(d.getFullYear()-1,8,6);
+  return Math.floor((d-a)/86400000)%TOTAL+1;}
+const mzOf=sd=>items.find(o=>sd>o.from&&sd<=o.to)||items[0];
+
+let LAT=25.3833, LON=49.5833, TZ=3, ELEV=150, PLACE="الأحساء", GPSACC=null, ALTSRC="افتراضي";
+const LOCAL_TZ=-new Date().getTimezoneOffset()/60;
+const dip=h=>0.0293*Math.sqrt(Math.max(0,h));
+function suntimes(d){
+  const zen=90.833+dip(ELEV);
+  const N=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);
+  const B=rd(360/365*(N-81));
+  const EoT=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
+  const dec=rd(23.45*Math.sin(rd(360/365*(N-81)))), phi=rd(LAT);
+  const cc=(Math.cos(rd(zen))-Math.sin(phi)*Math.sin(dec))/(Math.cos(phi)*Math.cos(dec));
+  if(cc>1||cc<-1) return null;
+  const w=180/Math.PI*Math.acos(cc), noon=12-(4*(LON-15*TZ)+EoT)/60;
+  return {rise:noon-w/15,set:noon+w/15,noon,day:2*w/15,night:24-2*w/15,dec:dec*180/Math.PI};
+}
+const hm=t=>{let h=Math.floor((t%24+24)%24),m=Math.round((t-Math.floor(t))*60);
+  if(m===60){h=(h+1)%24;m=0;} return ar(pad(h))+":"+ar(pad(m));};
+
+// ---------- أدوات رسم ----------
+function sector(r0,r1,a1,a2){
+  const [x1,y1]=P(r1,a1),[x2,y2]=P(r1,a2),[x3,y3]=P(r0,a2),[x4,y4]=P(r0,a1);
+  const big=(a2-a1)>180?1:0;
+  return `M${x1} ${y1} A${r1} ${r1} 0 ${big} 0 ${x2} ${y2} L${x3} ${y3} A${r0} ${r0} 0 ${big} 1 ${x4} ${y4} Z`;
+}
+const defs=E("defs",{}); sv.appendChild(defs); let pid=0;
+function arcText(r,mid,txt,fs,fill,weight){
+  const flip=Math.sin(rd(mid))<0, rr=flip?r+fs*0.78:r, a1=mid-45, a2=mid+45;
+  const [xs,ys]=P(rr,flip?a1:a2),[xe,ye]=P(rr,flip?a2:a1);
+  const id="bp"+(pid++);
+  defs.appendChild(E("path",{id,d:`M${xs} ${ys} A${rr} ${rr} 0 0 ${flip?0:1} ${xe} ${ye}`}));
+  const t=E("text",{"font-size":fs,fill}); if(weight)t.setAttribute("font-weight",weight);
+  const tp=E("textPath",{href:"#"+id,startOffset:"50%","text-anchor":"middle"});
+  tp.setAttributeNS("http://www.w3.org/1999/xlink","xlink:href","#"+id);
+  tp.textContent=txt; t.appendChild(tp); return t;
+}
+
+// ---------- الحلقة الخارجية: التقويم ----------
+const calG=E("g",{}); sv.appendChild(calG);
+function drawCal(now){
+  while(calG.firstChild) calG.removeChild(calG.firstChild);
+  const sd=starDay(now), o=mzOf(sd);
+  const deg=360/TOTAL, angD=d=>90+(d-sd)*deg;              // اليوم في القمة
+  // الطوالع
+  const tg=[]; items.forEach(x=>{const g=tg.at(-1); if(g&&g.k===x.tal)g.to=x.to; else tg.push({k:x.tal,from:x.from,to:x.to,fas:x.fas});});
+  tg.forEach(g=>{
+    const a1=angD(g.from+1)-deg/2, a2=angD(g.to)+deg/2;
+    calG.appendChild(E("path",{d:sector(R_T0,R_T1,a1,a2),fill:SEA[g.fas],"fill-opacity":.32,
+      stroke:"#0B1226","stroke-width":1}));
+    if(a2-a1>16) calG.appendChild(arcText(R_T0+14,(a1+a2)/2,g.k,15,"#E6EDFB"));
+  });
+  // المنازل
+  items.forEach(m=>{
+    const a1=angD(m.from+1)-deg/2, a2=angD(m.to)+deg/2, mid=(a1+a2)/2, now_=(m.i===o.i);
+    calG.appendChild(E("path",{d:sector(R_M0,R_M1,a1,a2),fill:SEA[m.fas],
+      "fill-opacity":now_?.95:.5,stroke:"#0B1226","stroke-width":1.2}));
+    calG.appendChild(arcText(R_M0+50,mid,m.name,now_?20:17,now_?"#FFFFFF":"#E4EAF7",now_?"700":null));
+    calG.appendChild(arcText(R_M0+22,mid,ar(m.i),12.5,now_?"#FFF3D8":"#9FAAC4"));
+  });
+  [R_T0,R_T1,R_M1].forEach(r=>calG.appendChild(E("circle",{cx:CX,cy:CY,r,fill:"none",
+    stroke:"#C9A227","stroke-opacity":.4})));
+  // مؤشر اليوم في القمة
+  const [px1,py1]=P(R_M1+6,90), [px2,py2]=P(R_M1+34,90);
+  calG.appendChild(E("path",{d:`M${px1} ${py1} L${px2-14} ${py2} L${px2+14} ${py2} Z`,fill:"#C9A227"}));
+  const t=E("text",{x:CX,y:py2-10,"text-anchor":"middle",fill:"#C9A227","font-size":19});
+  t.textContent="اليوم"; calG.appendChild(t);
+}
+
+// ---------- الحلقة الداخلية: الساعة ----------
+const hourG=E("g",{}); sv.appendChild(hourG);
+function drawHours(now){
+  while(hourG.firstChild) hourG.removeChild(hourG.firstChild);
+  const S=suntimes(now);
+  if(S){
+    const a1=angH(S.set), a2=angH(S.rise+24);
+    hourG.appendChild(E("path",{d:sector(R_H0,R_H1,a1,a2),fill:"#8FA0C6","fill-opacity":.14}));
+    [[a1,"الغروب "+hm(S.set)],[a2,"الشروق "+hm(S.rise)]].forEach(([a,lab])=>{
+      const [q1,q2]=P(R_H0,a),[q3,q4]=P(R_H1,a);
+      hourG.appendChild(E("line",{x1:q1,y1:q2,x2:q3,y2:q4,stroke:"#8FA0C6",
+        "stroke-width":2,"stroke-dasharray":"7 5","stroke-opacity":.8}));
+      hourG.appendChild(arcText(R_H0+26,a,lab,15,"#A9B6D4"));
+    });
+  }
+  hourG.appendChild(E("circle",{cx:CX,cy:CY,r:R_H1,fill:"none",stroke:"#C9A227","stroke-opacity":.55,"stroke-width":2}));
+  hourG.appendChild(E("circle",{cx:CX,cy:CY,r:R_H0,fill:"none",stroke:"#C9A227","stroke-opacity":.3}));
+  for(let h=0;h<24;h++){
+    const t=angH(h), [a,b]=P(R_H1,t), [x,y]=P(R_H1-(h%6===0?22:12),t);
+    hourG.appendChild(E("line",{x1:a,y1:b,x2:x,y2:y,stroke:"#C9A227",
+      "stroke-opacity":h%6===0?.9:.4,"stroke-width":h%6===0?2.4:1}));
+    const [lx,ly]=P(R_H1-42,t);
+    const tx=E("text",{x:lx,y:ly+7,"text-anchor":"middle","font-size":h%6===0?26:20,
+      fill:h%6===0?"#FFF3D8":"#B9C2D8"});
+    tx.textContent=ar(pad(h)); hourG.appendChild(tx);
+  }
+  for(let m=0;m<96;m++){ if(m%4===0) continue;
+    const t=angH(m/4),[a,b]=P(R_H1,t),[x,y]=P(R_H1-6,t);
+    hourG.appendChild(E("line",{x1:a,y1:b,x2:x,y2:y,stroke:"#C9A227","stroke-opacity":.22}));
+  }
+}
+
+// ---------- أوتار ارتفاع الشمس ----------
+// على هذا المينا الإحداثي الرأسي = جتا الزاوية الساعية بالضبط،
+// و جا(الارتفاع) = جتاφ·جتاδ·(جتاH − جتاH₀) ⇒ خطوط الارتفاع أوتار أفقية.
+let ALT=1;
+const altG=E("g",{}); sv.appendChild(altG);
+function drawAlt(now){
+  while(altG.firstChild) altG.removeChild(altG.firstChild);
+  window.SUNALT=null;
+  if(!ALT) return;
+  const R=R_H1-4, N=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+  const dec=rd(23.45*Math.sin(rd(360/365*(N-81)))), phi=rd(LAT);
+  const k=Math.cos(phi)*Math.cos(dec), y0=-Math.tan(phi)*Math.tan(dec);
+  const chord=(y,col,wid,dash,lab)=>{
+    if(Math.abs(y)>=0.995) return;
+    const yy=CY-y*R, xo=R*Math.sqrt(1-y*y), dy=Math.abs(y*R);
+    const segs = dy<R_TXT ? (()=>{const xi=Math.sqrt(R_TXT*R_TXT-dy*dy);
+        return [[CX-xo,CX-xi],[CX+xi,CX+xo]];})() : [[CX-xo,CX+xo]];
+    segs.forEach(([x1,x2])=>{
+      const l=E("line",{x1,y1:yy,x2,y2:yy,stroke:col,"stroke-width":wid,"stroke-opacity":.75});
+      if(dash) l.setAttribute("stroke-dasharray",dash); altG.appendChild(l);});
+    if(lab){
+      const lx = CX + (dy<R_TXT ? Math.sqrt(R_TXT*R_TXT-dy*dy)+30 : 46);
+      const t=E("text",{x:lx,y:yy-6,"text-anchor":"middle","font-size":16,fill:col,
+        stroke:"#0D1531","stroke-width":4,"paint-order":"stroke","font-weight":"600"});
+      t.textContent=lab; altG.appendChild(t);}
+  };
+  chord(y0,"#E8C46A",2.4,null,"الأفق ٠°");
+  [15,30,45,60,75].forEach(a=>chord(y0+Math.sin(rd(a))/k,"#9AD4EE",1.4,"6 5",ar(a)+"°"));
+  const h=hoursIn(now,TZ), t=angH(h), [sx,sy]=P(R,t);
+  const yS=(CY-sy)/R, alt=Math.asin(Math.max(-1,Math.min(1,k*(yS-y0))))*180/Math.PI;
+  altG.appendChild(E("circle",{cx:sx,cy:sy,r:9,fill:alt>0?"#F2C14E":"#4E5B7A",
+    stroke:"#0B1226","stroke-width":2}));
+  window.SUNALT=alt; window.SUNALTMAX=90-LAT+dec*180/Math.PI;
+}
+
+// ---------- مشرق الشمس ومغربها (السمت الحقيقي) ----------
+// زاوية الرسم = ٩٠ − السمت، فالشمال أعلى والشرق يمين — مطابق لعلامات الجهات
+let AZM=1;
+const azG=E("g",{}); sv.appendChild(azG);
+function azRise(dec){
+  const p=rd(LAT), d=rd(dec), h=rd(-0.833-dip(ELEV));
+  const c=(Math.sin(d)-Math.sin(p)*Math.sin(h))/(Math.cos(p)*Math.cos(h));
+  return 180/Math.PI*Math.acos(Math.max(-1,Math.min(1,c)));
+}
+function drawAz(now){
+  while(azG.firstChild) azG.removeChild(azG.firstChild);
+  if(!AZM) return;
+  const RA0=R_M1+16, RA1=R_M1+50, D=a=>90-a;
+  const aS=azRise(23.44), aW=azRise(-23.44);          // مدى التأرجح السنوي
+  const band=(a1,a2,fill,op)=>azG.appendChild(E("path",{d:sector(RA0,RA1,D(a2),D(a1)),
+    fill,"fill-opacity":op,stroke:"#0B1226","stroke-width":.8}));
+  band(aS,aW,"#8FA0C6",.22); band(360-aW,360-aS,"#8FA0C6",.22);
+  // اليوم
+  const S=suntimes(now); if(!S) return;
+  const at=azRise(S.dec);
+  [[at,"المشرق"],[360-at,"المغرب"]].forEach(([a,lab])=>{
+    const [x1,y1]=P(RA0-6,D(a)), [x2,y2]=P(RA1+6,D(a));
+    azG.appendChild(E("line",{x1,y1,x2,y2,stroke:"#F2C14E","stroke-width":3.5,"stroke-linecap":"round"}));
+    azG.appendChild(arcText(RA1+16,D(a),lab+" "+ar(a.toFixed(0))+"°",15,"#F2C14E"));
+  });
+  // حدود المدى
+  [[aS,"مشرق الصيف"],[aW,"مشرق الشتاء"],[360-aS,"مغرب الصيف"],[360-aW,"مغرب الشتاء"]]
+    .forEach(([a,lab])=>{
+      const [x1,y1]=P(RA0,D(a)), [x2,y2]=P(RA1,D(a));
+      azG.appendChild(E("line",{x1,y1,x2,y2,stroke:"#8FA0C6","stroke-width":1.4,"stroke-opacity":.8}));
+      azG.appendChild(arcText(RA0+11,D(a),lab,11.5,"#B9C4DC"));
+    });
+  window.AZR=at;
+}
+
+// ---------- العقارب والمركز ----------
+const handG=E("g",{}); sv.appendChild(handG);
+const hoursIn=(d,off)=>{const u=d.getTime()+d.getTimezoneOffset()*60000+off*3600000, x=new Date(u);
+  return x.getHours()+x.getMinutes()/60+x.getSeconds()/3600+x.getMilliseconds()/3600000;};
+function drawHands(now){
+  while(handG.firstChild) handG.removeChild(handG.firstChild);
+  const hM=hoursIn(now,3), hL=hoursIn(now,LOCAL_TZ);
+  const sec=now.getSeconds()+now.getMilliseconds()/1000, tS=angH((sec/60)*24);
+  const [sx,sy]=P(R_H1-16,tS), [sbx,sby]=P(-48,tS);
+  handG.appendChild(E("line",{x1:sbx,y1:sby,x2:sx,y2:sy,stroke:"#E06A5A","stroke-width":2,
+    "stroke-linecap":"round","stroke-opacity":.9}));
+  const arm=(h,col,w,len,cap)=>{const t=angH(h),[tx,ty]=P(len,t),[bx,by]=P(-40,t);
+    handG.appendChild(E("line",{x1:bx,y1:by,x2:tx,y2:ty,stroke:col,"stroke-width":w,"stroke-linecap":"round"}));
+    if(cap) handG.appendChild(E("circle",{cx:tx,cy:ty,r:cap,fill:col}));};
+  if(Math.abs(hL-hM)>0.01) arm(hL,"#8FA0C6",4,R_H1-34,8);
+  arm(hM,"#C9A227",6.5,R_H1-8,11);
+  handG.appendChild(E("circle",{cx:CX,cy:CY,r:14,fill:"#0B1226",stroke:"#C9A227","stroke-width":3}));
+}
+const coreG=E("g",{}); sv.appendChild(coreG);
+function drawCore(now){
+  while(coreG.firstChild) coreG.removeChild(coreG.firstChild);
+  coreG.appendChild(E("circle",{cx:CX,cy:CY,r:R_TXT,fill:"#0D1531","fill-opacity":.92,
+    stroke:"#C9A227","stroke-opacity":.5}));
+  const sd=starDay(now), o=mzOf(sd);
+  const put=(y,txt,fs,fill,w)=>{const t=E("text",{x:CX,y:CY+y,"text-anchor":"middle","font-size":fs,fill});
+    if(w)t.setAttribute("font-weight",w); t.textContent=txt; coreG.appendChild(t);};
+  put(-56,ar(pad(now.getHours()))+":"+ar(pad(now.getMinutes())),46,"#C9A227","700");
+  put(-24,"توقيت مكة",14,"#8B95B0");
+  put(20,o.name,34,"#FFFFFF","700");
+  put(50,"المنزلة "+ar(o.i)+" · اليوم "+ar(sd),16,"#A9B6D4");
+}
+
+// ---------- الجهات والقراءة ----------
+function drawCompass(){
+  [["شمال",90],["شرق",0],["جنوب",270],["غرب",180]].forEach(([w,a])=>{
+    const [x,y]=P(R_M1+128,a);
+    const t=E("text",{x,y:y+6,"text-anchor":"middle","font-size":20,fill:"#8FA0C6"});
+    t.textContent=w; sv.appendChild(t);});
+}
+drawCompass();
+function readout(now,live){
+  const sd=starDay(now), o=mzOf(sd), S=suntimes(now);
+  document.getElementById("out").innerHTML=
+    `<div class="bk-cell"><b>المنزلة</b><span>${o.name}</span></div>`+
+    `<div class="bk-cell"><b>الطالع</b><span>${o.tal}</span></div>`+
+    `<div class="bk-cell"><b>الفصل</b><span>${o.fas}</span></div>`+
+    `<div class="bk-cell"><b>يوم السنة</b><span>${ar(sd)}</span></div>`+
+    (S?`<div class="bk-cell"><b>الشروق</b><span>${hm(S.rise)}</span></div>`+
+       `<div class="bk-cell"><b>الغروب</b><span>${hm(S.set)}</span></div>`+
+       `<div class="bk-cell"><b>طول الليل</b><span>${hm(S.night)}</span></div>`+
+       `<div class="bk-cell"><b>قوس الليل</b><span>${ar(Math.round(S.night*15))}°</span></div>`:"")+
+    (window.SUNALT!=null?
+       `<div class="bk-cell"><b>ارتفاع الشمس</b><span>${window.SUNALT>=0?"":"\u2212"}${ar(Math.abs(window.SUNALT).toFixed(1))}°</span></div>`+
+       `<div class="bk-cell"><b>أقصى اليوم</b><span>${ar(window.SUNALTMAX.toFixed(1))}°</span></div>`:"")+
+    (window.AZR!=null?
+       `<div class="bk-cell"><b>سمت المشرق</b><span>${ar(window.AZR.toFixed(1))}°</span></div>`+
+       `<div class="bk-cell"><b>سمت المغرب</b><span>${ar((360-window.AZR).toFixed(1))}°</span></div>`:"");
+  document.getElementById("tlab").textContent = live?"الوقت الحقيقي"
+    :ar(pad(now.getHours()))+":"+ar(pad(now.getMinutes()));
+}
+
+// ---------- الموقع والارتفاع ----------
+async function fetchElevation(lat,lon){
+  try{const r=await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
+    const j=await r.json();
+    if(j&&j.elevation&&j.elevation.length){ELEV=Math.max(0,j.elevation[0]); ALTSRC="من الإنترنت";
+      document.getElementById("elev").value=Math.round(ELEV); setPlace(); tick(true); return;}
+  }catch(e){ ALTSRC="تعذّر الجلب — أدخله يدوياً"; setPlace(); }
+}
+const PRESETS={ahsa:{n:"الأحساء",la:25.3833,lo:49.5833},makkah:{n:"مكة المكرمة",la:21.4225,lo:39.8262}};
+function setPlace(){
+  const diff=LOCAL_TZ-3;
+  document.getElementById("place").innerHTML=
+    "الموقع: <b>"+PLACE+"</b> · "+LAT.toFixed(4)+"، "+LON.toFixed(4)+
+    (GPSACC!=null?" <span style='color:#E8C46A'>(دقة ±"+ar(Math.round(GPSACC))+" م)</span>":"")+
+    "<br>الارتفاع "+ar(Math.round(ELEV))+" م <span style='color:#7C86A3'>("+ALTSRC+")</span>"+
+    " · انخفاض الأفق "+dip(ELEV).toFixed(2)+"° · أثره على الشروق ≈ "+ar((dip(ELEV)*4).toFixed(1))+" دقيقة"+
+    (Math.abs(diff)>0.01?"<br>جهازك على UTC"+(LOCAL_TZ>=0?"+":"")+LOCAL_TZ+
+      " — العقرب الفضي توقيتك، والذهبي توقيت مكة":"<br>جهازك على توقيت السعودية — العقربان متطابقان");
+}
+document.getElementById("elev").value=ELEV;
+document.getElementById("elev").addEventListener("input",e=>{ELEV=+e.target.value||0; ALTSRC="يدوي"; setPlace(); tick(true);});
+document.querySelectorAll("[data-loc]").forEach(b=>b.addEventListener("click",()=>{
+  const q=PRESETS[b.dataset.loc]; LAT=q.la; LON=q.lo; PLACE=q.n; TZ=3; GPSACC=null; ALTSRC="جارٍ الجلب…";
+  setPlace(); tick(true); fetchElevation(LAT,LON);}));
+document.getElementById("geo").addEventListener("click",()=>{
+  const el=document.getElementById("place");
+  if(!navigator.geolocation){el.textContent="متصفحك لا يدعم تحديد الموقع."; return;}
+  el.textContent="جارٍ تحديد الموقع…";
+  navigator.geolocation.getCurrentPosition(pos=>{
+    LAT=pos.coords.latitude; LON=pos.coords.longitude; TZ=LOCAL_TZ; PLACE="موقعك"; GPSACC=pos.coords.accuracy;
+    if(pos.coords.altitude!=null&&!isNaN(pos.coords.altitude)){ELEV=Math.max(0,pos.coords.altitude);
+      ALTSRC="من الجوال ±"+Math.round(pos.coords.altitudeAccuracy||0)+" م";
+      document.getElementById("elev").value=Math.round(ELEV);} else ALTSRC="جارٍ الجلب…";
+    setPlace(); tick(true); fetchElevation(LAT,LON);},
+    err=>{el.textContent="تعذّر تحديد الموقع: "+err.message;},{enableHighAccuracy:true,timeout:15000});
+});
+document.getElementById("altbtn").addEventListener("click",e=>{
+  ALT=ALT?0:1; e.target.classList.toggle("on",!!ALT); tick(true);});
+document.getElementById("azbtn").addEventListener("click",e=>{
+  AZM=AZM?0:1; e.target.classList.toggle("on",!!AZM); tick(true);});
+setPlace(); fetchElevation(LAT,LON);
+
+// ---------- التشغيل ----------
+let simUntil=0; const sl=document.getElementById("tsim");
+sl.addEventListener("input",()=>{simUntil=Date.now()+8000;
+  const n=new Date(); n.setHours(Math.floor(sl.value/60),sl.value%60,0,0); render(n,false);});
+function render(now,live){ drawCal(now); drawHours(now); drawAz(now); drawAlt(now); drawHands(now); drawCore(now); readout(now,live); }
+function tick(force){
+  if(force){render(new Date(),true); return;}
+  if(Date.now()>simUntil){const n=new Date(); sl.value=n.getHours()*60+n.getMinutes(); render(n,true);}
+}
+tick(); (function loop(){tick(); requestAnimationFrame(loop);})();
+})();
+</script>
+</body>
+</html>
