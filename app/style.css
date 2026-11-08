@@ -561,3 +561,30 @@ button { font: inherit; cursor: pointer; }
 .pl-ax em { font-style: normal; font-size: 9px; font-weight: 400; color: var(--muted); }
 .pl-grid .pl-ywhead .pl-ydays > i { font-size: 11px; font-weight: 700; color: var(--ink); }
 .pl-ydays > i.pl-gcell:empty { min-height: 20px; padding: 0; }
+
+/* ── المخطط: المشاريع (مشروع ← خطة ← مهام)، والاهتمامات وسوماً، والأرشيف */
+.pl-projects { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--beige-300); border-radius: 10px; background: #fff; }
+.pl-padd { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pl-padd input[name="pname"] { flex: 1 1 160px; min-width: 0; padding: 4px 8px; border: 1px solid var(--beige-300); border-radius: 6px; font: inherit; font-size: 12px; }
+.pl-padd > button { display: inline-grid; place-items: center; min-width: 32px; min-height: 30px; border: 0; border-radius: 8px; background: var(--green-700); color: var(--beige-50); cursor: pointer; }
+.pl-ptags { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.pl-ptags label, .pl-ptags button { cursor: pointer; font: inherit; font-size: 10px; }
+.pl-ptags label input { position: absolute; opacity: 0; }
+.pl-ptags label span, .pl-ptags button { display: inline-block; padding: 1px 7px; border-radius: 99px; border: 1px solid var(--c); color: var(--c); background: #fff; }
+.pl-ptags label input:checked + span, .pl-ptags button[aria-pressed="true"] { background: var(--c); color: #fff; }
+.pl-plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pl-plist > li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 2px 8px; padding: 6px 8px; border: 1px solid var(--beige-300); border-radius: 8px; }
+.pl-plist > li.on { border-color: var(--green-700); box-shadow: inset 3px 0 0 var(--green-700); }
+.pl-plist .pl-pname { grid-column: 1; justify-self: start; border: 0; background: none; padding: 0; font: inherit; font-size: 13px; font-weight: 700; color: var(--green-800); cursor: pointer; text-align: start; }
+.pl-plist .pl-ptags { grid-column: 1 / -1; }
+.pl-plist small { grid-column: 1; font-size: 11px; color: var(--muted); }
+.pl-plist .pl-meter { grid-column: 1; height: 5px; }
+.pl-plist em { grid-row: 1; grid-column: 2; font-style: normal; font-weight: 700; color: var(--green-800); font-size: 12px; }
+.pl-plist > li > .pl-btn { grid-row: 1; grid-column: 3; }
+.pl-archive summary { cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.pl-archive summary em { font-style: normal; background: var(--beige-100); border-radius: 99px; padding: 0 7px; }
+.pl-pbanner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--beige-300); border-inline-start: 5px solid var(--c); }
+.pl-pbanner b { font-size: 14px; }
+.pl-pbanner small { color: var(--muted); }
+.pl-pbanner em { margin-inline-start: auto; font-style: normal; font-weight: 700; color: var(--green-800); }
+.pl-add select { font: inherit; font-size: 12px; padding: 3px 4px; border: 1px solid var(--beige-300); border-radius: 6px; max-width: 140px; }

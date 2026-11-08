@@ -298,6 +298,16 @@ export const UNITS = {
     for (let y = parse(from).getFullYear(); `${y}-01-01` <= to; y++) out.push({ start: `${y}-01-01` < from ? from : `${y}-01-01`, end: `${y}-12-31` > to ? to : `${y}-12-31`, label: String(y) });
     return out;
   } },
+  // العقد (طلب المالك): فترة عشر سنوات صفاً واحداً، فتكون «عشر سنوات × سنوات» ١٠ خلايا كل خلية سنة
+  decade: { label: 'عشر سنوات', rank: 5, segments: (from, to) => {
+    const out = [];
+    for (let y = parse(from).getFullYear(); `${y}-01-01` <= to; y += 10) {
+      const s = `${y}-01-01` < from ? from : `${y}-01-01`;
+      const e = `${y + 9}-12-31` > to ? to : `${y + 9}-12-31`;
+      out.push({ start: s, end: e, label: `${parse(s).getFullYear()}–${parse(e).getFullYear()}` });
+    }
+    return out;
+  } },
 };
 const SEASON_SYS = (o) => (['star', 'astro', 'quarter'].includes(o.system) ? o.system : 'star');
 
@@ -403,7 +413,8 @@ export const GRID_PRESETS = {
   seasonsMonths: { label: 'مواسم × أشهر', span: 'year', rows: 'season', cols: 'month' },
   tawaliManazil: { label: 'طوالع × منازل', span: 'starYear', rows: 'tali', cols: 'manzil' },
   monthCal: { label: 'شهر × أسابيع', span: 'month', rows: 'week', cols: 'weekday' },
-  decade: { label: 'الخطة العشرية', span: 'decade', rows: 'year', cols: 'month' },
+  decadeYears: { label: 'عشر سنوات (١٠ خلايا)', span: 'decade', rows: 'decade', cols: 'year' },
+  decade: { label: 'الخطة العشرية (١٠ × ١٢)', span: 'decade', rows: 'year', cols: 'month' },
 };
 export const PRESET_IDS = [...Object.keys(GRID_PRESETS), 'months']; // months: ١٢ تقويماً صغيراً (عرض خاص)
 /** القالب المطابق لإعداد الشبكة (إن وُجد) — لإبراز اسمه في الزر. */
