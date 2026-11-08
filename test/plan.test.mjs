@@ -122,8 +122,8 @@ test('«لاحقاً»: مهمة بلا تاريخ في النظام نفسه، 
 
 import { WEEKDAY_COLS, monthCells, monthOffset, nextYearLayout, yearWeeks } from '../app/widgets/planner/plan.js';
 
-test('تخطيطات السنة الأربعة تدور: بالتاريخ ← باليوم ← أشهراً ← أسابيع', () => {
-  assert.deepEqual(['date', 'weekday', 'months', 'weeks'].map(nextYearLayout), ['weekday', 'months', 'weeks', 'date']);
+test('ترتيبات السنة تدور: بالتاريخ ← باليوم ← أشهراً ← أسابيع ← مواسم × أشهر ← طوالع × منازل', () => {
+  assert.deepEqual(['date', 'weekday', 'months', 'weeks', 'seasonsMonths', 'tawaliManazil'].map(nextYearLayout), ['weekday', 'months', 'weeks', 'seasonsMonths', 'tawaliManazil', 'date']);
 });
 
 test('المحاذاة باليوم: ١ نوفمبر ٢٠٢٦ أحد (إزاحة ٠ والأسبوع يبدأ الأحد)، و١ يناير ٢٠٢٦ خميس (إزاحة ٤)', () => {
@@ -141,4 +141,51 @@ test('أسابيع السنة: تبدأ بأسبوع ١ يناير وتنتهي 
   assert.equal(w.length, 53);
   assert.equal(w.filter((x) => x.monthStart != null).length, 12);
   assert.equal(w.find((x) => x.monthStart === 10).start, '2026-11-01');
+});
+
+import { GRID_PRESETS, SPANS, buildGrid, gridBars, segmentsOf, validCombo } from '../app/widgets/planner/plan.js';
+
+test('القاعدة: الصف يحتوي العمود، والخلية بوحدة العمود — والعكس مرفوض', () => {
+  assert.deepEqual([validCombo('season', 'month'), validCombo('tali', 'manzil'), validCombo('month', 'dayNum'), validCombo('week', 'weekday')], [true, true, true, true]);
+  assert.deepEqual([validCombo('month', 'season'), validCombo('day', 'month'), validCombo('month', 'month'), validCombo('day', 'dayNum')], [false, false, false, false]);
+  assert.throws(() => buildGrid(SPANS.year.range('2026-11-08'), 'month', 'season'));
+});
+
+test('المحرّك يعيد العروض الحالية: أشهر × رقم اليوم = ١٢ صفاً × ٣١ عموداً، وأشهر × يوم الأسبوع = ٣٧ عموداً', () => {
+  const y = SPANS.year.range('2026-11-08');
+  const g = buildGrid(y, 'month', 'dayNum');
+  assert.deepEqual([g.rows.length, g.cols, g.header[30], g.rows[1].cells.length], [12, 31, '31', 28]);
+  const w = buildGrid(y, 'month', 'weekday');
+  assert.deepEqual([w.cols, w.rows[0].cells[0].col, w.rows[10].cells[0].col], [37, 4, 0]);   // ١ يناير خميس، ١ نوفمبر أحد
+  const wk = buildGrid(y, 'week', 'weekday');
+  assert.equal(wk.rows.length, 53);
+});
+
+test('سنة × مواسم × أشهر: صف لكل موسم، وخلاياه الأشهر التي يمسّها (مقصوصة عند حدوده)', () => {
+  const g = buildGrid(SPANS.year.range('2026-11-08'), 'season', 'month', { system: 'astro' });
+  assert.deepEqual(g.rows.map((r) => r.label), ['الشتاء', 'الربيع', 'الصيف', 'الخريف', 'الشتاء']);
+  const autumn = g.rows[3];
+  assert.deepEqual(autumn.cells.map((c) => `${c.label}:${c.start.slice(5)}→${c.end.slice(5)}`), ['سبتمبر:09-22→09-30', 'أكتوبر:10-01→10-31', 'نوفمبر:11-01→11-30', 'ديسمبر:12-01→12-20']);
+  assert.equal(g.header, null); // الأعمدة تختلف من صف لآخر، فاسم الشهر داخل خليته
+  const star = buildGrid(SPANS.year.range('2026-11-08'), 'season', 'month', { system: 'star' });
+  assert.equal(star.rows.find((r) => r.label === 'الخريف').cells[0].start, '2026-09-06');
+});
+
+test('سنة نجمية × طوالع × منازل: ٣٦٥ يوماً، ٢٨ منزلة موزعة على الطوالع بلا قصّ', () => {
+  const span = SPANS.starYear.range('2026-11-08');
+  assert.deepEqual([span.start, span.end], ['2026-09-06', '2027-09-05']);
+  const g = buildGrid(span, 'tali', 'manzil');
+  assert.equal(g.rows.reduce((n, r) => n + r.cells.length, 0), 28);
+  assert.deepEqual(g.rows.map((r) => r.label).slice(0, 4), ['سهيل', 'الوسم', 'المربعانية', 'الشبط']);
+  assert.deepEqual(g.rows[1].cells.map((c) => c.label), ['العواء', 'السماك', 'الغفر', 'الزبانا']);
+  assert.equal(GRID_PRESETS.tawaliManazil.rows, 'tali');
+  assert.equal(segmentsOf('manzil', span.start, span.end).length, 28);
+});
+
+test('أشرطة المهام في خلايا الشبكة: مهمة ١٥ أكتوبر–١٠ نوفمبر تمسّ خليتي أكتوبر ونوفمبر في صف الخريف', () => {
+  const g = buildGrid(SPANS.year.range('2026-11-08'), 'season', 'month', { system: 'astro' });
+  const t = makeTask({ name: 'تجربة', start: '2026-10-15', end: '2026-11-10', progress: 50 }, 'x');
+  const [b] = gridBars([t], g.rows[3]);
+  assert.deepEqual([b.col, b.span], [1, 2]);
+  assert.equal(gridBars([t], g.rows[1]).length, 0);
 });

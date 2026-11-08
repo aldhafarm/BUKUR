@@ -544,3 +544,13 @@ button { font: inherit; cursor: pointer; }
 .pl-ywhead { position: sticky; top: 0; z-index: 2; background: var(--beige-50); }
 .pl-ywhead .pl-ydays > i { font-size: 10px; padding: 2px 0; }
 .pl-ywhead .pl-ydays > i.pl-hnow { color: #e0393e; }
+
+/* ── المحرّك العام: خلايا بأسمائها (شهر، منزلة…)، وتسمية الصف بلونه */
+.pl-grid .pl-yrow { grid-template-columns: 78px 1fr; }
+.pl-grid .pl-rlabel { font-size: 12px; padding: 6px 6px 0; border-inline-start: 4px solid var(--rc); }
+.pl-grid .pl-ydays { grid-template-columns: repeat(var(--cols), minmax(64px, 1fr)); }
+.pl-ydays > i.pl-gcell { min-height: 38px; display: grid; align-content: start; gap: 1px; padding: 4px 6px; background: color-mix(in srgb, var(--s) 8%, #fff); }
+.pl-gcell b { font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-gcell small { font-size: 9px; color: var(--muted); }
+.pl-ydays > i.pl-gnow { box-shadow: inset 0 0 0 2px #e0393e; }
+.pl-grid .pl-task { height: 14px; font-size: 9px; line-height: 14px; }
