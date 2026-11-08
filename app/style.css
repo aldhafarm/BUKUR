@@ -334,3 +334,21 @@ button { font: inherit; cursor: pointer; }
 .hb-expand { justify-self: center; border: 1px solid var(--beige-300); background: #fff; border-radius: 99px; font-size: 12px; padding: 3px 12px; min-height: 28px; color: var(--green-800); }
 .nt-a { margin: 0; line-height: 1.6; padding-top: 6px; border-top: 1px dashed var(--beige-300); white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; color: var(--green-800); }
 .nt-show { justify-self: start; border: 1px solid var(--beige-300); background: var(--beige-50); border-radius: 8px; padding: 4px 12px; min-height: 30px; font-size: 12px; color: var(--green-800); }
+
+/* ── «أقل نص»: أزرار أيقونات داخل الودجات (Material Symbols) */
+.bk-chip { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; }
+.bk-chip .ic { width: 16px; height: 16px; color: #a9bcae; }
+.bk-btn, .ft-btn, .ft-chip, .ft-modes button, .qt-nav button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.bk-btn .ic, .ft-btn .ic { width: 22px; height: 22px; }
+.bk-btn.bk-primary { min-width: 64px; }
+.ft-btn.ft-primary { min-width: 72px; }
+.ft-chip .ic, .ft-modes .ic, .qt-nav .ic { width: 18px; height: 18px; }
+.ft-chip { min-width: 36px; font-weight: 600; }
+.bk-daily > span[data-tip] .ic { width: 18px; height: 18px; }
+.ft-stats > div { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; }
+.ft-stats .ic { width: 16px; height: 16px; color: var(--muted); }
+.nt-tabs button, .nt-switch, .nt-add button, .nt-acts button, .nt-show, .hb-expand, .hb-add button { display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
+.nt-tabs .ic, .nt-switch .ic, .nt-add .ic, .nt-show .ic { width: 18px; height: 18px; }
+.nt-acts .ic, .hb-add .ic { width: 20px; height: 20px; }
+.hb-expand .ic { width: 18px; height: 18px; }
+.nt-due:not(:empty) { font-size: 11px; font-weight: 700; }

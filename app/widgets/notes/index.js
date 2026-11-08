@@ -1,6 +1,7 @@
 // ودجة الملاحظات — حفظ تلقائي، ومعها «الاستذكار المتباعد» (طلب المالك، ٨ نوفمبر):
 // أي سطر أو نص محدد يُضاف بطاقةَ مراجعة، وتظهر البطاقات المستحقة يومياً بفترات لايتنر المتزايدة (sr.js).
 import { dueItems, facesOf, newItem, pickText, review, whenLabel } from './sr.js';
+import { icon, tip } from '../../icons.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -17,16 +18,16 @@ export default {
       <div class="nt">
         <div class="nt-bar">
           <div class="nt-tabs" role="tablist">
-            <button type="button" role="tab" data-tab="note">ملاحظة</button>
-            <button type="button" role="tab" data-tab="sr" hidden>استذكار <span class="nt-due"></span></button>
+            <button type="button" role="tab" data-tab="note" ${tip('الملاحظة')}>${icon('edit_note')}</button>
+            <button type="button" role="tab" data-tab="sr" hidden ${tip('الاستذكار: بطاقات اليوم')}>${icon('school')}<span class="nt-due"></span></button>
           </div>
-          <label class="nt-switch" title="تتبّع الاستذكار المتباعد لما تضيفه من الملاحظة"><input type="checkbox" data-sr-on> تابع الاستذكار</label>
+          <label class="nt-switch" ${tip('تابع الاستذكار المتباعد')}><input type="checkbox" data-sr-on>${icon('school')}</label>
         </div>
         <div class="nt-pane" data-pane="note">
           <textarea class="nt-text" placeholder="اكتب ملاحظة… تُحفظ تلقائياً" aria-label="ملاحظات"></textarea>
           <div class="nt-add" hidden>
-            <button type="button" data-add>＋ أضف السطر للاستذكار</button>
-            <span class="nt-hint">ضع المؤشر على سطر أو حدّد نصاً. «سؤال: جواب» تصير بطاقة بوجهين.</span>
+            <button type="button" data-add ${tip('أضف السطر أو المحدد للاستذكار · «سؤال: جواب» بوجهين')}>${icon('add')}${icon('school')}</button>
+            <span class="nt-hint"></span>
           </div>
         </div>
         <div class="nt-pane" data-pane="sr" hidden></div>
@@ -64,18 +65,18 @@ export default {
                 const f = facesOf(c);
                 const open = !f.back || shown.has(c.id);
                 return `<p class="nt-q">${esc(f.front)}</p>
-                  ${f.back ? (open ? `<p class="nt-a">${esc(f.back)}</p>` : '<button type="button" data-show class="nt-show">اكشف الجواب</button>') : ''}
+                  ${f.back ? (open ? `<p class="nt-a">${esc(f.back)}</p>` : `<button type="button" data-show class="nt-show" ${tip('اكشف الجواب')}>${icon('visibility')}</button>`) : ''}
                   <p class="nt-meta">الصندوق ${c.box + 1} من ٧ · ${esc(whenLabel(c, today))}</p>
                   ${open ? `<div class="nt-acts">
-                    <button type="button" data-rev="1" class="nt-ok">✓ تذكّرتها</button>
-                    <button type="button" data-rev="0" class="nt-no">✗ نسيتها</button>
+                    <button type="button" data-rev="1" class="nt-ok" ${tip('تذكّرتها')}>${icon('check')}</button>
+                    <button type="button" data-rev="0" class="nt-no" ${tip('نسيتها — تعود غداً')}>${icon('close')}</button>
                   </div>` : ''}`;
               })()}
             </li>`).join('')}</ul>`
           : `<p class="nt-sub">${cards.length ? 'لا مراجعة اليوم ✓' : 'لا بطاقات بعد. اكتب في «ملاحظة» ثم «أضف السطر للاستذكار».'}</p>`}
         ${upcoming.length ? `<details class="nt-next" data-size="m l"><summary>القادمة (${upcoming.length})</summary>
           <ul>${upcoming.map((c) => `<li data-id="${esc(c.id)}"><span>${esc(facesOf(c).front)}</span><small>${esc(whenLabel(c, today))} · صندوق ${c.box + 1}</small><button type="button" data-del aria-label="حذف">×</button></li>`).join('')}</ul></details>` : ''}
-        <p class="nt-hint" data-size="l">المراجعة بعد يوم، ثم ٣ أيام، ثم أسبوع، ثم أسبوعين، ثم شهر، ثم أشهر. «نسيتها» تعيدها للبداية.</p>`;
+`;
       applySize(ctx.size);
     }
 
