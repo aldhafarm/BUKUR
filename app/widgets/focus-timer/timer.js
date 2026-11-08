@@ -90,6 +90,13 @@ export function logFocus(log, date, minutes) {
   return { ...log, [key]: { sessions: day.sessions + 1, minutes: day.minutes + minutes } };
 }
 
+/** دقائق تركيز بلا جلسة (مهام التصاعدي): تُجمع في ساعات التركيز ولا تُحسب في عدّاد البومودورو. */
+export function logMinutes(log, date, minutes) {
+  const key = dateKey(date);
+  const day = log[key] ?? { sessions: 0, minutes: 0 };
+  return { ...log, [key]: { sessions: day.sessions, minutes: Math.round((day.minutes + minutes) * 100) / 100 } };
+}
+
 export const dayStats = (log, date) => log[dateKey(date)] ?? { sessions: 0, minutes: 0 };
 
 /** مجموع آخر سبعة أيام (اليوم ضمنها). */
