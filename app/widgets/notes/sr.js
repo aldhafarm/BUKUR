@@ -11,8 +11,25 @@ export function addDays(key, n) {
   return dayKey(new Date(y, m - 1, d + n));
 }
 
+/**
+ * وجها البطاقة (سؤال / جواب): يُفصل السطر عند أول «::»، وإلا عند أول نقطتين «:».
+ * «Genetic drift: loss by chance» ← سؤال «Genetic drift» وجواب «loss by chance». بلا فاصل: وجه واحد.
+ */
+export function splitQA(text) {
+  const t = String(text).trim();
+  const i = t.indexOf('::') >= 0 ? t.indexOf('::') : t.indexOf(':');
+  const sep = t.indexOf('::') >= 0 ? 2 : 1;
+  if (i <= 0) return { front: t, back: '' };
+  const front = t.slice(0, i).trim();
+  const back = t.slice(i + sep).trim();
+  return back ? { front, back } : { front: t, back: '' };
+}
+
+/** وجها بطاقة محفوظة — البطاقات القديمة (نص واحد) تُقرأ بالقاعدة نفسها. */
+export const facesOf = (item) => (item.front != null ? { front: item.front, back: item.back ?? '' } : splitQA(item.text ?? ''));
+
 /** بطاقة جديدة: تعلّمتها اليوم، أول مراجعة غداً. */
-export const newItem = (text, today, id) => ({ id, text: String(text).trim(), box: 0, due: addDays(dayKey(today), INTERVALS[0]), added: dayKey(today), reviews: 0, lapses: 0 });
+export const newItem = (text, today, id) => ({ id, text: String(text).trim(), ...splitQA(text), box: 0, due: addDays(dayKey(today), INTERVALS[0]), added: dayKey(today), reviews: 0, lapses: 0 });
 
 export const isDue = (item, today) => item.due <= dayKey(today);
 export const dueItems = (items, today) => items.filter((it) => isDue(it, today)).sort((a, b) => (a.due < b.due ? -1 : a.due > b.due ? 1 : a.box - b.box));

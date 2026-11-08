@@ -57,3 +57,13 @@ test('النص المضاف: المحدد إن وُجد، وإلا سطر الم
   assert.equal(pickText(v, 10, 10), 'Bottleneck: loss of variation');
   assert.equal(pickText(v, 8, 18), 'Bottleneck');
 });
+
+import { facesOf, splitQA } from '../app/widgets/notes/sr.js';
+
+test('بطاقة بوجهين: «سؤال: جواب» أو «سؤال :: جواب»، وبلا فاصل وجه واحد', () => {
+  assert.deepEqual(splitQA('Genetic drift: loss by chance'), { front: 'Genetic drift', back: 'loss by chance' });
+  assert.deepEqual(splitQA('الساعة :: 10:30 صباحاً'), { front: 'الساعة', back: '10:30 صباحاً' });
+  assert.deepEqual(splitQA('Bottleneck'), { front: 'Bottleneck', back: '' });
+  assert.deepEqual(splitQA(':بلا سؤال'), { front: ':بلا سؤال', back: '' });
+  assert.deepEqual(facesOf({ text: 'Q: A' }), { front: 'Q', back: 'A' }); // بطاقة قديمة
+});

@@ -278,3 +278,6 @@ button { font: inherit; cursor: pointer; }
 .hb-add button { min-width: 34px; border: 0; border-radius: 8px; background: var(--green-700); color: var(--beige-50); font-size: 16px; }
 .hb-list { display: flex; flex-wrap: wrap; gap: 4px; }
 .hb-list button { border: 1px solid var(--beige-300); background: #fff; border-radius: 99px; font-size: 11px; padding: 2px 8px; color: var(--muted); }
+.hb-expand { justify-self: center; border: 1px solid var(--beige-300); background: #fff; border-radius: 99px; font-size: 12px; padding: 3px 12px; min-height: 28px; color: var(--green-800); }
+.nt-a { margin: 0; line-height: 1.6; padding-top: 6px; border-top: 1px dashed var(--beige-300); white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; color: var(--green-800); }
+.nt-show { justify-self: start; border: 1px solid var(--beige-300); background: var(--beige-50); border-radius: 8px; padding: 4px 12px; min-height: 30px; font-size: 12px; color: var(--green-800); }

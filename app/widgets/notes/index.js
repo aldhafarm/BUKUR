@@ -1,6 +1,6 @@
 // ودجة الملاحظات — حفظ تلقائي، ومعها «الاستذكار المتباعد» (طلب المالك، ٨ نوفمبر):
 // أي سطر أو نص محدد يُضاف بطاقةَ مراجعة، وتظهر البطاقات المستحقة يومياً بفترات لايتنر المتزايدة (sr.js).
-import { dueItems, newItem, pickText, review, whenLabel } from './sr.js';
+import { dueItems, facesOf, newItem, pickText, review, whenLabel } from './sr.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -26,7 +26,7 @@ export default {
           <textarea class="nt-text" placeholder="اكتب ملاحظة… تُحفظ تلقائياً" aria-label="ملاحظات"></textarea>
           <div class="nt-add" hidden>
             <button type="button" data-add>＋ أضف السطر للاستذكار</button>
-            <span class="nt-hint">حدّد نصاً أو ضع المؤشر على سطر، ثم أضفه.</span>
+            <span class="nt-hint">ضع المؤشر على سطر أو حدّد نصاً. «سؤال: جواب» تصير بطاقة بوجهين.</span>
           </div>
         </div>
         <div class="nt-pane" data-pane="sr" hidden></div>
@@ -36,6 +36,7 @@ export default {
     area.value = ctx.store.get().text;
     const rows = { s: 3, m: 6, l: 12 };
     let toast = '';
+    const shown = new Set(); // بطاقات كُشف جوابها
 
     function save(patch) { ctx.store.set(patch); }
 
@@ -59,16 +60,21 @@ export default {
         ${due.length ? `<p class="nt-sub">للمراجعة اليوم: ${due.length}</p>
           <ul class="nt-cards">${due.map((c) => `
             <li data-id="${esc(c.id)}">
-              <p class="nt-q">${esc(c.text)}</p>
-              <p class="nt-meta">الصندوق ${c.box + 1} من ٧ · ${esc(whenLabel(c, today))}</p>
-              <div class="nt-acts">
-                <button type="button" data-rev="1" class="nt-ok">✓ تذكّرتها</button>
-                <button type="button" data-rev="0" class="nt-no">✗ نسيتها</button>
-              </div>
+              ${(() => {
+                const f = facesOf(c);
+                const open = !f.back || shown.has(c.id);
+                return `<p class="nt-q">${esc(f.front)}</p>
+                  ${f.back ? (open ? `<p class="nt-a">${esc(f.back)}</p>` : '<button type="button" data-show class="nt-show">اكشف الجواب</button>') : ''}
+                  <p class="nt-meta">الصندوق ${c.box + 1} من ٧ · ${esc(whenLabel(c, today))}</p>
+                  ${open ? `<div class="nt-acts">
+                    <button type="button" data-rev="1" class="nt-ok">✓ تذكّرتها</button>
+                    <button type="button" data-rev="0" class="nt-no">✗ نسيتها</button>
+                  </div>` : ''}`;
+              })()}
             </li>`).join('')}</ul>`
           : `<p class="nt-sub">${cards.length ? 'لا مراجعة اليوم ✓' : 'لا بطاقات بعد. اكتب في «ملاحظة» ثم «أضف السطر للاستذكار».'}</p>`}
         ${upcoming.length ? `<details class="nt-next" data-size="m l"><summary>القادمة (${upcoming.length})</summary>
-          <ul>${upcoming.map((c) => `<li data-id="${esc(c.id)}"><span>${esc(c.text)}</span><small>${esc(whenLabel(c, today))} · صندوق ${c.box + 1}</small><button type="button" data-del aria-label="حذف">×</button></li>`).join('')}</ul></details>` : ''}
+          <ul>${upcoming.map((c) => `<li data-id="${esc(c.id)}"><span>${esc(facesOf(c).front)}</span><small>${esc(whenLabel(c, today))} · صندوق ${c.box + 1}</small><button type="button" data-del aria-label="حذف">×</button></li>`).join('')}</ul></details>` : ''}
         <p class="nt-hint" data-size="l">المراجعة بعد يوم، ثم ٣ أيام، ثم أسبوع، ثم أسبوعين، ثم شهر، ثم أشهر. «نسيتها» تعيدها للبداية.</p>`;
       applySize(ctx.size);
     }
@@ -104,9 +110,11 @@ export default {
       if (!li) return;
       const id = li.dataset.id;
       const cards = ctx.store.get().cards ?? [];
+      if (e.target.closest('[data-show]')) { shown.add(id); paint(); return; }
       const rev = e.target.closest('[data-rev]');
       if (rev) {
         const ok = rev.dataset.rev === '1';
+        shown.delete(id);
         const next = cards.map((c) => (c.id === id ? review(c, ok, new Date()) : c));
         const c = next.find((x) => x.id === id);
         toast = ok ? `✓ المراجعة القادمة ${whenLabel(c, new Date())}` : '↺ تعود غداً من البداية';

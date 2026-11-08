@@ -1,6 +1,6 @@
 // «متتبع العادات» (طلب المالك، ٨ نوفمبر): جدول أيام الشهر (٢٨–٣١) × العادات التي تريد الالتزام بها.
 // كل خانة حلقة تقبل الضغط المتكرر: كاملة ← نصف ← ثلث ← ربع ← فارغة (habits.js).
-// الأيام صفوف والعادات أعمدة: يناسب عرض القائمة الجانبية الضيق.
+// الأيام صفوف والعادات أعمدة: يناسب عرض القائمة الجانبية الضيق. يظهر اليوم وحده افتراضياً، ويتوسّع للشهر.
 import { LEVEL_LABEL, arcPath, cycle, fractionOf, monthDays, monthScore, streak } from './habits.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -23,7 +23,7 @@ export default {
   name: 'متتبع العادات',
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
-  defaults: { habits: [], marks: {} },
+  defaults: { habits: [], marks: {}, expanded: false }, // expanded: الشهر كاملاً بدل اليوم وحده
 
   mount(el, ctx) {
     const now = new Date();
@@ -31,19 +31,19 @@ export default {
     let armed = null; // حذف العادة يحتاج ضغطتين
 
     function render() {
-      const { habits, marks } = ctx.store.get();
+      const { habits, marks, expanded } = ctx.store.get();
       const today = new Date();
       const tKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       let days = monthDays(view.y, view.m);
-      // الحجم الصغير: آخر سبعة أيام من الشهر المعروض حتى اليوم
-      if (ctx.size === 's') {
-        const upto = days.filter((d) => d.key <= tKey);
-        days = (upto.length ? upto : days).slice(-7);
+      // الافتراضي (قرار المالك): اليوم الحالي وحده، مع زر يوسّع إلى الشهر كاملاً
+      if (!expanded) {
+        view = { y: today.getFullYear(), m: today.getMonth() };
+        days = monthDays(view.y, view.m).filter((d) => d.key === tKey);
       }
       const isCurrent = view.y === today.getFullYear() && view.m === today.getMonth();
       el.innerHTML = `
         <div class="hb">
-          <div class="hb-head">
+          <div class="hb-head" ${expanded ? '' : 'hidden'}>
             <button type="button" data-month="-1" aria-label="الشهر السابق">→</button>
             <b>${MONTHS[view.m]} ${view.y}</b>
             <button type="button" data-month="1" aria-label="الشهر التالي">←</button>
@@ -71,6 +71,7 @@ export default {
               return `<td class="hb-score"><b>${s.pct}٪</b>${k > 1 ? `<small>🔥${k}</small>` : ''}</td>`;
             }).join('')}</tr></tfoot>
           </table></div>` : '<p class="hb-empty">أضف عادة تريد الالتزام بها، ثم اضغط حلقة اليوم كلما أنجزتها.</p>'}
+          ${habits.length ? `<button type="button" class="hb-expand" data-expand aria-expanded="${!!expanded}">${expanded ? 'اليوم فقط ▴' : `الشهر كاملاً (${MONTHS[today.getMonth()]}) ▾`}</button>` : ''}
           <form class="hb-add" data-size="m l">
             <input name="h" maxlength="24" placeholder="عادة جديدة… (مثل: ورد، رياضة، قراءة)" aria-label="اسم العادة" ${habits.length >= MAX_HABITS ? 'disabled' : ''}>
             <button type="submit" ${habits.length >= MAX_HABITS ? 'disabled' : ''}>＋</button>
@@ -82,6 +83,7 @@ export default {
     }
 
     el.addEventListener('click', (e) => {
+      if (e.target.closest('[data-expand]')) { ctx.store.set({ expanded: !ctx.store.get().expanded }); return; }
       const cell = e.target.closest('.hb-cell');
       if (cell) { ctx.store.set({ marks: cycle(ctx.store.get().marks, cell.dataset.h, cell.dataset.k) }); return; }
       const mb = e.target.closest('[data-month]');
