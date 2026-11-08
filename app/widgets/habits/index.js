@@ -2,6 +2,7 @@
 // كل خانة حلقة تقبل الضغط المتكرر: كاملة ← نصف ← ثلث ← ربع ← فارغة (habits.js).
 // الأيام صفوف والعادات أعمدة: يناسب عرض القائمة الجانبية الضيق. يظهر اليوم وحده افتراضياً، ويتوسّع للشهر.
 import { LEVEL_LABEL, arcPath, cycle, fractionOf, monthDays, monthScore, streak } from './habits.js';
+import { icon, tip } from '../../icons.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -71,13 +72,13 @@ export default {
               return `<td class="hb-score"><b>${s.pct}٪</b>${k > 1 ? `<small>🔥${k}</small>` : ''}</td>`;
             }).join('')}</tr></tfoot>
           </table></div>` : '<p class="hb-empty">أضف عادة تريد الالتزام بها، ثم اضغط حلقة اليوم كلما أنجزتها.</p>'}
-          ${habits.length ? `<button type="button" class="hb-expand" data-expand aria-expanded="${!!expanded}">${expanded ? 'اليوم فقط ▴' : `الشهر كاملاً (${MONTHS[today.getMonth()]}) ▾`}</button>` : ''}
+          ${habits.length ? `<button type="button" class="hb-expand" data-expand aria-expanded="${!!expanded}" ${tip(expanded ? 'اليوم فقط' : `الشهر كاملاً (${MONTHS[today.getMonth()]})`)}>${expanded ? `${icon('today')}` : `${icon('calendar_month')}`}</button>` : ''}
           <form class="hb-add" data-size="m l">
-            <input name="h" maxlength="24" placeholder="عادة جديدة… (مثل: ورد، رياضة، قراءة)" aria-label="اسم العادة" ${habits.length >= MAX_HABITS ? 'disabled' : ''}>
-            <button type="submit" ${habits.length >= MAX_HABITS ? 'disabled' : ''}>＋</button>
+            <input name="h" maxlength="24" placeholder="عادة جديدة…" aria-label="اسم العادة" ${habits.length >= MAX_HABITS ? 'disabled' : ''}>
+            <button type="submit" ${tip('أضف العادة')} ${habits.length >= MAX_HABITS ? 'disabled' : ''}>${icon('add')}</button>
           </form>
           ${habits.length ? `<div class="hb-list" data-size="l">${habits.map((h) => `<button type="button" data-del="${esc(h.id)}">${armed === h.id ? 'اضغط مرة ثانية للحذف' : `× ${esc(h.name)}`}</button>`).join('')}</div>` : ''}
-          <p class="hb-hint" data-size="l">ضغطة: تمت · ثانية: نصفها · ثالثة: ثلثها · رابعة: ربعها · خامسة: تُمسح. النسبة من الأيام المنقضية، و🔥 أيام كاملة متتالية.</p>
+          <p class="hb-hint" data-size="l">ضغطة: تمت · ثم ½ · ⅓ · ¼ · تُمسح</p>
         </div>`;
       for (const n of el.querySelectorAll('[data-size]')) n.hidden = !n.dataset.size.split(' ').includes(ctx.size);
     }

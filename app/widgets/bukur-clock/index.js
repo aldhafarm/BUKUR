@@ -1,5 +1,6 @@
 // ودجة ساعة البكور — أول ودجة في الحاضنة. تتبع عقد الودجة في docs/design.md §٤.
 import { dialMarkup } from './dial.js';
+import { icon, tip } from '../../icons.js';
 import {
   angleDelta, awakeStatus, bezelForTime, formatDuration, formatHM, hoursAwake, rotate, wakeHourFromBezel,
 } from './time.js';
@@ -36,23 +37,23 @@ const TEMPLATE = `
   <div class="bk-clock">
     <div class="bk-digital"><span data-ref="hm"></span><small data-ref="sec"></small></div>
     <div class="bk-chips" data-size="m l">
-      <div class="bk-chip"><span>الاستيقاظ</span><b data-ref="wake"></b></div>
-      <div class="bk-chip"><span>اليقظة</span><b data-ref="awake"></b></div>
-      <div class="bk-chip"><span>الحالة</span><b data-ref="status"></b></div>
+      <div class="bk-chip" ${tip('وقت الاستيقاظ')}>${icon('alarm')}<b data-ref="wake"></b></div>
+      <div class="bk-chip" ${tip('مدة اليقظة')}>${icon('schedule')}<b data-ref="awake"></b></div>
+      <div class="bk-chip" ${tip('الحالة')}>${icon('info')}<b data-ref="status"></b></div>
     </div>
     <div class="bk-bar" data-size="m l"><div data-ref="bar"></div></div>
     <svg class="bk-dial" viewBox="0 0 400 400" role="img" aria-label="قرص البكور — اسحب الإطار لتحديد وقت الاستيقاظ" data-ref="dial"></svg>
     <div class="bk-actions" data-size="m l">
-      <button type="button" class="bk-btn bk-primary" data-act="now">☀️ استيقظت الآن</button>
-      <button type="button" class="bk-btn" data-act="reset">تصفير</button>
-      <button type="button" class="bk-btn" data-act="settings" aria-expanded="false" aria-label="الإعدادات">⚙️</button>
+      <button type="button" class="bk-btn bk-primary" data-act="now" ${tip('استيقظت الآن')}>${icon('wb_sunny')}</button>
+      <button type="button" class="bk-btn" data-act="reset" ${tip('تصفير')}>${icon('restart_alt')}</button>
+      <button type="button" class="bk-btn" data-act="settings" aria-expanded="false" ${tip('الإعدادات')}>${icon('settings')}</button>
     </div>
     <div class="bk-daily" data-size="l">
-      <span>وقت الاستيقاظ اليومي</span>
+      <span ${tip('وقت الاستيقاظ اليومي')}>${icon('alarm')}</span>
       <input type="number" min="0" max="23" inputmode="numeric" data-ref="wh" aria-label="الساعة" dir="ltr">
       <span>:</span>
       <input type="number" min="0" max="59" step="5" inputmode="numeric" data-ref="wm" aria-label="الدقيقة" dir="ltr">
-      <button type="button" class="bk-btn bk-accent" data-act="daily">اضبط</button>
+      <button type="button" class="bk-btn bk-accent" data-act="daily" ${tip('اضبط الاستيقاظ اليومي')}>${icon('check')}</button>
     </div>
     <div class="bk-settings" data-ref="settings" hidden>
       <div class="bk-row"><span>القرص</span><span class="bk-seg" data-key="dialMode">
@@ -66,7 +67,6 @@ const TEMPLATE = `
       <div class="bk-row"><span>تقدّم اليقظة على الإطار</span><span class="bk-seg" data-key="showAwakeProgress">
         <button type="button" data-val="false">إيقاف</button><button type="button" data-val="true">تشغيل</button></span></div>
     </div>
-    <p class="bk-hint" data-size="m l">اسحب الإطار · اضغط ☀️ عند الاستيقاظ</p>
   </div>`;
 
 export default {

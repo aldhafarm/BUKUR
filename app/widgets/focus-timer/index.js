@@ -2,6 +2,7 @@
 // • القرص: قطاع يتناقص (برتقالي للتركيز، أخضر للراحة) — يُسحب بالفأرة أو اللمس لتحديد المدة.
 // • زر الوحدة: الحلقة = ٦٠ دقيقة أو ١٢ ساعة. • داخل الحلقة: عجلات ساعات/دقائق/ثوانٍ كمؤقت أبل.
 // • «سلسلة»: الراحة ثم التركيز تتواليان تلقائياً، مع تنبيه عند كل انتقال.
+import { icon, setIconBtn, tip } from '../../icons.js';
 import {
   PHASE_LABEL, PRESETS, RING, advance, angleToMs, autoUnit, catchUp, configFor, customWith, dayStats,
   formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, pause, phaseMs, remaining, reset,
@@ -20,7 +21,7 @@ const DEFAULTS = {
   notice: null,
 };
 
-const MODES = [...Object.entries(PRESETS).map(([id, p]) => [id, `${p.label} ${p.focus}/${p.short}`]), ['custom', 'مخصص']];
+const MODES = [...Object.entries(PRESETS).map(([id, p]) => [id, `${p.focus}/${p.short}`, p.label]), ['custom', '', 'مخصص']];
 const ROW = 26; // ارتفاع صف العجلة بالبكسل
 const range = (n) => Array.from({ length: n }, (_, i) => i);
 const wheel = (key, n, label) => `
@@ -31,7 +32,7 @@ const wheel = (key, n, label) => `
 const TEMPLATE = `
   <div class="ft">
     <div class="ft-modes" data-size="m l" role="group" aria-label="النموذج">
-      ${MODES.map(([id, label]) => `<button type="button" data-mode="${id}">${label}</button>`).join('')}
+      ${MODES.map(([id, short, name]) => `<button type="button" data-mode="${id}" ${tip(name)}>${short || icon('tune')}</button>`).join('')}
     </div>
     <div class="ft-face">
       <svg viewBox="-14 -14 228 228" class="ft-disk" data-ref="disk" role="slider" tabindex="0"
@@ -53,20 +54,20 @@ const TEMPLATE = `
       </div>
     </div>
     <div class="ft-tools">
-      <button type="button" class="ft-chip" data-act="unit" title="ضغطة: دقائق ⇄ ساعات"></button>
-      <button type="button" class="ft-chip" data-act="chain" title="الراحة ثم الجلسة التالية تبدآن تلقائياً، مع تنبيه">🔁 سلسلة تلقائية</button>
-      <button type="button" class="ft-chip" data-act="mute" title="تشغيل/إيقاف نغمة التنبيه"></button>
+      <button type="button" class="ft-chip" data-act="unit"></button>
+      <button type="button" class="ft-chip" data-act="chain" ${tip('سلسلة تلقائية: الراحة ثم الجلسة التالية مع تنبيه')}>${icon('sync')}</button>
+      <button type="button" class="ft-chip" data-act="mute"></button>
     </div>
     <p class="ft-notice" data-ref="notice" role="status" hidden></p>
     <div class="ft-actions">
       <button type="button" class="ft-btn ft-primary" data-act="toggle"></button>
-      <button type="button" class="ft-btn" data-act="skip" title="انتقل للمرحلة التالية">تخطٍّ ⏭</button>
-      <button type="button" class="ft-btn" data-act="reset" title="أعد المرحلة الحالية لبدايتها">إعادة ↺</button>
+      <button type="button" class="ft-btn" data-act="skip" ${tip('تخطَّ إلى المرحلة التالية')}>${icon('skip_next')}</button>
+      <button type="button" class="ft-btn" data-act="reset" ${tip('أعد المرحلة لبدايتها')}>${icon('restart_alt')}</button>
     </div>
     <div class="ft-stats" data-size="m l">
-      <div><span>اليوم</span><b data-ref="today"></b></div>
-      <div><span>ساعات التركيز</span><b data-ref="hours"></b></div>
-      <div data-size="l"><span>آخر ٧ أيام</span><b data-ref="week"></b></div>
+      <div ${tip('جلسات اليوم / الهدف')}>${icon('today')}<b data-ref="today"></b></div>
+      <div ${tip('ساعات التركيز اليوم')}>${icon('timer')}<b data-ref="hours"></b></div>
+      <div data-size="l" ${tip('آخر ٧ أيام')}>${icon('calendar_month')}<b data-ref="week"></b></div>
     </div>
     <div class="ft-goal" data-size="l">
       <label>هدف اليوم <input type="number" min="1" max="24" inputmode="numeric" data-ref="goal" dir="ltr"> جلسات</label>
@@ -281,9 +282,13 @@ export default {
       if (showPicker) syncWheels(t.remainingMs);
       const per = c.every || 4;
       ref('dots').textContent = c.every ? '🍅'.repeat(t.done % per) + '○'.repeat(per - (t.done % per)) : '';
-      el.querySelector('[data-act="toggle"]').textContent = t.status === 'running' ? 'إيقاف مؤقت ⏸' : t.status === 'paused' ? 'استئناف ▶' : 'ابدأ ▶';
-      el.querySelector('[data-act="unit"]').textContent = { minutes: 'الحلقة: دقائق ⇄', hours: 'الحلقة: ساعات ⇄', percent: 'الحلقة: نسبة ٪ ⇄' }[unit];
-      el.querySelector('[data-act="mute"]').textContent = s.muted ? '🔕 صامت' : '🔔 تنبيه';
+      const tg = el.querySelector('[data-act="toggle"]');
+      if (t.status === 'running') setIconBtn(tg, 'pause', 'إيقاف مؤقت');
+      else setIconBtn(tg, 'play_arrow', t.status === 'paused' ? 'استئناف' : 'ابدأ');
+      setIconBtn(el.querySelector('[data-act="unit"]'), { minutes: 'schedule', hours: 'schedule', percent: 'percent' }[unit],
+        { minutes: 'الحلقة: دقائق — اضغط للتبديل', hours: 'الحلقة: ساعات — اضغط للتبديل', percent: 'الحلقة: نسبة ٪ — اضغط للتبديل' }[unit],
+        { minutes: 'د', hours: 'س', percent: '' }[unit]);
+      setIconBtn(el.querySelector('[data-act="mute"]'), s.muted ? 'notifications_off' : 'notifications', s.muted ? 'صامت — اضغط لتشغيل التنبيه' : 'التنبيه يعمل — اضغط للكتم');
       el.querySelector('[data-act="mute"]').setAttribute('aria-pressed', String(Boolean(s.muted)));
       el.querySelector('[data-act="chain"]').setAttribute('aria-pressed', String(Boolean(s.chain)));
       for (const b of el.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === s.mode));

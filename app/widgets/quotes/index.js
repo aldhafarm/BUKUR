@@ -4,6 +4,7 @@
 // الصور رمزية (نجمة هندسية) — لا صور حقيقية لهؤلاء الأعلام.
 
 import { fetchWiki } from './wiki.js';
+import { icon, tip } from '../../icons.js';
 
 const DATA_URL = new URL('./alam.json', import.meta.url).href;
 const WIKI_TTL = 7 * 86_400_000; // تُحدَّث صورة العَلَم ومعلوماته من ويكي داتا أسبوعياً
@@ -135,7 +136,7 @@ export default {
         ${a.bioSummary ? `<p class="qt-bio" data-size="l">${esc(a.bioSummary)}<br><small>المصدر: ${citation(a.bioSource)}</small></p>` : ''}
         <div class="qt-nav" data-size="m l">
           <button type="button" data-step="1" aria-label="السابق">→</button>
-          <button type="button" data-today>قول اليوم</button>
+          <button type="button" data-today ${tip('قول اليوم')}>${icon('today')}</button>
           <button type="button" data-step="-1" aria-label="التالي">←</button>
         </div>
         <div class="qt-chips" data-size="l">${alam.map((x) => `<button type="button" data-alam="${esc(x.id)}" aria-pressed="${x.id === a.id}" ${x.quotes?.length ? '' : 'data-empty'}>${esc(x.name)}</button>`).join('')}</div>`;
