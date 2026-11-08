@@ -14,6 +14,8 @@
   var id=[q,saved].filter(function(x){return x&&ids.indexOf(x)>=0;})[0]||"ees525";
   window.__DECK_ID=id;
   try{localStorage.setItem("vocab-deck",id);}catch(e){}
+  /* القائمة الجانبية الضيقة: الإعدادات مطويّة افتراضاً (ما لم يختر المستخدم غير ذلك) */
+  try{if(window.innerWidth<520&&localStorage.getItem("ees525-stcollapsed")===null)localStorage.setItem("ees525-stcollapsed","1");}catch(e){}
   if(id==="ees525") return;
   var PER_DECK=/^ees525-(fc|hist|type|typetxt|flags|speed)$/;
   var map=function(k){k=String(k);return PER_DECK.test(k)?"vocab:"+id+":"+k.slice(7):k;};
@@ -1297,7 +1299,7 @@ const DEF_AR=(window.__DECK&&window.__DECK.ar)||{"Bottleneck": "فقد التن�
   var list=window.__DECKS||[]; if(!list.length) return;
   var head=document.querySelector("header");
   var wrap=document.createElement("label"); wrap.className="decksel";
-  wrap.innerHTML='<span class="label">Practice list · قائمة التدريب</span><select id="deckSel"></select>';
+  wrap.innerHTML='<span class="label">Practice list · <span style="font-family:var(--f-ar);letter-spacing:0;text-transform:none">قائمة التدريب</span></span><select id="deckSel"></select>';
   head.appendChild(wrap);
   var sel=wrap.querySelector("select");
   list.forEach(function(d){var o=document.createElement("option");o.value=d.id;o.textContent=d.name+" ("+d.n+")";if(d.id===window.__DECK_ID)o.selected=true;sel.appendChild(o);});
@@ -1318,7 +1320,7 @@ const DEF_AR=(window.__DECK&&window.__DECK.ar)||{"Bottleneck": "فقد التن�
     });
     head.appendChild(det);
   }
-  st.textContent=".plans summary{cursor:pointer;font-size:.85rem;color:var(--accent)}.plans h3{font-family:var(--f-ar);font-size:1rem;margin:12px 0 6px;direction:rtl}.pltab{overflow-x:auto;direction:rtl}.pltab table{border-collapse:collapse;font-family:var(--f-ar);font-size:.85rem;min-width:640px}.pltab th,.pltab td{border:1px solid var(--line);padding:6px 8px;text-align:start;vertical-align:top}.pltab th{background:var(--back)}"+".decksel{display:flex;flex-direction:column;gap:6px;margin-top:6px}.decksel select{font:inherit;font-size:.9rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}";
+  st.textContent=".decksel .label{letter-spacing:.04em}.plans summary{cursor:pointer;font-size:.85rem;color:var(--accent);font-family:var(--f-ar);letter-spacing:0}.plans h3{font-family:var(--f-ar);font-size:1rem;margin:12px 0 6px;direction:rtl}.pltab{overflow-x:auto;direction:rtl}.pltab table{border-collapse:collapse;font-family:var(--f-ar);font-size:.85rem;min-width:640px}.pltab th,.pltab td{border:1px solid var(--line);padding:6px 8px;text-align:start;vertical-align:top}.pltab th{background:var(--back)}"+"@media (max-width:520px){body{padding-block:10px}h1{font-size:1.05rem!important}.sub{font-size:.68rem}.decksel select{font-size:.8rem;padding:6px 8px}.settings{padding:10px 12px;gap:8px}.settings h2{font-size:.95rem}.term{font-size:clamp(1.15rem,6vw,1.6rem)}.ar{font-size:clamp(1.2rem,6.4vw,1.7rem)}.face{padding:16px}.nav button{padding:9px 10px;font-size:.8rem}.practice{padding:12px}.practice h2{font-size:1rem}.wrap{gap:12px}}"+".decksel{display:flex;flex-direction:column;gap:6px;margin-top:6px}.decksel select{font:inherit;font-size:.9rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}";
   document.head.appendChild(st);
   if(!window.__DECK) return;
   var D=window.__DECK;

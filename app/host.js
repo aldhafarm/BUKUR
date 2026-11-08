@@ -1,15 +1,19 @@
 // الحاضنة: ترسم الودجات بترتيب المستخدم، وتدير السحب والطي والحجم والإخفاء و«أدواتي» والتوسيع.
 import { createStore } from './store.js';
 import { WIDGETS } from './widgets/index.js';
-import { moveBefore, moveBy, nextSize, reconcileOrder, toggle } from './layout.js';
+import { WIDTH_LABEL, moveBefore, moveBy, nextSize, nextWidth, reconcileOrder, toggle, widthOf } from './layout.js';
+import { icon } from './icons.js';
 
 const byId = new Map(WIDGETS.map((w) => [w.id, w]));
-const layout = createStore('layout', { defaults: { order: [], hidden: [], collapsed: [], sizes: {} } });
+const layout = createStore('layout', { defaults: { order: [], hidden: [], collapsed: [], sizes: {}, widths: {} } });
 layout.set({ order: reconcileOrder(layout.get().order, WIDGETS.map((w) => w.id)) });
 
 const board = document.getElementById('board');
 const mounted = new Map(); // id → { card, unmount, setSize }
 const SIZE_LABEL = { s: 'صغير', m: 'متوسط', l: 'كبير' };
+const SIZE_SHORT = { s: 'ص', m: 'م', l: 'ك' };
+const WIDTH_ICON = { 1: 'width_normal', 2: 'width_wide', 3: 'width_full' };
+const widthFor = (w) => widthOf(layout.get().widths?.[w.id], w.defaultWidth ?? 1);
 
 function sizeOf(w) {
   const saved = layout.get().sizes[w.id];
@@ -23,11 +27,12 @@ function buildCard(w) {
   card.setAttribute('aria-label', w.name);
   card.innerHTML = `
     <header class="card-head">
-      <button type="button" class="handle" data-act="drag" title="اسحب لإعادة الترتيب (أو الأسهم ↑↓)" aria-label="نقل"><span aria-hidden="true">⋮⋮</span></button>
+      <button type="button" class="handle" data-act="drag" data-tip="اسحب للترتيب (أو ↑↓)" aria-label="نقل">${icon('drag_indicator')}</button>
       <h2></h2>
-      <button type="button" class="icon" data-act="size" title="الحجم"></button>
-      <button type="button" class="icon" data-act="collapse" title="طي / فتح" aria-label="طي أو فتح"><span aria-hidden="true">▾</span></button>
-      <button type="button" class="icon" data-act="hide" title="إخفاء (يعود من «أدواتي»)" aria-label="إخفاء"><span aria-hidden="true">✕</span></button>
+      <button type="button" class="icon" data-act="width"></button>
+      <button type="button" class="icon" data-act="size"></button>
+      <button type="button" class="icon" data-act="collapse" data-tip="طي / فتح" aria-label="طي أو فتح">${icon('keyboard_arrow_down')}</button>
+      <button type="button" class="icon" data-act="hide" data-tip="إخفاء (يعود من «أدواتي»)" aria-label="إخفاء">${icon('close')}</button>
     </header>
     <div class="card-body"></div>`;
   card.querySelector('h2').textContent = w.name;
@@ -44,12 +49,24 @@ function buildCard(w) {
   const setSize = (next) => {
     size = next;
     card.dataset.size = next;
-    card.querySelector('[data-act="size"]').textContent = SIZE_LABEL[next] ?? next;
+    const sb = card.querySelector('[data-act="size"]');
+    sb.innerHTML = `${icon('aspect_ratio')}<span>${SIZE_SHORT[next] ?? next}</span>`;
+    sb.dataset.tip = `الحجم: ${SIZE_LABEL[next] ?? next} — اضغط للتغيير`;
+    sb.setAttribute('aria-label', sb.dataset.tip);
     for (const fn of sizeListeners) fn(next);
   };
   setSize(size);
+  applyWidth(card, widthFor(w));
   const unmount = w.mount(body, ctx);
   return { card, unmount, setSize };
+}
+
+function applyWidth(card, width) {
+  card.dataset.width = String(width);
+  const b = card.querySelector('[data-act="width"]');
+  b.innerHTML = icon(WIDTH_ICON[width]);
+  b.dataset.tip = `العرض: ${WIDTH_LABEL[width]} — اضغط للتغيير`;
+  b.setAttribute('aria-label', b.dataset.tip);
 }
 
 function render() {
@@ -80,6 +97,11 @@ board.addEventListener('click', (e) => {
   const s = layout.get();
   if (btn.dataset.act === 'collapse') layout.set({ collapsed: toggle(s.collapsed, id) });
   if (btn.dataset.act === 'hide') layout.set({ hidden: toggle(s.hidden, id) });
+  if (btn.dataset.act === 'width') {
+    const next = nextWidth(widthFor(byId.get(id)));
+    layout.set({ widths: { ...(s.widths ?? {}), [id]: next } });
+    applyWidth(card, next);
+  }
   if (btn.dataset.act === 'size') {
     const next = nextSize(byId.get(id).sizes, sizeOf(byId.get(id)));
     layout.set({ sizes: { ...s.sizes, [id]: next } });
@@ -180,6 +202,15 @@ document.getElementById('import').addEventListener('change', async (e) => {
 
 // ── التوسيع: نفس الصفحة في تبويب كامل (في القائمة الجانبية عرضها محدود)
 document.getElementById('expand').addEventListener('click', () => window.open(location.href, '_blank', 'noopener'));
+
+// أيقونات الشريط العلوي (Material Symbols) مع تلميح الاسم
+const toolsBtn = document.getElementById('tools');
+toolsBtn.innerHTML = `${icon('widgets')}<span>أدواتي</span>`;
+toolsBtn.dataset.tip = 'أظهر أو أخفِ الأدوات';
+const expandBtn = document.getElementById('expand');
+expandBtn.innerHTML = icon('open_in_full');
+expandBtn.dataset.tip = 'افتح في تبويب كامل';
+expandBtn.removeAttribute('title');
 
 layout.subscribe(render);
 render();

@@ -2,19 +2,22 @@
 // لماذا: الساعة الاحترافية (React + Tailwind) وعجلة السنة النجمية صفحتان كاملتان بأنماطهما؛
 // الإطار يمنع تسرّب أنماطهما إلى الحاضنة، ويبقي كل منهما كما بُنيت. الربط بينها لاحقاً عبر postMessage.
 
-export function embedWidget({ id, name, src, heights, note }) {
+import { icon } from '../icons.js';
+
+export function embedWidget({ id, name, src, heights, note, defaultWidth = 1 }) {
   return {
     id,
     name,
     sizes: ['s', 'm', 'l'],
     defaultSize: 'm',
+    defaultWidth,
     defaults: {},
     mount(el, ctx) {
       el.innerHTML = `
         <div class="em">
           <div class="em-bar">
             ${note ? `<span class="em-note"></span>` : '<span></span>'}
-            <a class="em-open" target="_blank" rel="noopener" title="افتحها وحدها في تبويب">افتح وحدها ↗</a>
+            <a class="em-open" target="_blank" rel="noopener" data-tip="افتحها وحدها في تبويب" aria-label="افتحها وحدها في تبويب">${icon('open_in_new')}</a>
           </div>
           <iframe class="em-frame" loading="lazy" title=""></iframe>
         </div>`;

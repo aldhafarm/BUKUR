@@ -29,3 +29,12 @@ test('toggle', () => {
   assert.deepEqual(toggle(['a'], 'a'), []);
   assert.deepEqual(toggle([], 'a'), ['a']);
 });
+
+import { nextWidth, widthOf } from '../app/layout.js';
+
+test('عرض البطاقة: عمود ← عمودان ← كامل ← عمود، والقيمة غير الصالحة ترجع للافتراضي', () => {
+  assert.deepEqual([nextWidth(1), nextWidth(2), nextWidth(3), nextWidth(undefined)], [2, 3, 1, 2]);
+  assert.equal(widthOf('2'), 2);
+  assert.equal(widthOf(7, 3), 3);
+  assert.equal(widthOf(undefined), 1);
+});

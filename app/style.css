@@ -1,3 +1,11 @@
+/* خط IBM Plex Sans Arabic من Google Fonts — مستضاف هنا (app/fonts، رخصة OFL) فلا طلب لخوادم Google ويعمل بلا اتصال. */
+@font-face { font-family: 'IBM Plex Sans Arabic'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2) format('woff2'); unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE70-FEFC; }
+@font-face { font-family: 'IBM Plex Sans Arabic'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2) format('woff2'); unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE70-FEFC; }
+@font-face { font-family: 'IBM Plex Sans Arabic'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2) format('woff2'); unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE70-FEFC; }
+@font-face { font-family: 'IBM Plex Sans Arabic'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-sans-arabic-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
+@font-face { font-family: 'IBM Plex Sans Arabic'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/ibm-plex-sans-arabic-latin-600-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
+@font-face { font-family: 'IBM Plex Sans Arabic'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/ibm-plex-sans-arabic-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
+
 /* هوية Mind8x: أخضر داكن ملكي · برتقالي للإبراز · بيج للأرضية. العربية أولاً، RTL. */
 :root {
   --green-900: #0d261a;
@@ -16,7 +24,7 @@
   --active: #e5c33b;
   --tired: #ef8a35;
   --sleep: #e0483e;
-  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Arabic", Tahoma, sans-serif;
+  font-family: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", "Noto Sans Arabic", Tahoma, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -33,9 +41,11 @@ button { font: inherit; cursor: pointer; }
 .top h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: .5px; }
 .top-actions { display: flex; gap: 6px; }
 .top-actions button {
-  min-height: 34px; padding: 4px 12px; border: 1px solid var(--green-600); border-radius: 8px;
-  background: var(--green-700); color: var(--beige-50);
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding: 4px 10px; border: 1px solid var(--green-600); border-radius: 8px;
+  background: var(--green-700); color: var(--beige-50); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
 }
+.top-actions .ic { width: 20px; height: 20px; }
 .top-actions button[aria-expanded="true"] { background: var(--orange); border-color: var(--orange); }
 
 /* ── «أدواتي» */
@@ -52,6 +62,37 @@ button { font: inherit; cursor: pointer; }
 .board { display: grid; gap: 12px; padding: 12px; align-items: start; }
 @media (min-width: 760px) {
   .board { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); max-width: 1400px; margin: 0 auto; }
+  /* عرض البطاقة في الشبكة: عمود (افتراضي) · عمودان · كامل العرض */
+  .card[data-width="2"] { grid-column: span 2; }
+  .card[data-width="3"] { grid-column: 1 / -1; }
+  .card .card-head [data-act="width"] { display: inline-grid; }
+}
+
+/* ── التلميح: اسم الزر يظهر فوقه عند مرور الفأرة أو التركيز */
+[data-tip] { position: relative; }
+[data-tip]:hover::after, [data-tip]:focus-visible::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  padding: 4px 8px; border-radius: 6px; background: var(--ink); color: var(--beige-50);
+  font-size: 12px; font-weight: 500; line-height: 1.4; white-space: nowrap; pointer-events: none; z-index: 20;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+/* الشريط العلوي ورأس البطاقة (البطاقة تقصّ ما فوقها): التلميح تحت الزر */
+.top [data-tip]:hover::after, .top [data-tip]:focus-visible::after,
+.card-head [data-tip]:hover::after, .card-head [data-tip]:focus-visible::after { bottom: auto; top: calc(100% + 6px); }
+.card-head [data-tip]:first-child:hover::after, .card-head [data-tip]:first-child:focus-visible::after { left: auto; right: 0; transform: none; }
+.card-head [data-tip]:last-child:hover::after, .card-head [data-tip]:last-child:focus-visible::after,
+.top-actions [data-tip]:last-child:hover::after { left: 0; transform: none; }
+
+/* ── القائمة الجانبية (عرض ضيق): نصوص وحواف أصغر */
+@media (max-width: 520px) {
+  .top { padding: 6px 10px; }
+  .top h1 { font-size: 16px; }
+  .top-actions button { min-height: 30px; font-size: 13px; padding: 2px 8px; }
+  .board { gap: 8px; padding: 8px; }
+  .card-head { padding: 3px 4px; gap: 2px; }
+  .card-head h2 { font-size: 13px; }
+  .card-head .handle, .card-head .icon { min-width: 26px; min-height: 26px; }
+  .card-head .ic { width: 18px; height: 18px; }
 }
 .empty { text-align: center; color: var(--muted); padding: 24px; }
 
@@ -62,15 +103,21 @@ button { font: inherit; cursor: pointer; }
 .card-head { display: flex; align-items: center; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--beige-300); }
 .card-head h2 { flex: 1; margin: 0; font-size: 14px; font-weight: 700; color: var(--green-800); }
 .card-head .handle, .card-head .icon {
-  min-width: 32px; min-height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--muted);
+  display: inline-grid; place-items: center; min-width: 30px; min-height: 30px; padding: 0; border: 0; border-radius: 6px;
+  background: transparent; color: var(--muted); cursor: pointer;
 }
-.card-head .handle { cursor: grab; letter-spacing: -2px; }
-.card-head .icon[data-act="size"] { font-size: 12px; padding: 0 8px; }
+.card-head .ic { width: 20px; height: 20px; }
+.card-head .handle { cursor: grab; }
+.card-head .icon[data-act="size"] { grid-auto-flow: column; gap: 2px; padding: 0 6px; font: inherit; font-size: 11px; font-weight: 600; }
+.card-head .icon[data-act="size"] .ic { width: 16px; height: 16px; }
+.card-head [data-act="width"] { display: none; } /* العرض يهمّ في الشبكة فقط (التبويب الكامل) */
 .card-head .handle:hover, .card-head .icon:hover { background: var(--beige-100); color: var(--ink); }
 .card.collapsed .card-body { display: none; }
-.card.collapsed [data-act="collapse"] span { display: inline-block; transform: rotate(90deg); }
+.card [data-act="collapse"] .ic { transition: transform .15s; }
+.card.collapsed [data-act="collapse"] .ic { transform: rotate(90deg); }
 .card-body { padding: 0; }
 [hidden] { display: none !important; }
+.ic { display: block; fill: currentColor; flex: none; }
 
 /* ── ودجة الساعة: جسم داكن بهوية خضراء، والقرص كما في الأصل */
 .bk-clock {
@@ -150,8 +197,10 @@ button { font: inherit; cursor: pointer; }
 /* ── ودجة التضمين (الساعة الاحترافية، خارطة النجوم) */
 .em-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; font-size: 12px; border-bottom: 1px solid var(--beige-300); }
 .em-note { color: var(--muted); }
-.em-open { color: var(--green-700); text-decoration: none; white-space: nowrap; }
-.em-open:hover { text-decoration: underline; }
+.em-open { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; color: var(--green-700); }
+.em-open .ic { width: 18px; height: 18px; }
+.em-open:hover { background: var(--beige-100); }
+.em-bar [data-tip]:hover::after { bottom: auto; top: calc(100% + 6px); left: 0; transform: none; }
 .em-frame { display: block; width: 100%; border: 0; background: #18181b; }
 
 /* ── المؤقت التفاعلي: حلقة تُسحب، عجلات داخل الحلقة، أزرار الوحدة والسلسلة */
