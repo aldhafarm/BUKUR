@@ -220,3 +220,17 @@ test('صيغة الوقت المستغرق، وسجل المهام (الأحدث
   assert.deepEqual(t.map((x) => x.name), ['مهمة', 'واجب الإحصاء']);
   assert.equal(t[1].ms, 42 * MIN);
 });
+
+import { quarterCrossed, quarterOf, upStep } from '../app/widgets/focus-timer/timer.js';
+
+test('تنبيه المراحل: عند كل انتقال لون (كل ربع) مرة واحدة، ولا شيء عند البداية أو الانتهاء', () => {
+  assert.deepEqual([1, 0.76, 0.75, 0.5, 0.26, 0.25, 0.01].map(quarterOf), [3, 3, 2, 1, 1, 0, 0]);
+  assert.equal(quarterCrossed(0.76, 0.74), 25);
+  assert.equal(quarterCrossed(0.51, 0.49), 50);
+  assert.equal(quarterCrossed(0.26, 0.24), 75);
+  assert.equal(quarterCrossed(0.74, 0.70), null);   // داخل اللون نفسه
+  assert.equal(quarterCrossed(null, 0.5), null);    // أول قراءة (فتح الصفحة): لا تنبيه
+  assert.equal(quarterCrossed(0.1, 0), null);       // الانتهاء له نغمته
+  assert.equal(quarterCrossed(0.3, 0.8), null);     // إعادة الضبط للأعلى: لا تنبيه
+  assert.deepEqual([0, 14.9, 15, 44, 61].map((m) => upStep(m * MIN)), [0, 0, 1, 2, 4]);
+});

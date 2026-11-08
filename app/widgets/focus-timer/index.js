@@ -7,7 +7,7 @@ import {
   PHASE_LABEL, PRESETS, RING, advance, autoUnit, catchUp, configFor, customWith, dayStats,
   formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, pause, phaseMs, remaining, reset,
   PERCENT_LABELS, nextUnit, remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit, zoneColor,
-  dragMs, stepDetent, PALETTE, formatElapsed, logTask, swElapsed, swInitial, swToggle,
+  dragMs, stepDetent, PALETTE, quarterCrossed, upStep, formatElapsed, logTask, swElapsed, swInitial, swToggle,
 } from './timer.js';
 
 const DEFAULTS = {
@@ -66,6 +66,7 @@ const TEMPLATE = `
       <button type="button" class="ft-chip" data-act="mute"></button>
     </div>
     <p class="ft-notice" data-ref="notice" role="status" hidden></p>
+    <p class="ft-toast" data-ref="toast" role="status" aria-live="polite" hidden></p>
     <div class="ft-actions">
       <button type="button" class="ft-btn ft-primary" data-act="toggle"></button>
       <button type="button" class="ft-btn" data-act="skip" data-down ${tip('تخطَّ إلى المرحلة التالية')}>${icon('skip_next')}</button>
@@ -163,6 +164,24 @@ function chime(kind) {
       osc.stop(t + i * 0.28 + 0.26);
     });
   } catch { /* لا صوت متاح — تكفي الرسالة */ }
+}
+
+/** نغمة خفيفة واحدة لتنبيه المراحل — أهدأ من نغمة الانتهاء. */
+function softCue() {
+  try {
+    audio ??= new AudioContext();
+    const t = audio.currentTime;
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 740;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    osc.connect(gain).connect(audio.destination);
+    osc.start(t);
+    osc.stop(t + 0.36);
+  } catch { /* بلا صوت */ }
 }
 
 export default {
@@ -289,6 +308,26 @@ export default {
       setDuration(stepDetent(t.remainingMs, ['ArrowUp', 'ArrowRight'].includes(e.key) ? 1 : -1));
     });
 
+    // ── تنبيه المراحل: كلما انتقلت الحلقة إلى لون جديد (ربع المرحلة، أو كل ١٥ دقيقة في التصاعدي)
+    let prevFrac = null;
+    let prevStep = null;
+    let toastTimer;
+    function stageAlert(text, color) {
+      const face = el.querySelector('.ft-face');
+      face.style.setProperty('--pulse', color);
+      face.classList.remove('ft-pulse');
+      void face.offsetWidth; // لإعادة تشغيل الحركة
+      face.classList.add('ft-pulse');
+      const toast = ref('toast');
+      toast.textContent = text;
+      toast.style.setProperty('--pulse', color);
+      toast.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.hidden = true; }, 6000);
+      if (!store.get().muted) softCue();
+      try { navigator.vibrate?.(30); } catch { /* بلا اهتزاز */ }
+    }
+
     const sw = () => store.get().sw ?? swInitial();
     const isUp = () => store.get().kind === 'up';
 
@@ -314,6 +353,11 @@ export default {
       ref('knob').style.display = 'none';
       if (ref('labels').dataset.unit !== 'minutes') { ref('labels').innerHTML = labelsMarkup('minutes'); ref('labels').dataset.unit = 'minutes'; }
       disk.setAttribute('aria-valuetext', formatElapsed(ms));
+      const step = upStep(ms);
+      if (w.status === 'running' && prevStep != null && step > prevStep) {
+        stageAlert(`مضت ${formatMinutes(step * 15)}`, zoneColor(Math.min(0.9999, ((step * 15) % 60) / 60 + 0.01)));
+      }
+      prevStep = step;
       const hrs = Math.floor(ms / (60 * 60_000));
       const dk = `h${hrs}`;
       if (ref('dots').dataset.k !== dk) { ref('dots').dataset.k = dk; ref('dots').innerHTML = icon('circle', 'fill').repeat(Math.min(hrs, 8)); }
@@ -348,6 +392,12 @@ export default {
       const unit = unitFor(t);
       const left = remaining(t, now);
       const frac = ringFraction(left, unit, phaseMs(t.phase, c));
+      const rf = left / phaseMs(t.phase, c);
+      if (t.status === 'running') {
+        const crossed = t.phase === 'focus' ? quarterCrossed(prevFrac, rf) : null;
+        if (crossed) stageAlert(`مضى ${crossed}٪ — بقي ${formatClock(left)}`, remainingColor(t.phase, rf));
+        prevFrac = rf;
+      } else prevFrac = t.status === 'paused' ? rf : null;
       const root = el.querySelector('.ft');
       root.dataset.phase = t.phase;
       root.dataset.status = t.status;

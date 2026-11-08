@@ -249,3 +249,20 @@ export function logTask(tasks, name, ms, date) {
   const entry = { name: String(name ?? '').trim() || 'مهمة', ms: Math.round(ms), at: date.getTime() };
   return [entry, ...(tasks ?? [])].slice(0, 50);
 }
+
+/**
+ * تنبيه المراحل (طلب المالك): عند انتقال الحلقة من لون إلى لون — أي كلما مضى ربع المرحلة — تنبيه خفيف.
+ * frac = نسبة المتبقي (1 → 0). تعيد رقم الربع (3 فيروزي … 0 أحمر).
+ */
+export const quarterOf = (frac) => Math.max(0, Math.min(3, Math.ceil(frac * 4) - 1));
+
+/** هل عبرنا حدّ ربع منذ القراءة السابقة؟ يعيد نسبة ما مضى (25/50/75) أو null. لا تنبيه عند الانتهاء (له نغمته). */
+export function quarterCrossed(prevFrac, frac) {
+  if (prevFrac == null || frac <= 0 || frac >= prevFrac) return null;
+  const a = quarterOf(prevFrac);
+  const b = quarterOf(frac);
+  return b < a ? (4 - (b + 1)) * 25 : null;
+}
+
+/** للتصاعدي: رقم الفترة (كل ١٥ دقيقة = لون على الحلقة) — يتغيّر فيُنبَّه. */
+export const upStep = (ms) => Math.floor(Math.max(0, ms) / (15 * MIN));
