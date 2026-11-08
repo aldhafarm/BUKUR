@@ -31,7 +31,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null }, // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal' }, // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -51,8 +51,7 @@ export default {
 
     // ── العارض العام: كل تقويم = فترة × صفوف × أعمدة (buildGrid). الخلية يوماً (رقم اليوم، يوم الأسبوع، أيام)
     // أو وحدة باسمها (شهر، منزلة، طالع…)، وأشرطة المهام تمتد على الخلايا التي تمسّها.
-    function calView(s, range, t0) {
-      const G = s.grid;
+    function calView(s, range, t0, G = s.grid) {
       if (G.months) return yearMonthsView(s, parse(range.start).getFullYear(), t0);
       const g = buildGrid(range, G.rows, G.cols, { system: s.system, weekStart: s.weekStart });
       const dayCols = G.cols === 'dayNum' || G.cols === 'weekday' || G.cols === 'day';
@@ -228,13 +227,17 @@ export default {
       const r = two ? { start: two[0].start, end: two[1].end, label: `${two[0].label} ← ${two[1].label}` }
         : s.scope === 'year' ? SPANS[s.grid.months ? 'year' : s.grid.span].range(anchor(), spanOpts) : rangeFor(s.scope, anchor(), s.system);
       const prog = rangeProgress(s.tasks, r);
-      const body = s.scope === 'year' ? calView(s, r, today()) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
+      // دمج التقويم في الشهر والموسم والأسبوع (طلب المالك): شبكة أسابيع × أيام بالمحرّك نفسه، أو جانت
+      const calScope = !narrow && ['month', 'season', 'week'].includes(s.scope);
+      const asCal = calScope && (all.view ?? 'cal') === 'cal';
+      const body = s.scope === 'year' ? calView(s, r, today()) : asCal ? calView(s, r, today(), { rows: 'week', cols: 'weekday' }) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
         : s.scope === 'week' && narrow ? weekDaysView(s, r) : ganttView(s, r);
       const t0 = today();
       el.innerHTML = `<div class="pl">
         <div class="pl-top">
           <button type="button" class="pl-btn pl-scope" data-act="scope" ${tip(narrow ? 'بدّل العرض: يوم ← أسبوع ← شهران ← فترتان (السنة والشهر الكامل في التبويب الكامل)' : 'بدّل العرض: سنة ← موسم ← شهر ← أسبوع ← يوم')}>${icon(SCOPE_ICON[s.scope])}<span>${SCOPE_LABEL[s.scope]}</span></button>
           ${s.scope === 'year' ? builderBar(s) : ''}
+          ${calScope ? `<button type="button" class="pl-btn" data-act="view" ${tip(asCal ? 'تقويم (أسابيع × أيام) — اضغط لجانت' : 'جانت (صف لكل مهمة) — اضغط للتقويم')}>${icon(asCal ? 'calendar_month' : 'view_timeline')}<span>${asCal ? 'تقويم' : 'جانت'}</span></button>` : ''}
           <button type="button" class="pl-btn" data-act="system" ${tip('نظام المواسم — اضغط للتبديل')}>${icon('eco')}<span>${SYSTEMS[s.system].label}</span></button>
           <span class="pl-nav">
             <button type="button" class="pl-btn" data-act="prev" ${tip('السابق')}>${icon('chevron_right')}</button>
@@ -293,6 +296,7 @@ export default {
         store.set({ grid: next === 'months' ? { ...GRID_PRESETS.date, months: true } : { ...GRID_PRESETS[next] }, anchor: null });
       }
       if (act === 'g-span') store.set({ grid: nextSpan(curGrid()), anchor: null });
+      if (act === 'view') store.set({ view: (s.view ?? 'cal') === 'cal' ? 'gantt' : 'cal' });
       if (act === 'g-rows') store.set({ grid: nextRows(curGrid()) });
       if (act === 'g-cols') store.set({ grid: nextCols(curGrid()) });
       if (act === 'system') store.set({ system: nextSystem(s.system) });

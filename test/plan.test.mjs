@@ -222,3 +222,15 @@ test('الخطة العشرية (سنوات × أشهر) وشهر × أسابي�
   assert.equal(presetOf({ span: 'year', rows: 'tali', cols: 'week' }), null);
   assert.equal(PRESET_IDS.at(-1), 'months');
 });
+
+test('عشر سنوات صفاً واحداً من ١٠ خلايا (كل خلية سنة)، أو ١٠ × ١٢ شهراً', () => {
+  const span = SPANS.decade.range('2026-11-08');
+  const one = buildGrid(span, 'decade', 'year');
+  assert.deepEqual([one.rows.length, one.cols, one.rows[0].label, one.rows[0].cells.map((c) => c.label).join(',')], [1, 10, '2026–2035', '2026,2027,2028,2029,2030,2031,2032,2033,2034,2035']);
+  const t = makeTask({ name: 'الدكتوراه', start: '2027-09-01', end: '2031-06-30', progress: 20 }, 'phd');
+  const [b] = gridBars([t], one.rows[0]);
+  assert.deepEqual([b.col, b.span], [1, 5]);                       // ٢٠٢٧ ← ٢٠٣١
+  assert.equal(buildGrid(span, 'year', 'month').cols, 12);
+  assert.equal(presetOf({ span: 'decade', rows: 'decade', cols: 'year' }), 'decadeYears');
+  assert.ok(validCombo('decade', 'year') && !validCombo('year', 'decade'));
+});
