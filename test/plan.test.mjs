@@ -102,3 +102,20 @@ test('عطلة نهاية الأسبوع بحسب البلد: السعودية �
   assert.deepEqual([isWeekend('2026-11-13', WEEKEND_PRESETS.west.days), isWeekend('2026-11-15', WEEKEND_PRESETS.west.days)], [false, true]);
   assert.equal(isWeekend('2026-11-14', WEEKEND_PRESETS.none.days), false);
 });
+
+import { isUndated, scheduleOn, undatedTasks, unschedule } from '../app/widgets/planner/plan.js';
+
+test('«لاحقاً»: مهمة بلا تاريخ في النظام نفسه، لا تظهر في التقويم حتى تُجدوَل، وتُسحب إلى يوم', () => {
+  const later = makeTask({ name: 'قراءة كتاب عن التربة', category: 'study' }, 'L');
+  assert.deepEqual([later.start, later.end, isUndated(later), later.category], [null, null, true, 'study']);
+  const one = makeTask({ name: 'موعد', end: '2026-11-12' }, 'O');                       // تاريخ واحد = يوم واحد
+  assert.deepEqual([one.start, one.end], ['2026-11-12', '2026-11-12']);
+  const all = [later, one];
+  assert.deepEqual(undatedTasks(all).map((x) => x.id), ['L']);
+  assert.deepEqual(tasksIn(all, rangeFor('month', '2026-11-08')).map((x) => x.id), ['O']);   // التقويم لا يعرض «لاحقاً»
+  const placed = scheduleOn(later, '2026-11-14');
+  assert.deepEqual([placed.start, placed.end, isUndated(placed)], ['2026-11-14', '2026-11-14', false]);
+  const moved = scheduleOn(makeTask({ start: '2026-11-02', end: '2026-11-05' }, 'M'), '2026-11-20'); // نقل بمدتها
+  assert.deepEqual([moved.start, moved.end], ['2026-11-20', '2026-11-23']);
+  assert.equal(isUndated(unschedule(moved)), true);
+});

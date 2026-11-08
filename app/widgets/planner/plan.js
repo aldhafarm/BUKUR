@@ -178,7 +178,7 @@ export function countByCategory(tasks, r) {
 
 // ── المهام: {id, name, start, end, category, progress 0..100} (مهام قديمة قد تحمل color بدل category)
 /** المهام التي تتقاطع مع النطاق، بترتيب البداية. */
-export const tasksIn = (tasks, r) => (tasks ?? []).filter((t) => t.end >= r.start && t.start <= r.end).sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
+export const tasksIn = (tasks, r) => (tasks ?? []).filter((t) => t.start && t.end && t.end >= r.start && t.start <= r.end).sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
 
 /** موضع شريط المهمة داخل النطاق (أعمدة الأيام): {col (يبدأ ٠), span, clipStart, clipEnd}. */
 export function barFor(t, r) {
@@ -205,12 +205,26 @@ export function yearRows(tasks, y) {
 
 /** مهمة جديدة سليمة: النهاية لا تسبق البداية، والنسبة بين ٠ و١٠٠. */
 export function makeTask({ name, start, end, category, color, progress }, id) {
-  const s = start <= end ? start : end;
-  const e = start <= end ? end : start;
+  // بلا تاريخين ← مهمة «لاحقاً» (النظام نفسه، فئة خاصة فقط)؛ وبتاريخ واحد ← مهمة يوم واحد
+  start = start || end || null;
+  end = end || start || null;
+  const s = start && start <= end ? start : end;
+  const e = start && start <= end ? end : start;
   const t = { id, name: String(name ?? '').trim() || 'مهمة', start: s, end: e, progress: Math.max(0, Math.min(100, Math.round(Number(progress) || 0))) };
   if (CAT[category]) t.category = category; else t.color = color || '#3b82c4';
   return t;
 }
+
+// ── «لاحقاً»: المهام بلا موعد — في النظام نفسه، تُعرض صندوقاً مستقلاً حتى تُجدوَل
+export const isUndated = (t) => !t.start || !t.end;
+export const undatedTasks = (tasks) => (tasks ?? []).filter(isUndated);
+/** جدولة مهمة في يوم (بالسحب إليه): مهمة «لاحقاً» تصير مهمة ذلك اليوم؛ والمجدولة تنتقل بمدتها كاملة. */
+export function scheduleOn(t, day) {
+  if (isUndated(t)) return { ...t, start: day, end: day };
+  return { ...t, start: day, end: addDays(day, diffDays(t.start, t.end)) };
+}
+/** إعادة مهمة إلى «لاحقاً» (إلغاء موعدها). */
+export const unschedule = (t) => ({ ...t, start: null, end: null });
 
 /** إنجاز النطاق: متوسط نسب المهام فيه موزوناً بأيامها داخله. */
 export function rangeProgress(tasks, r) {
