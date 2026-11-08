@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SYSTEMS, barFor, makeTask, nextScope, periodAt, periodsBetween, rangeFor, rangeProgress, shift, tasksIn, yearRows } from '../app/widgets/planner/plan.js';
 
-test('الزر متعدد الضغطات: سنة ← موسم ← شهر ← أسبوع ← يوم ← سنة', () => {
+test('الزر متعدد الضغطات (التطبيق الكامل): سنة ← موسم ← شهر ← أسبوع ← يوم ← سنة', () => {
   const seq = []; let s = 'year';
   for (let i = 0; i < 5; i++) { s = nextScope(s); seq.push(s); }
   assert.deepEqual(seq, ['season', 'month', 'week', 'day', 'year']);
@@ -74,4 +74,31 @@ test('التصنيفات: اللون من التصنيف، والفرز يخفي
   assert.deepEqual(visibleTasks([a, b, old], ['work']).map((t) => t.id), ['b', 'c']);
   const n = countByCategory([a, b, old], rangeFor('month', '2026-11-08'));
   assert.deepEqual([n.work, n.health, n.family], [1, 1, 0]);
+});
+
+import { NARROW_SCOPES, WEEKEND_PRESETS, isWeekend, scopeFor, twoRanges } from '../app/widgets/planner/plan.js';
+
+test('القائمة الجانبية: يوم ← أسبوع ← شهران ← فترتان، والنطاقات الكاملة للتطبيق الكامل فقط', () => {
+  const seq = []; let s = 'day';
+  for (let i = 0; i < 4; i++) { s = nextScope(s, true); seq.push(s); }
+  assert.deepEqual(seq, ['week', 'months2', 'periods2', 'day']);
+  assert.deepEqual([scopeFor('year', true), scopeFor('months2', false), scopeFor('periods2', false), scopeFor('week', true)], ['day', 'month', 'season', 'week']);
+  assert.equal(nextScope('year', true), 'day');
+  assert.deepEqual(NARROW_SCOPES.includes('year'), false);
+});
+
+test('الحالي والتالي: شهران (عبر السنة)، وموسمان، ومنزلتان', () => {
+  const [a, b] = twoRanges('months2', '2026-12-10');
+  assert.deepEqual([a.label, b.label, b.start, b.end], ['ديسمبر 2026', 'يناير 2027', '2027-01-01', '2027-01-31']);
+  assert.deepEqual(twoRanges('periods2', '2026-11-08', 'star').map((r) => r.label), ['الخريف', 'الشتاء']);
+  assert.deepEqual(twoRanges('periods2', '2026-11-08', 'anwa').map((r) => r.label), ['الوسم', 'المربعانية']);
+  const m = twoRanges('periods2', '2026-09-10', 'manazil');
+  assert.deepEqual([m[0].label, m[0].start, m[0].end, m[1].label], ['الجبهة', '2026-09-06', '2026-09-19', 'الزبرة']);   // الجبهة ١٤ يوماً
+  assert.equal(SYSTEMS.manazil.periods(2026).length, 28);
+});
+
+test('عطلة نهاية الأسبوع بحسب البلد: السعودية الجمعة والسبت، والغرب السبت والأحد', () => {
+  assert.deepEqual([isWeekend('2026-11-13', WEEKEND_PRESETS.sa.days), isWeekend('2026-11-14', WEEKEND_PRESETS.sa.days), isWeekend('2026-11-15', WEEKEND_PRESETS.sa.days)], [true, true, false]);
+  assert.deepEqual([isWeekend('2026-11-13', WEEKEND_PRESETS.west.days), isWeekend('2026-11-15', WEEKEND_PRESETS.west.days)], [false, true]);
+  assert.equal(isWeekend('2026-11-14', WEEKEND_PRESETS.none.days), false);
 });

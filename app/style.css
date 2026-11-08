@@ -481,3 +481,27 @@ button { font: inherit; cursor: pointer; }
 .pl-ydays > i.pl-off { background: repeating-linear-gradient(45deg, transparent 0 3px, var(--beige-100) 3px 4px); border-top-color: transparent; }
 .pl-ydays .pl-task { height: 13px; margin: 0; padding: 0 3px; border-radius: 3px; font-size: 8px; line-height: 13px; }
 .pl-yhead { display: none; } /* أرقام الأيام صارت داخل الخانات */
+
+/* ── المخطط: الأسبوع يوماً يوماً، والحالي/التالي، والإعدادات */
+.pl-week { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pl-week li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 8px; border: 1px solid var(--beige-300); border-radius: 8px; background: #fff; }
+.pl-week li.pl-wkend { background: #f4ede1; }
+.pl-week li.pl-now { border-color: #e0393e; box-shadow: inset 3px 0 0 #e0393e; }
+.pl-week li > b { flex: 0 0 100%; font-size: 12px; }
+.pl-week li > b span { font-weight: 400; color: var(--muted); }
+.pl-week li > small { color: var(--muted); font-size: 11px; }
+.pl-chipt { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 8px; border: 0; border-radius: 99px; cursor: pointer; font: inherit; font-size: 11px; font-weight: 600; color: #fff;
+  background: linear-gradient(to left, var(--c) var(--p), color-mix(in srgb, var(--c) 45%, #fff) var(--p)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-chipt em { font-style: normal; font-size: 10px; opacity: .9; }
+.pl-agenda { display: grid; gap: 4px; padding: 6px 8px; border: 1px solid var(--beige-300); border-top: 4px solid var(--s); border-radius: 8px; background: #fff; }
+.pl-agenda + .pl-agenda { margin-top: 6px; }
+.pl-agenda h4 { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; }
+.pl-agenda h4 small { font-weight: 400; color: var(--muted); font-size: 11px; }
+.pl-agenda h4 em { margin-inline-start: auto; font-style: normal; font-size: 12px; color: var(--green-800); }
+.pl-set { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--beige-300); border-radius: 10px; background: #fff; font-size: 12px; }
+.pl-set label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pl-set select { font: inherit; font-size: 12px; padding: 3px 6px; border: 1px solid var(--beige-300); border-radius: 6px; max-width: 100%; }
+.pl-wdays { display: flex; flex-wrap: wrap; gap: 4px; }
+.pl-wdays button { padding: 2px 8px; min-height: 26px; border: 1px solid var(--beige-300); border-radius: 99px; background: #fff; font: inherit; font-size: 11px; cursor: pointer; }
+.pl-wdays button[aria-pressed="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }
+.pl-btn[aria-expanded="true"] { background: var(--green-800); color: var(--beige-50); border-color: var(--green-800); }
