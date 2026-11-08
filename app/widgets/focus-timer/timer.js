@@ -219,3 +219,33 @@ export function dragMs(angleDeg, unit) {
   const raw = (a / 360) * RING[unit].spanMs;
   return detentMs(raw < RING[unit].spanMs * 0.01 && a > 300 ? RING[unit].spanMs : raw);
 }
+
+// ── «تصاعدي» (طلب المالك): الوقت يتزايد بدل أن يتناقص — لمن يريد معرفة كم تستغرق مهمة معيّنة.
+// الحالة تعتمد لحظة البدء (startedAt) كالتنازلي، فيبقى العدّ صحيحاً وإن أُغلقت الصفحة.
+
+export const swInitial = () => ({ status: 'idle', startedAt: null, elapsedMs: 0 });
+
+export const swElapsed = (w, now) => (w.status === 'running' ? w.elapsedMs + Math.max(0, now - w.startedAt) : w.elapsedMs);
+
+/** تشغيل ↔ إيقاف مؤقت. */
+export function swToggle(w, now) {
+  if (w.status === 'running') return { status: 'paused', startedAt: null, elapsedMs: swElapsed(w, now) };
+  return { status: 'running', startedAt: now, elapsedMs: w.elapsedMs };
+}
+
+/** «MM:SS» تحت الساعة، و«H:MM:SS» من ساعة فأكثر. يُقرّب لأسفل: لا يسبق الثانية. */
+export function formatElapsed(ms) {
+  const t = Math.floor(Math.max(0, ms) / 1000);
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  const mm = String(m).padStart(2, '0');
+  const ss = String(s).padStart(2, '0');
+  return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+/** سجل المهام: الأحدث أولاً، ٥٠ مهمة على الأكثر. */
+export function logTask(tasks, name, ms, date) {
+  const entry = { name: String(name ?? '').trim() || 'مهمة', ms: Math.round(ms), at: date.getTime() };
+  return [entry, ...(tasks ?? [])].slice(0, 50);
+}

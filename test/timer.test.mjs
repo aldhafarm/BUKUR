@@ -196,3 +196,27 @@ test('السحب على الحلقة يقف عند الوقفات: ٩٠° = ١٥
   assert.equal(dragMs(359.9, 'minutes'), 60 * MIN);
   assert.equal(dragMs(32.5, 'hours'), 65 * MIN);       // حلقة الساعات (١٢ ساعة): ١:٠٥
 });
+
+import { formatElapsed, logTask, swElapsed, swInitial, swToggle } from '../app/widgets/focus-timer/timer.js';
+
+test('التصاعدي: يتزايد من لحظة البدء، ويتجمّد عند الإيقاف، ويكمل بعد الاستئناف ولو أُغلقت الصفحة', () => {
+  let w = swInitial();
+  assert.equal(swElapsed(w, T0), 0);
+  w = swToggle(w, T0);
+  assert.equal(swElapsed(w, T0 + 7 * MIN), 7 * MIN);
+  w = swToggle(w, T0 + 10 * MIN);                // إيقاف بعد ١٠ دقائق
+  assert.equal(swElapsed(w, T0 + 99 * MIN), 10 * MIN);
+  w = swToggle(w, T0 + 100 * MIN);               // استئناف
+  assert.equal(swElapsed(w, T0 + 125 * MIN), 35 * MIN);
+});
+
+test('صيغة الوقت المستغرق، وسجل المهام (الأحدث أولاً)', () => {
+  assert.equal(formatElapsed(0), '00:00');
+  assert.equal(formatElapsed(59_999), '00:59');
+  assert.equal(formatElapsed(25 * MIN + 7000), '25:07');
+  assert.equal(formatElapsed(75 * MIN), '1:15:00');
+  let t = logTask([], ' واجب الإحصاء ', 42 * MIN, new Date(T0));
+  t = logTask(t, '', MIN, new Date(T0 + MIN));
+  assert.deepEqual(t.map((x) => x.name), ['مهمة', 'واجب الإحصاء']);
+  assert.equal(t[1].ms, 42 * MIN);
+});
