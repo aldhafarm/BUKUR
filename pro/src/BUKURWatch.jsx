@@ -1,4 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+// أيقونات Material Symbols Sharp من Google Fonts فقط — نفس مصدر البكور (app/icons.js يضيف الخط عند الاستيراد)
+import '../../app/icons.js';
+
+const Ic = ({ n, className = '' }) => <span className={`ic ${className}`} aria-hidden="true">{n}</span>;
 
 export default function BUKURWatch() {
   // ═══════════════════════════════════════════════════════════════
@@ -142,7 +146,7 @@ export default function BUKURWatch() {
     time: language === 'ar' ? 'الوقت' : 'Time',
     
     // Settings
-    settings: language === 'ar' ? 'الإعدادات ⚙️' : 'Settings ⚙️',
+    settings: language === 'ar' ? 'الإعدادات' : 'Settings',
     hideSettings: language === 'ar' ? 'إخفاء الإعدادات' : 'Hide Settings',
     
     // Language
@@ -210,8 +214,8 @@ export default function BUKURWatch() {
     
     // Hands direction
     handsDir: language === 'ar' ? 'اتجاه العقارب:' : 'Hands Direction:',
-    clockwise: language === 'ar' ? 'مع عقارب الساعة ↻' : 'Clockwise ↻',
-    counterclockwise: language === 'ar' ? 'عكس عقارب الساعة ↺' : 'Counter-clockwise ↺',
+    clockwise: language === 'ar' ? 'مع عقارب الساعة' : 'Clockwise',
+    counterclockwise: language === 'ar' ? 'عكس عقارب الساعة' : 'Counter-clockwise',
     
     // Arabic hour name
     arabicHourName: language === 'ar' ? 'اسم الساعة:' : 'Hour Name:',
@@ -258,8 +262,8 @@ export default function BUKURWatch() {
     
     // Sleep Tracking
     sleepTracking: language === 'ar' ? 'تتبع النوم' : 'Sleep Tracking',
-    iWokeUp: language === 'ar' ? '☀️ استيقظت' : '☀️ I Woke Up',
-    goingToSleep: language === 'ar' ? '🌙 ذاهب للنوم' : '🌙 Going to Sleep',
+    iWokeUp: language === 'ar' ? 'استيقظت' : 'I Woke Up',
+    goingToSleep: language === 'ar' ? 'ذاهب للنوم' : 'Going to Sleep',
     wokeUpAt: language === 'ar' ? 'استيقظت الساعة:' : 'Woke up at:',
     sleptAt: language === 'ar' ? 'نمت الساعة:' : 'Slept at:',
     sleepDuration: language === 'ar' ? 'مدة النوم:' : 'Sleep Duration:',
@@ -267,7 +271,7 @@ export default function BUKURWatch() {
     clearSleepData: language === 'ar' ? 'مسح البيانات' : 'Clear Data',
     
     // Alarms & Sleep Settings
-    alarmSettings: language === 'ar' ? '⏰ إعدادات المنبه والنوم' : '⏰ Alarm & Sleep Settings',
+    alarmSettings: language === 'ar' ? 'إعدادات المنبه والنوم' : 'Alarm & Sleep Settings',
     alarmTime: language === 'ar' ? 'وقت المنبه:' : 'Alarm Time:',
     desiredSleepHours: language === 'ar' ? 'ساعات النوم المطلوبة:' : 'Desired Sleep Hours:',
     awakeTrackingHours: language === 'ar' ? 'ساعات اليقظة للمتابعة:' : 'Awake Hours to Track:',
@@ -300,7 +304,7 @@ export default function BUKURWatch() {
     handStyleSkeleton: language === 'ar' ? 'هيكلي' : 'Skeleton',
     
     // Reset
-    resetBezel: language === 'ar' ? 'إعادة ضبط الإطار ↺' : 'Reset Bezel ↺',
+    resetBezel: language === 'ar' ? 'إعادة ضبط الإطار' : 'Reset Bezel',
     
     // Footer
     footerText: language === 'ar' ? '∞ = 8 = البداية من النور' : '∞ = 8 = Beginning from Light',
@@ -538,10 +542,10 @@ export default function BUKURWatch() {
     const half = awakeTrackingHours / 2;
     const threeQuarter = (awakeTrackingHours * 3) / 4;
     
-    if (awakeHours < quarter) return { text: 'نشيط', textEn: 'Active', color: '#22c55e', emoji: '⚡' };
-    if (awakeHours < half) return { text: 'متيقظ', textEn: 'Alert', color: '#eab308', emoji: '👁️' };
-    if (awakeHours < threeQuarter) return { text: 'متعب', textEn: 'Tired', color: '#f97316', emoji: '😴' };
-    return { text: 'نَم!', textEn: 'Sleep!', color: '#ef4444', emoji: '🛏️' };
+    if (awakeHours < quarter) return { text: 'نشيط', textEn: 'Active', color: '#22c55e', emoji: 'bolt' };
+    if (awakeHours < half) return { text: 'متيقظ', textEn: 'Alert', color: '#eab308', emoji: 'visibility' };
+    if (awakeHours < threeQuarter) return { text: 'متعب', textEn: 'Tired', color: '#f97316', emoji: 'snooze' };
+    return { text: 'نَم!', textEn: 'Sleep!', color: '#ef4444', emoji: 'bed' };
   };
   const awakeStatus = getAwakeStatus();
 
@@ -701,13 +705,13 @@ export default function BUKURWatch() {
   // Get all daily times as array for iteration
   const getDailyTimesArray = () => {
     return [
-      { id: 'ishraq', name: 'الإشراق', nameEn: 'Ishraq', time: dailyTimes.ishraq, icon: '🌅', color: '#fbbf24' },
-      { id: 'duha', name: 'الضحى', nameEn: 'Duha', time: dailyTimes.duha, icon: '☀️', color: '#f59e0b' },
-      { id: 'dhuhr', name: 'الظهر', nameEn: 'Dhuhr', time: dailyTimes.dhuhr, icon: '🌞', color: '#eab308' },
-      { id: 'asr', name: 'العصر', nameEn: 'Asr', time: dailyTimes.asr, icon: '🌤️', color: '#f97316' },
-      { id: 'aseel', name: 'الأصيل', nameEn: 'Aseel', time: dailyTimes.aseel, icon: '🌇', color: '#ea580c' },
-      { id: 'maghrib', name: 'المغرب', nameEn: 'Maghrib', time: dailyTimes.maghrib, icon: '🌆', color: '#dc2626' },
-      { id: 'isha', name: 'العشاء', nameEn: 'Isha', time: dailyTimes.isha, icon: '🌙', color: '#7c3aed' },
+      { id: 'ishraq', name: 'الإشراق', nameEn: 'Ishraq', time: dailyTimes.ishraq, icon: 'wb_twilight', color: '#fbbf24' },
+      { id: 'duha', name: 'الضحى', nameEn: 'Duha', time: dailyTimes.duha, icon: 'wb_sunny', color: '#f59e0b' },
+      { id: 'dhuhr', name: 'الظهر', nameEn: 'Dhuhr', time: dailyTimes.dhuhr, icon: 'light_mode', color: '#eab308' },
+      { id: 'asr', name: 'العصر', nameEn: 'Asr', time: dailyTimes.asr, icon: 'partly_cloudy_day', color: '#f97316' },
+      { id: 'aseel', name: 'الأصيل', nameEn: 'Aseel', time: dailyTimes.aseel, icon: 'brightness_6', color: '#ea580c' },
+      { id: 'maghrib', name: 'المغرب', nameEn: 'Maghrib', time: dailyTimes.maghrib, icon: 'brightness_4', color: '#dc2626' },
+      { id: 'isha', name: 'العشاء', nameEn: 'Isha', time: dailyTimes.isha, icon: 'dark_mode', color: '#7c3aed' },
     ];
   };
   
@@ -2363,14 +2367,14 @@ export default function BUKURWatch() {
           onClick={recordWakeUp}
           className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg"
         >
-          <span className="text-lg">☀️</span>
+          <span className="text-lg"><Ic n="wb_sunny" /></span>
           {language === 'ar' ? 'استيقظت' : 'I Woke Up'}
         </button>
         <button
           onClick={recordSleep}
           className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg"
         >
-          <span className="text-lg">🌙</span>
+          <span className="text-lg"><Ic n="bedtime" /></span>
           {language === 'ar' ? 'ذاهب للنوم' : 'Going to Sleep'}
         </button>
       </div>
@@ -2391,7 +2395,7 @@ export default function BUKURWatch() {
           <div className="grid grid-cols-2 gap-3 text-sm">
             {/* Sleep Time */}
             <div className="bg-indigo-900/30 rounded-lg p-2 text-center">
-              <span className="text-indigo-300 text-xs block mb-1">🌙 {language === 'ar' ? 'نمت' : 'Slept'}</span>
+              <span className="text-indigo-300 text-xs block mb-1"><Ic n="bedtime" /> {language === 'ar' ? 'نمت' : 'Slept'}</span>
               <span className="text-white font-bold">
                 {sleepTime ? formatTime(sleepTime.hour, sleepTime.minute) : '--:--'}
               </span>
@@ -2399,7 +2403,7 @@ export default function BUKURWatch() {
             
             {/* Wake Time */}
             <div className="bg-amber-900/30 rounded-lg p-2 text-center">
-              <span className="text-amber-300 text-xs block mb-1">☀️ {language === 'ar' ? 'استيقظت' : 'Woke Up'}</span>
+              <span className="text-amber-300 text-xs block mb-1"><Ic n="wb_sunny" /> {language === 'ar' ? 'استيقظت' : 'Woke Up'}</span>
               <span className="text-white font-bold">
                 {wakeUpTime ? formatTime(wakeUpTime.hour, wakeUpTime.minute) : '--:--'}
               </span>
@@ -2409,7 +2413,7 @@ export default function BUKURWatch() {
           {/* Sleep Duration */}
           {sleepDuration && (
             <div className="mt-2 text-center bg-green-900/30 rounded-lg p-2">
-              <span className="text-green-300 text-xs block mb-1">😴 {t.sleepDuration}</span>
+              <span className="text-green-300 text-xs block mb-1"><Ic n="snooze" /> {t.sleepDuration}</span>
               <span className="text-white font-bold text-lg">
                 {sleepDuration.hours}{t.h} {sleepDuration.minutes}{t.m}
               </span>
@@ -2427,7 +2431,7 @@ export default function BUKURWatch() {
         <div className="flex items-center justify-between">
           <span className="text-zinc-400 text-sm">{t.status}:</span>
           <span className="font-bold flex items-center gap-2" style={{ color: awakeStatus.color }}>
-            {awakeStatus.emoji} {language === 'ar' ? awakeStatus.text : awakeStatus.textEn}
+            <Ic n={awakeStatus.emoji} /> {language === 'ar' ? awakeStatus.text : awakeStatus.textEn}
           </span>
         </div>
       </div>
@@ -2437,7 +2441,7 @@ export default function BUKURWatch() {
         <div className="mt-2 bg-orange-500/10 border border-orange-500/30 rounded-xl p-3 w-80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-orange-400 text-lg">🌍</span>
+              <span className="text-orange-400 text-lg"><Ic n="public" /></span>
               <div>
                 <span className="text-orange-400 font-bold">
                   {language === 'ar' ? getTimezoneByOffset(gmtOffset).city : getTimezoneByOffset(gmtOffset).cityEn}
@@ -2464,7 +2468,7 @@ export default function BUKURWatch() {
           className="w-full bg-violet-900/30 border border-violet-500/30 rounded-xl p-3 flex items-center justify-between hover:bg-violet-900/40 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <span className="text-xl">{nextDailyTime.icon}</span>
+            <span className="text-xl"><Ic n={nextDailyTime.icon} /></span>
             <div className={`text-${language === 'ar' ? 'right' : 'left'}`}>
               <span className="text-violet-300 font-bold text-sm">
                 {language === 'ar' ? 'القادم:' : 'Next:'} {language === 'ar' ? nextDailyTime.name : nextDailyTime.nameEn}
@@ -2483,7 +2487,7 @@ export default function BUKURWatch() {
               {formatDecimalTime(nextDailyTime.time)}
             </span>
             <span className={`text-violet-400 transition-transform ${showPrayerTimes ? 'rotate-180' : ''}`}>
-              ▼
+              <Ic n="arrow_drop_down" />
             </span>
           </div>
         </button>
@@ -2504,22 +2508,22 @@ export default function BUKURWatch() {
                   } ${isNext ? 'bg-violet-900/30' : ''} ${isPast ? 'opacity-50' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg w-6 text-center">{item.icon}</span>
+                    <span className="text-lg w-6 text-center"><Ic n={item.icon} /></span>
                     <div>
                       <span className={`font-bold text-sm ${isNext ? 'text-violet-300' : 'text-zinc-300'}`}>
                         {language === 'ar' ? item.name : item.nameEn}
                       </span>
                       {isNext && (
                         <p className="text-violet-400 text-xs">
-                          {language === 'ar' 
-                            ? `⏱️ بعد ${nextDailyTime.remainingHours}س ${nextDailyTime.remainingMinutes}د`
-                            : `⏱️ in ${nextDailyTime.remainingHours}h ${nextDailyTime.remainingMinutes}m`
+                          <Ic n="timer" /> {language === 'ar' 
+                            ? `بعد ${nextDailyTime.remainingHours}س ${nextDailyTime.remainingMinutes}د`
+                            : `in ${nextDailyTime.remainingHours}h ${nextDailyTime.remainingMinutes}m`
                           }
                         </p>
                       )}
                       {isPast && !isNext && (
                         <p className="text-zinc-500 text-xs">
-                          {language === 'ar' ? '✓ انتهى' : '✓ Passed'}
+                          <Ic n="check" /> {language === 'ar' ? 'انتهى' : 'Passed'}
                         </p>
                       )}
                     </div>
@@ -2542,7 +2546,7 @@ export default function BUKURWatch() {
         onClick={() => setShowSettings(!showSettings)}
         className="mt-4 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg text-sm hover:bg-zinc-700"
       >
-        {showSettings ? t.hideSettings : t.settings}
+        <Ic n="settings" /> {showSettings ? t.hideSettings : t.settings}
       </button>
 
       {/* Settings Panel */}
@@ -2582,7 +2586,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showBezel ? 'bg-amber-600' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showBezel ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showBezel ? '◉' : '○'}
+                <Ic n={showBezel ? 'radio_button_checked' : 'radio_button_unchecked'} />
               </div>
             </button>
           </div>
@@ -2650,8 +2654,8 @@ export default function BUKURWatch() {
               </div>
               <p className="text-zinc-500 text-xs mt-2">
                 {language === 'ar' 
-                  ? '✓ اضغط للإضافة/الإزالة • الحد الأقصى 4 إطارات • البوصلة دائماً الإطار الخارجي' 
-                  : '✓ Click to add/remove • Max 4 bezels • Compass always outermost'}
+                  ? 'اضغط للإضافة/الإزالة • الحد الأقصى 4 إطارات • البوصلة دائماً الإطار الخارجي' 
+                  : 'Click to add/remove • Max 4 bezels • Compass always outermost'}
               </p>
             </div>
           )}
@@ -2686,7 +2690,7 @@ export default function BUKURWatch() {
                   onClick={requestCompassPermission}
                   className="w-full mb-3 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-500 transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>🧭</span>
+                  <Ic n="explore" />
                   {t.requestPermission}
                 </button>
               )}
@@ -2758,12 +2762,12 @@ export default function BUKURWatch() {
                     userLocation ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
                   }`}
                 >
-                  <span>📍</span>
+                  <Ic n="location_on" />
                   {t.saveCurrentLocation}
                 </button>
                 {savedHomeLocation && (
                   <p className="text-green-400 text-xs mt-1 text-center">
-                    ✓ {t.locationSaved} ({savedHomeLocation.lat.toFixed(4)}°, {savedHomeLocation.lng.toFixed(4)}°)
+                    <Ic n="check" /> {t.locationSaved} ({savedHomeLocation.lat.toFixed(4)}°, {savedHomeLocation.lng.toFixed(4)}°)
                   </p>
                 )}
               </div>
@@ -2771,7 +2775,7 @@ export default function BUKURWatch() {
               {/* Home indicator toggle */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs">🏠</span>
+                  <span className="w-4 h-4 bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs"><Ic n="home" /></span>
                   <span className="text-zinc-300 text-sm">{t.showHomeIndicator}</span>
                 </div>
                 <button
@@ -2906,7 +2910,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showDialNumbers ? 'bg-amber-600' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showDialNumbers ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showDialNumbers ? '◉' : '○'}
+                <Ic n={showDialNumbers ? 'radio_button_checked' : 'radio_button_unchecked'} />
               </div>
             </button>
           </div>
@@ -2987,7 +2991,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${dialFlipped ? 'bg-amber-600' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${dialFlipped ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {dialFlipped ? '↓' : '↑'}
+                <Ic n={dialFlipped ? 'arrow_downward' : 'arrow_upward'} />
               </div>
             </button>
           </div>
@@ -3005,7 +3009,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${handsDirection === 'counterclockwise' ? 'bg-amber-600' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${handsDirection === 'counterclockwise' ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {handsDirection === 'clockwise' ? '↻' : '↺'}
+                <Ic n={handsDirection === 'clockwise' ? 'rotate_right' : 'rotate_left'} />
               </div>
             </button>
           </div>
@@ -3023,7 +3027,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showArabicHourName ? 'bg-amber-600' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showArabicHourName ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showArabicHourName ? '☀' : '○'}
+                <Ic n={showArabicHourName ? 'wb_sunny' : 'circle'} />
               </div>
             </button>
           </div>
@@ -3041,7 +3045,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showMinuteMarkers ? 'bg-amber-600' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showMinuteMarkers ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showMinuteMarkers ? '●' : '○'}
+                <Ic n={showMinuteMarkers ? 'radio_button_checked' : 'radio_button_unchecked'} />
               </div>
             </button>
           </div>
@@ -3059,28 +3063,28 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showSecondMarkers ? 'bg-red-500' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showSecondMarkers ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showSecondMarkers ? '●' : '○'}
+                <Ic n={showSecondMarkers ? 'radio_button_checked' : 'radio_button_unchecked'} />
               </div>
             </button>
           </div>
 
           {/* Hand Style Selector */}
           <div className="border-t border-zinc-700 pt-4">
-            <label className="text-zinc-400 text-sm block mb-3">✋ {t.handStyle}</label>
+            <label className="text-zinc-400 text-sm block mb-3"><Ic n="pan_tool" /> {t.handStyle}</label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { id: 'baton', icon: '│', name: t.handStyleBaton },
-                { id: 'sword', icon: '⚔️', name: t.handStyleSword },
-                { id: 'dauphine', icon: '◆', name: t.handStyleDauphine },
-                { id: 'leaf', icon: '🍃', name: t.handStyleLeaf },
-                { id: 'mercedes', icon: '☆', name: t.handStyleMercedes },
-                { id: 'alpha', icon: 'A', name: t.handStyleAlpha },
-                { id: 'arrow', icon: '➤', name: t.handStyleArrow },
-                { id: 'breguet', icon: '◎', name: t.handStyleBreguet },
-                { id: 'cathedral', icon: '⛪', name: t.handStyleCathedral },
-                { id: 'snowflake', icon: '❄️', name: t.handStyleSnowflake },
-                { id: 'syringe', icon: '💉', name: t.handStyleSyringe },
-                { id: 'skeleton', icon: '☐', name: t.handStyleSkeleton },
+                { id: 'baton', icon: 'horizontal_rule', name: t.handStyleBaton },
+                { id: 'sword', icon: 'swords', name: t.handStyleSword },
+                { id: 'dauphine', icon: 'diamond', name: t.handStyleDauphine },
+                { id: 'leaf', icon: 'eco', name: t.handStyleLeaf },
+                { id: 'mercedes', icon: 'star', name: t.handStyleMercedes },
+                { id: 'alpha', icon: 'change_history', name: t.handStyleAlpha },
+                { id: 'arrow', icon: 'navigation', name: t.handStyleArrow },
+                { id: 'breguet', icon: 'radio_button_checked', name: t.handStyleBreguet },
+                { id: 'cathedral', icon: 'church', name: t.handStyleCathedral },
+                { id: 'snowflake', icon: 'ac_unit', name: t.handStyleSnowflake },
+                { id: 'syringe', icon: 'vaccines', name: t.handStyleSyringe },
+                { id: 'skeleton', icon: 'check_box_outline_blank', name: t.handStyleSkeleton },
               ].map(style => (
                 <button
                   key={style.id}
@@ -3091,7 +3095,7 @@ export default function BUKURWatch() {
                       : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
                   }`}
                 >
-                  <span className="text-lg block">{style.icon}</span>
+                  <span className="text-lg block"><Ic n={style.icon} /></span>
                   <span className="text-xs">{style.name}</span>
                 </button>
               ))}
@@ -3111,7 +3115,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showMinuteHand ? 'bg-zinc-500' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showMinuteHand ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showMinuteHand ? '│' : '○'}
+                <Ic n={showMinuteHand ? 'radio_button_checked' : 'radio_button_unchecked'} />
               </div>
             </button>
           </div>
@@ -3129,7 +3133,7 @@ export default function BUKURWatch() {
               className={`w-14 h-7 rounded-full transition-colors flex items-center ${showSecondHand ? 'bg-red-500' : 'bg-zinc-600'}`}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow transition-transform flex items-center justify-center text-xs ${showSecondHand ? 'translate-x-7' : 'translate-x-0.5'}`}>
-                {showSecondHand ? '│' : '○'}
+                <Ic n={showSecondHand ? 'radio_button_checked' : 'radio_button_unchecked'} />
               </div>
             </button>
           </div>
@@ -3244,7 +3248,7 @@ export default function BUKURWatch() {
               {/* Sunrise toggle */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-lg">🌅</span>
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-lg"><Ic n="wb_twilight" /></span>
                   <div>
                     <span className="text-zinc-300 text-sm">{t.showSunrise}</span>
                     <p className="text-zinc-500 text-xs">
@@ -3263,7 +3267,7 @@ export default function BUKURWatch() {
               {/* Sunset toggle */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-lg">🌇</span>
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-lg"><Ic n="brightness_6" /></span>
                   <div>
                     <span className="text-zinc-300 text-sm">{t.showSunset}</span>
                     <p className="text-zinc-500 text-xs">
@@ -3339,14 +3343,14 @@ export default function BUKURWatch() {
           {/* Alarm & Sleep Settings */}
           <div className="border-t border-zinc-700 pt-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl">⏰</span>
+              <span className="text-xl"><Ic n="alarm" /></span>
               <span className="text-zinc-300 font-bold text-sm">{t.alarmSettings}</span>
             </div>
             
             {/* Alarm Time / Wake Time (Combined) */}
             <div className="mb-4">
               <label className="text-zinc-400 text-sm block mb-2">
-                ⏰☀️ {language === 'ar' ? 'وقت الاستيقاظ / المنبه:' : 'Wake Time / Alarm:'}
+                <Ic n="alarm" /> {language === 'ar' ? 'وقت الاستيقاظ / المنبه:' : 'Wake Time / Alarm:'}
               </label>
               <div className="flex gap-2">
                 <div className="flex-1">
@@ -3375,7 +3379,7 @@ export default function BUKURWatch() {
               </div>
               <div className="mt-2 flex justify-between items-center text-xs">
                 <span className="text-amber-400">
-                  🔔 {formatTime(alarmHour, alarmMinute)}
+                  <Ic n="notifications" /> {formatTime(alarmHour, alarmMinute)}
                 </span>
                 <span className="text-zinc-500">
                   = BUKUR {alarmBukurHour} ({language === 'ar' ? 'لتتبع اليقظة' : 'for awake tracking'})
@@ -3409,7 +3413,7 @@ export default function BUKURWatch() {
             
             {/* Recommended Bedtime */}
             <div className="bg-indigo-900/30 rounded-xl p-4 text-center">
-              <span className="text-indigo-300 text-xs block mb-1">🌙 {t.recommendedBedtime}</span>
+              <span className="text-indigo-300 text-xs block mb-1"><Ic n="bedtime" /> {t.recommendedBedtime}</span>
               <span className="text-white font-bold text-2xl">
                 {formatTime(recommendedBedtime.hour, recommendedBedtime.minute)}
               </span>
