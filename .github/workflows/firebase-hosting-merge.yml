@@ -1,0 +1,22 @@
+# النشر الحيّ: كل دمج إلى main يُختبر ثم يُنشر على https://bukur.mind8x.com
+name: النشر على Firebase (main)
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUKUR8 }}
+          projectId: bukur8
+          channelId: live

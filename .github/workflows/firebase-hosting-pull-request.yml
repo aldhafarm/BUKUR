@@ -1,0 +1,25 @@
+# المعاينة: كل طلب دمج (PR) يُختبر ويُنشر على رابط معاينة مؤقت يظهر تعليقاً في الطلب.
+# الرابط الحيّ لا يتغيّر إلا بعد الدمج — المالك يراجع أولاً.
+name: معاينة على Firebase (PR)
+on: pull_request
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+jobs:
+  preview:
+    # طلبات الدمج من مستودعات منسوخة (fork) لا تصلها الأسرار — تُتخطّى
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUKUR8 }}
+          projectId: bukur8
+          expires: 7d
