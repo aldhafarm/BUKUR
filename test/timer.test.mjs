@@ -144,3 +144,22 @@ test('بلا سلسلة: تنتهي المرحلة وتنتظر؛ مع السل�
   assert.equal(on.state.status, 'running');
   assert.equal(remaining(on.state, T0 + 40 * MIN), 15 * MIN);
 });
+
+import { PALETTE, remainingColor, wrapUnit } from '../app/widgets/focus-timer/timer.js';
+
+test('ألوان المتبقي: التركيز أخضر ← أصفر ← برتقالي ← أحمر، والراحة أزرق', () => {
+  assert.equal(remainingColor('focus', 0.8), PALETTE.green);
+  assert.equal(remainingColor('focus', 0.4), PALETTE.yellow);
+  assert.equal(remainingColor('focus', 0.2), PALETTE.orange);
+  assert.equal(remainingColor('focus', 0.05), PALETTE.red);
+  assert.equal(remainingColor('short', 0.05), PALETTE.blue);
+  assert.equal(remainingColor('long', 0.9), PALETTE.blue);
+});
+
+test('السحب المتصل: عبور القمة بعد ٦٠ دقيقة يحوّل للساعات، والعكس يعيد للدقائق', () => {
+  assert.equal(wrapUnit('minutes', 355, 4), 'hours');
+  assert.equal(wrapUnit('hours', 6, 350), 'minutes');
+  assert.equal(wrapUnit('minutes', 200, 210), 'minutes');
+  assert.equal(wrapUnit('minutes', 6, 350), 'minutes');   // الرجوع عبر القمة في الدقائق لا يغيّر
+  assert.equal(wrapUnit('hours', 355, 4), 'hours');
+});

@@ -5,7 +5,7 @@
 import {
   PHASE_LABEL, PRESETS, RING, advance, angleToMs, autoUnit, catchUp, configFor, customWith, dayStats,
   formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, pause, phaseMs, remaining, reset,
-  ringFraction, splitHMS, start, weekStats,
+  remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit,
 } from './timer.js';
 
 const DEFAULTS = {
@@ -194,26 +194,38 @@ export default {
       });
     }
 
-    // ── سحب الحلقة
+    // ── سحب الحلقة — متصل: عبور القمة بعد ٦٠ دقيقة يحوّل للساعات (وتحتها لا تقل المدة عن ساعة)
     let dragging = false;
+    let lastDeg = 0;
     const angleAt = (e) => {
       const r = disk.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2);
       const dy = e.clientY - (r.top + r.height / 2);
-      return { deg: (Math.atan2(dx, -dy) * 180) / Math.PI, dist: Math.hypot(dx, dy) / (r.width / 2) };
+      const deg = ((Math.atan2(dx, -dy) * 180) / Math.PI + 360) % 360;
+      return { deg, dist: Math.hypot(dx, dy) / (r.width / 2) };
     };
+    let autoHours = false; // تحوّلت للساعات بعبور القمة في هذا السحب
+    function dragTo(deg) {
+      const before = unitFor(timer());
+      const unit = wrapUnit(before, lastDeg, deg);
+      lastDeg = deg;
+      if (unit !== before) { autoHours = unit === 'hours'; store.set({ unit }); }
+      let ms = angleToMs(deg, unit);
+      if (unit === 'hours' && autoHours) ms = Math.max(ms, 60 * 60_000); // بعد العبور: لا تقل عن ساعة
+      setDuration(ms);
+    }
     disk.addEventListener('pointerdown', (e) => {
       const { deg, dist } = angleAt(e);
       if (dist < 0.55 || !editable(timer())) return; // المركز للعجلات؛ والجلسة الجارية لا تُعدَّل بالسحب
       e.preventDefault();
       dragging = true;
+      autoHours = false;
+      lastDeg = deg;
       disk.setPointerCapture(e.pointerId);
       disk.classList.add('ft-dragging');
       setDuration(angleToMs(deg, unitFor(timer())));
     });
-    disk.addEventListener('pointermove', (e) => {
-      if (dragging) setDuration(angleToMs(angleAt(e).deg, unitFor(timer())));
-    });
+    disk.addEventListener('pointermove', (e) => { if (dragging) dragTo(angleAt(e).deg); });
     const stop = () => { dragging = false; disk.classList.remove('ft-dragging'); };
     disk.addEventListener('pointerup', stop);
     disk.addEventListener('pointercancel', stop);
@@ -235,6 +247,7 @@ export default {
       const root = el.querySelector('.ft');
       root.dataset.phase = t.phase;
       root.dataset.status = t.status;
+      root.style.setProperty('--ph', remainingColor(t.phase, left / phaseMs(t.phase, c)));
       ref('time').textContent = formatClock(left);
       ref('phase').textContent = PHASE_LABEL[t.phase];
       const frac = ringFraction(left, unit);
