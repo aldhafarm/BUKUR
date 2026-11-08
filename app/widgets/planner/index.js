@@ -34,11 +34,13 @@ export default {
     const anchor = () => store.get().anchor ?? today();
 
     // خانة يوم في السنة: رقمه وحرفه، وظل العطلة، وخط لون الموسم، ودائرة حمراء لليوم
-    function dayCell(s, d, t0, label) {
+    // bare: خانة بلا رقم ولا حرف (الرقم أو الحرف في رأس العمود) — في ترتيبي «بالتاريخ» و«محاذاة باليوم»
+    function dayCell(s, d, t0, label, bare = false) {
       const k = key(d);
       const p = periodAt(s.system, k);
       const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : '';
-      return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}" data-day="${k}" ${tip(`${label}${p ? ` · ${p.name}` : ''}`)}><b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s></i>`;
+      const full = `${DOW[d.getDay()]} ${label}${p ? ` · ${p.name}` : ''}`;
+      return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}${bare ? ' pl-bare' : ''}" data-day="${k}" ${tip(full)}>${bare ? '' : `<b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s>`}</i>`;
     }
 
     function yearView(s, r) {
@@ -55,12 +57,13 @@ export default {
         const cells = Array.from({ length: cols }, (_, i) => {
           const day = i - off + 1;
           if (day < 1 || day > row.days) return '<i class="pl-off"></i>';
-          return dayCell(s, new Date(y, row.m, day), t0, `${day} ${row.name}`);
+          return dayCell(s, new Date(y, row.m, day), t0, `${day} ${row.name}`, true);
         }).join('');
         const lanes = row.bars.map((b, i) => bar(b.t, { ...b, col: b.col + off }, `grid-row:${i + 2}`)).join('');
         return `<div class="pl-yrow"><b>${row.name.slice(0, 3)}</b><div class="pl-ydays" style="--cols:${cols}">${cells}${lanes}</div></div>`;
       }).join('');
-      const head = aligned ? `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:${cols}">${Array.from({ length: cols }, (_, i) => `<i>${DOW1[(i + s.weekStart) % 7]}</i>`).join('')}</div></div>` : '';
+      // رأس الأعمدة (طلب المالك): أرقام الأيام ١–٣١ في «بالتاريخ»، وحروف الأيام في «محاذاة باليوم» — والخانات بلا نص
+      const head = `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:${cols}">${Array.from({ length: cols }, (_, i) => `<i${!aligned && (y === parse(t0).getFullYear()) && i + 1 === parse(t0).getDate() ? ' class="pl-hnow"' : ''}>${aligned ? DOW1[(i + s.weekStart) % 7] : i + 1}</i>`).join('')}</div></div>`;
       return `<div class="pl-year">${head}${rows}</div>`;
     }
 

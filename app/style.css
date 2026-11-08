@@ -537,3 +537,10 @@ button { font: inherit; cursor: pointer; }
 .pl-mgrid button span { display: flex; gap: 1px; min-height: 4px; }
 .pl-mgrid button u { width: 4px; height: 4px; border-radius: 50%; }
 .pl-mgrid button:hover { background: #fff3e6; }
+
+/* ── السنة: الأرقام/الحروف في رأس الأعمدة، والخانات بلا نص (طلب المالك) */
+.pl-ydays > i.pl-bare { min-height: 16px; padding: 0; }
+.pl-ydays > i.pl-bare.pl-now { background: #e0393e; border-top-color: #e0393e; }
+.pl-ywhead { position: sticky; top: 0; z-index: 2; background: var(--beige-50); }
+.pl-ywhead .pl-ydays > i { font-size: 10px; padding: 2px 0; }
+.pl-ywhead .pl-ydays > i.pl-hnow { color: #e0393e; }
