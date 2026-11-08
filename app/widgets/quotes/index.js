@@ -29,6 +29,24 @@ function citation(src) {
   return parts.join('، ') + auto;
 }
 
+// كتب العَلَم من ويكي داتا (P800): غلاف واحد، ويتوسّع لبقية كتبه
+function cover(w) {
+  const pic = w.image
+    ? `<img src="${esc(w.image.thumb)}" alt="${esc(w.title)}" loading="lazy" referrerpolicy="no-referrer">`
+    : '<span class="qt-book-ph" aria-hidden="true">📖</span>';
+  return `<a class="qt-book" href="${esc(w.image?.page ?? w.url)}" target="_blank" rel="noopener" title="${esc(w.title)}">${pic}<span>${esc(w.title)}</span></a>`;
+}
+function booksMarkup(works, open) {
+  if (!works?.length) return '';
+  const first = works.find((x) => x.image) ?? works[0];
+  const list = open ? works : [first];
+  return `<div class="qt-books" data-open="${open}">
+      <div class="qt-shelf">${list.map(cover).join('')}</div>
+      ${works.length > 1 ? `<button type="button" class="qt-more" data-books>${open ? 'إخفاء ▴' : `كتبه (${works.length}) ▾`}</button>` : ''}
+      <small class="qt-books-note">من ويكي داتا · الصور من كومنز وقد تكون مخطوطة أو طبعة قديمة لا غلافاً حديثاً</small>
+    </div>`;
+}
+
 // «قول اليوم»: يتبدّل يومياً بين من لهم أقوال موثّقة، ثابت طوال اليوم
 function dailyIndex(items, date) {
   const day = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86_400_000);
@@ -48,6 +66,7 @@ export default {
     let alam = [];
     let alive = true;
     const inflight = new Set();
+    let showBooks = false; // عرض كل كتب العَلَم
     const failedAt = new Map(); // لا إعادة محاولة قبل ٥ دقائق بعد فشل الاتصال
 
     // صورة العَلَم ومعلوماته من ويكي داتا/ويكيبيديا — عند عرضه أول مرة، ثم من الذاكرة أسبوعاً
@@ -92,6 +111,7 @@ export default {
             ${a.famousBook ? `<span>أشهر كتبه: ${esc(a.famousBook)}</span>` : ''}
           </div>
         </div>
+        ${booksMarkup(w?.works, showBooks)}
         ${cur && !chosenAlam ? `
           <blockquote class="qt-text">${esc(cur.q.text)}</blockquote>
           <p class="qt-src">${cur.q.kind === 'reported' ? 'نُقل عنه في ' : 'من '}${citation(cur.q.source)}</p>
@@ -119,9 +139,11 @@ export default {
     }
 
     root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-books]')) { showBooks = !showBooks; render(); return; }
       if (e.target.closest('[data-today]')) ctx.store.set({ pick: null });
       const chip = e.target.closest('[data-alam]');
       if (chip) {
+        showBooks = false;
         const first = entries().find((x) => x.a.id === chip.dataset.alam);
         ctx.store.set({ pick: first ? first.key : chip.dataset.alam });
       }

@@ -128,7 +128,8 @@ export function angleToMs(angleDeg, unit) {
 }
 
 /** نسبة المدة من الحلقة (0..1) لرسم القطاع — ما يزيد على الحلقة يُرسم حلقة كاملة. */
-export const ringFraction = (ms, unit) => Math.min(1, Math.max(0, ms / RING[unit].spanMs));
+export const ringFraction = (ms, unit, phaseTotalMs) =>
+  Math.min(1, Math.max(0, ms / (unit === 'percent' ? phaseTotalMs : RING[unit].spanMs)));
 
 /** الوحدة المناسبة للمدة: أكثر من ساعة ← ساعات. */
 export const autoUnit = (ms) => (ms > 60 * MIN ? 'hours' : 'minutes');
@@ -164,17 +165,24 @@ export function catchUp(s, cfg, now, chain) {
 }
 
 /**
- * لون القطاع بحسب المتبقي من المرحلة (اقتراح لطلب المالك «ألوان تميّز الوقت المتبقي»):
- * التركيز كإشارة المرور — أخضر (> ٥٠٪) ← أصفر (> ٢٥٪) ← برتقالي (> ١٠٪) ← أحمر؛ والراحة أزرق هادئ.
+ * ألوان الحلقة كما في المؤقت المرجعي (صورة المالك): أشرطة ملوّنة بحسب موضعها من القمة مع عقارب الساعة —
+ * أحمر ٠–٢٥٪ · برتقالي ٢٥–٥٠٪ · أصفر ٥٠–٧٥٪ · فيروزي ٧٥–١٠٠٪. يختفي الفيروزي أولاً ويبقى الأحمر آخراً.
+ * الراحة أشرطة زرقاء هادئة.
  */
-export const PALETTE = { green: '#2e9e6b', yellow: '#e2b33a', orange: '#e8742c', red: '#d9483b', blue: '#3b82c4' };
-export function remainingColor(phase, frac) {
-  if (phase !== 'focus') return PALETTE.blue;
-  if (frac > 0.5) return PALETTE.green;
-  if (frac > 0.25) return PALETTE.yellow;
-  if (frac > 0.1) return PALETTE.orange;
-  return PALETTE.red;
+export const PALETTE = { red: '#e0393e', orange: '#f06a28', yellow: '#f3d13a', cyan: '#40c4c9', blue: '#3b82c4' };
+export function zoneColor(pos) {
+  if (pos < 0.25) return PALETTE.red;
+  if (pos < 0.5) return PALETTE.orange;
+  if (pos < 0.75) return PALETTE.yellow;
+  return PALETTE.cyan;
 }
+/** لون «الطرف» الحالي (للزر): لون الشريط الأخير المضاء. */
+export const remainingColor = (phase, frac) => (phase === 'focus' ? zoneColor(Math.max(0, Math.min(0.9999, frac - 1e-9))) : PALETTE.blue);
+
+/** وحدات الحلقة بالترتيب: دقائق ← ساعات ← نسبة مئوية من مدة المرحلة. */
+export const UNITS = ['minutes', 'hours', 'percent'];
+export const nextUnit = (u) => UNITS[(UNITS.indexOf(u) + 1) % UNITS.length];
+export const PERCENT_LABELS = [100, 10, 20, 30, 40, 50, 60, 70, 80, 90];
 
 /**
  * السحب المتصل حول الحلقة: في وحدة الدقائق، عبور القمة مع عقارب الساعة (من آخر الدائرة إلى أولها)

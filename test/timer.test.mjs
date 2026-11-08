@@ -145,15 +145,24 @@ test('بلا سلسلة: تنتهي المرحلة وتنتظر؛ مع السل�
   assert.equal(remaining(on.state, T0 + 40 * MIN), 15 * MIN);
 });
 
-import { PALETTE, remainingColor, wrapUnit } from '../app/widgets/focus-timer/timer.js';
+import { PALETTE, remainingColor, wrapUnit, zoneColor, nextUnit, PERCENT_LABELS } from '../app/widgets/focus-timer/timer.js';
 
-test('ألوان المتبقي: التركيز أخضر ← أصفر ← برتقالي ← أحمر، والراحة أزرق', () => {
-  assert.equal(remainingColor('focus', 0.8), PALETTE.green);
-  assert.equal(remainingColor('focus', 0.4), PALETTE.yellow);
-  assert.equal(remainingColor('focus', 0.2), PALETTE.orange);
-  assert.equal(remainingColor('focus', 0.05), PALETTE.red);
+test('ألوان الحلقة كالمؤقت المرجعي: أحمر ← برتقالي ← أصفر ← فيروزي بحسب الموضع، والراحة أزرق', () => {
+  assert.equal(zoneColor(0.1), PALETTE.red);
+  assert.equal(zoneColor(0.3), PALETTE.orange);
+  assert.equal(zoneColor(0.6), PALETTE.yellow);
+  assert.equal(zoneColor(0.9), PALETTE.cyan);
+  assert.equal(remainingColor('focus', 1), PALETTE.cyan);   // بداية الجلسة: الطرف فيروزي
+  assert.equal(remainingColor('focus', 0.2), PALETTE.red);  // آخرها: أحمر
   assert.equal(remainingColor('short', 0.05), PALETTE.blue);
-  assert.equal(remainingColor('long', 0.9), PALETTE.blue);
+});
+
+test('وحدات الحلقة تدور: دقائق ← ساعات ← نسبة ← دقائق؛ والنسبة من مدة المرحلة', () => {
+  assert.equal(nextUnit('minutes'), 'hours');
+  assert.equal(nextUnit('hours'), 'percent');
+  assert.equal(nextUnit('percent'), 'minutes');
+  assert.equal(PERCENT_LABELS[0], 100);
+  assert.equal(ringFraction(15 * MIN, 'percent', 60 * MIN), 0.25);
 });
 
 test('السحب المتصل: عبور القمة بعد ٦٠ دقيقة يحوّل للساعات، والعكس يعيد للدقائق', () => {

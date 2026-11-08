@@ -45,3 +45,20 @@ test('fetchWiki يجمع الكيان ومقدمة المقالة العربية
   assert.equal(w.extract, 'مقدمة تجريبية');
   assert.equal(w.wikipediaUrl, 'https://ar.wikipedia.org/wiki/x');
 });
+
+import { parseWorks, worksUrl } from '../app/widgets/quotes/wiki.js';
+
+test('أعماله البارزة (P800): عنوان كل كتاب وصورته إن وُجدت، بالترتيب', () => {
+  const ent = structuredClone(sample);
+  ent.entities.Q1.claims.P800 = [{ mainsnak: { datavalue: { value: { id: 'Q10' } } } }, { mainsnak: { datavalue: { value: { id: 'Q11' } } } }];
+  assert.deepEqual(parseEntity(ent).workIds, ['Q10', 'Q11']);
+  const works = parseWorks({ entities: {
+    Q11: { id: 'Q11', labels: { en: { value: 'Book B' } }, claims: {} },
+    Q10: { id: 'Q10', labels: { ar: { value: 'كتاب أ' } }, claims: { P18: [{ mainsnak: { datavalue: { value: 'Cover A.jpg' } } }] } },
+  } }, ['Q10', 'Q11']);
+  assert.equal(works[0].title, 'كتاب أ');
+  assert.match(works[0].image.thumb, /Cover_A\.jpg\?width=220$/);
+  assert.equal(works[1].title, 'Book B');
+  assert.equal(works[1].image, null);
+  assert.equal(new URL(worksUrl(['Q10', 'Q11'])).searchParams.get('ids'), 'Q10|Q11');
+});
