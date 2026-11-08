@@ -3,7 +3,10 @@
 // ومن لم يُعثر له على قول موثّق يظهر بلا قول بدل قولٍ منسوب لا يصح.
 // الصور رمزية (نجمة هندسية) — لا صور حقيقية لهؤلاء الأعلام.
 
+import { fetchWiki } from './wiki.js';
+
 const DATA_URL = new URL('./alam.json', import.meta.url).href;
+const WIKI_TTL = 7 * 86_400_000; // تُحدَّث صورة العَلَم ومعلوماته من ويكي داتا أسبوعياً
 
 const STATUS_LABEL = { verified: 'موثّق من الشاملة', partial: 'موثّق جزئياً', unverified: 'لا قول موثّق بعد' };
 
@@ -37,13 +40,28 @@ export default {
   name: 'أقوال الأعلام',
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
-  defaults: { pick: null }, // null = قول اليوم
+  defaults: { pick: null, wiki: {} }, // pick: null = قول اليوم · wiki: ذاكرة ويكي داتا لكل عَلَم
 
   mount(el, ctx) {
     el.innerHTML = `<div class="qt"><p class="qt-loading">…</p></div>`;
     const root = el.querySelector('.qt');
     let alam = [];
     let alive = true;
+    const inflight = new Set();
+    const failedAt = new Map(); // لا إعادة محاولة قبل ٥ دقائق بعد فشل الاتصال
+
+    // صورة العَلَم ومعلوماته من ويكي داتا/ويكيبيديا — عند عرضه أول مرة، ثم من الذاكرة أسبوعاً
+    function wikiFor(a) {
+      const cached = ctx.store.get().wiki?.[a.id];
+      if (a.enwiki && (!cached || Date.now() - cached.at > WIKI_TTL) && !inflight.has(a.id) && !(Date.now() - (failedAt.get(a.id) ?? 0) < 300_000)) {
+        inflight.add(a.id);
+        fetchWiki(a.enwiki)
+          .then((data) => { if (alive) ctx.store.set({ wiki: { ...ctx.store.get().wiki, [a.id]: { data, at: Date.now() } } }); })
+          .catch(() => { failedAt.set(a.id, Date.now()); /* بلا اتصال: تبقى النجمة الرمزية */ })
+          .finally(() => inflight.delete(a.id));
+      }
+      return cached?.data ?? null;
+    }
 
     // كل (عَلَم، قول) عنصرٌ يُعرض؛ ومن لا قول له يظهر في القائمة فقط
     const entries = () => alam.flatMap((a) => (a.quotes ?? []).map((q, qi) => ({ a, q, key: `${a.id}:${qi}` })));
@@ -59,11 +77,17 @@ export default {
       const a = chosenAlam ?? cur?.a;
       if (!a) { root.innerHTML = '<p class="qt-empty">لا بيانات بعد.</p>'; return; }
       const hue = (alam.indexOf(a) * 36) % 360;
+      const w = wikiFor(a);
+      const avatar = w?.image
+        ? `<figure class="qt-fig"><img class="qt-img" src="${esc(w.image.thumb)}" alt="${esc(a.name)} — صورة تخيّلية" loading="lazy" referrerpolicy="no-referrer">
+             <figcaption><a href="${esc(w.image.page)}" target="_blank" rel="noopener">صورة تخيّلية · كومنز</a></figcaption></figure>`
+        : star(esc(a.name.replace(/^(ابن|أبو)\s+/, '')[0]), hue);
       root.innerHTML = `
         <div class="qt-head">
-          ${star(esc(a.name.replace(/^(ابن|أبو)\s+/, '')[0]), hue)}
+          ${avatar}
           <div class="qt-who">
             <b>${esc(a.name)}</b>
+            ${w?.description ? `<span class="qt-desc">${esc(w.description)}</span>` : ''}
             <span>${[a.died?.hijri && `ت ${esc(a.died.hijri)}هـ`, a.died?.gregorian && `${esc(a.died.gregorian)}م`, a.field && esc(a.field)].filter(Boolean).join(' · ')}</span>
             ${a.famousBook ? `<span>أشهر كتبه: ${esc(a.famousBook)}</span>` : ''}
           </div>
@@ -74,6 +98,7 @@ export default {
           ${cur.q.note ? `<p class="qt-note">${esc(cur.q.note)}</p>` : ''}` :
           `<p class="qt-empty">${STATUS_LABEL.unverified} — لا نعرض قولاً منسوباً حتى يُوثَّق من مصدره.</p>`}
         <p class="qt-badge" data-status="${esc(a.status)}">${STATUS_LABEL[a.status] ?? ''}</p>
+        ${w?.extract ? `<p class="qt-wiki" data-size="l">${esc(w.extract)}<br><small>من <a href="${esc(w.wikipediaUrl)}" target="_blank" rel="noopener">ويكيبيديا</a> · <a href="${esc(w.wikidataUrl)}" target="_blank" rel="noopener">ويكي داتا</a> (معلومات عامة، غير موثّقة كالأقوال)</small></p>` : ''}
         ${a.bioSummary ? `<p class="qt-bio" data-size="l">${esc(a.bioSummary)}<br><small>المصدر: ${citation(a.bioSource)}</small></p>` : ''}
         <div class="qt-nav" data-size="m l">
           <button type="button" data-step="1" aria-label="السابق">→</button>
@@ -81,6 +106,8 @@ export default {
           <button type="button" data-step="-1" aria-label="التالي">←</button>
         </div>
         <div class="qt-chips" data-size="l">${alam.map((x) => `<button type="button" data-alam="${esc(x.id)}" aria-pressed="${x.id === a.id}" ${x.quotes?.length ? '' : 'data-empty'}>${esc(x.name)}</button>`).join('')}</div>`;
+      const img = root.querySelector('.qt-img');
+      img?.addEventListener('error', () => { img.closest('.qt-fig').outerHTML = star(esc(a.name.replace(/^(ابن|أبو)\s+/, '')[0]), hue); });
       applySize(ctx.size);
       root.querySelector('[data-step="1"]')?.addEventListener('click', () => step(-1, list, i));
       root.querySelector('[data-step="-1"]')?.addEventListener('click', () => step(1, list, i));
