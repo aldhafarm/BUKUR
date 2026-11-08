@@ -119,3 +119,26 @@ test('«لاحقاً»: مهمة بلا تاريخ في النظام نفسه، 
   assert.deepEqual([moved.start, moved.end], ['2026-11-20', '2026-11-23']);
   assert.equal(isUndated(unschedule(moved)), true);
 });
+
+import { WEEKDAY_COLS, monthCells, monthOffset, nextYearLayout, yearWeeks } from '../app/widgets/planner/plan.js';
+
+test('تخطيطات السنة الأربعة تدور: بالتاريخ ← باليوم ← أشهراً ← أسابيع', () => {
+  assert.deepEqual(['date', 'weekday', 'months', 'weeks'].map(nextYearLayout), ['weekday', 'months', 'weeks', 'date']);
+});
+
+test('المحاذاة باليوم: ١ نوفمبر ٢٠٢٦ أحد (إزاحة ٠ والأسبوع يبدأ الأحد)، و١ يناير ٢٠٢٦ خميس (إزاحة ٤)', () => {
+  assert.equal(monthOffset(2026, 10, 0), 0);
+  assert.equal(monthOffset(2026, 0, 0), 4);
+  assert.equal(monthOffset(2026, 0, 6), 5);           // الأسبوع يبدأ السبت
+  assert.ok(Math.max(...Array.from({ length: 12 }, (_, m) => monthOffset(2026, m) + new Date(2026, m + 1, 0).getDate())) <= WEEKDAY_COLS);
+  const cells = monthCells(2026, 0);
+  assert.deepEqual([cells.slice(0, 4).every((c) => c === null), cells[4], cells.length], [true, '2026-01-01', 35]);
+});
+
+test('أسابيع السنة: تبدأ بأسبوع ١ يناير وتنتهي بأسبوع ٣١ ديسمبر، وتعلّم أول كل شهر', () => {
+  const w = yearWeeks(2026);
+  assert.deepEqual([w[0].start, w[0].end, w.at(-1).start <= '2026-12-31', w.at(-1).end >= '2026-12-31'], ['2025-12-28', '2026-01-03', true, true]);
+  assert.equal(w.length, 53);
+  assert.equal(w.filter((x) => x.monthStart != null).length, 12);
+  assert.equal(w.find((x) => x.monthStart === 10).start, '2026-11-01');
+});

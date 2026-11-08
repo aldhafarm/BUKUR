@@ -232,3 +232,36 @@ export function rangeProgress(tasks, r) {
   for (const t of tasksIn(tasks, r)) { const b = barFor(t, r); w += b.span; sum += b.span * t.progress; }
   return w ? Math.round(sum / w) : null;
 }
+
+// ── تخطيطات السنة (طلب المالك): الأشهر لا تبدأ بيوم الأسبوع نفسه، فللسنة أربع طرق عرض:
+//   date: صف لكل شهر بأعمدة ١–٣١ (الأيام بالرقم، وتختلف نهايات الأشهر)
+//   weekday: صف لكل شهر محاذىً بيوم الأسبوع (عمود واحد لكل يوم أسبوع، ٣٧ عموداً)
+//   months: ١٢ تقويماً شهرياً صغيراً
+//   weeks: صف لكل أسبوع (٥٢–٥٤ أسبوعاً) × ٧ أيام
+export const YEAR_LAYOUTS = ['date', 'weekday', 'months', 'weeks'];
+export const YEAR_LAYOUT_LABEL = { date: 'بالتاريخ ١–٣١', weekday: 'محاذاة باليوم', months: 'مقسّم أشهراً', weeks: 'مقسّم أسابيع' };
+export const nextYearLayout = (l) => YEAR_LAYOUTS[(YEAR_LAYOUTS.indexOf(l) + 1) % YEAR_LAYOUTS.length];
+
+/** إزاحة أول الشهر عن بداية الأسبوع (٠ = يبدأ الشهر في أول عمود). weekStart: ٠ الأحد … ٦ السبت. */
+export const monthOffset = (y, m, weekStart = 0) => (new Date(y, m, 1).getDay() - weekStart + 7) % 7;
+
+/** أعمدة المحاذاة باليوم: أكبر إزاحة + ٣١ = ٣٧ عموداً تكفي كل الأشهر. */
+export const WEEKDAY_COLS = 37;
+
+/** أسابيع السنة: من بداية الأسبوع الذي فيه ١ يناير حتى الأسبوع الذي فيه ٣١ ديسمبر. */
+export function yearWeeks(y, weekStart = 0) {
+  let s = addDays(`${y}-01-01`, -monthOffset(y, 0, weekStart));
+  const out = [];
+  while (s <= `${y}-12-31`) {
+    const e = addDays(s, 6);
+    const firstOfMonth = Array.from({ length: 7 }, (_, i) => addDays(s, i)).find((k) => k.endsWith('-01') && k.startsWith(String(y)));
+    out.push({ start: s, end: e, n: out.length + 1, monthStart: firstOfMonth ? Number(firstOfMonth.slice(5, 7)) - 1 : null });
+    s = addDays(s, 7);
+  }
+  return out;
+}
+
+/** خلايا شهر صغير (تقويم شهري): إزاحة ثم أيام الشهر — null للخانة الفارغة. */
+export function monthCells(y, m, weekStart = 0) {
+  return [...Array(monthOffset(y, m, weekStart)).fill(null), ...Array.from({ length: daysInMonth(y, m) }, (_, i) => key(new Date(y, m, i + 1)))];
+}
