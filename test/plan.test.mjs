@@ -1,0 +1,63 @@
+// اختبارات المخطط (جانت): النطاقات وأنظمة المواسم وأشرطة المهام.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { SYSTEMS, barFor, makeTask, nextScope, periodAt, periodsBetween, rangeFor, rangeProgress, shift, tasksIn, yearRows } from '../app/widgets/planner/plan.js';
+
+test('الزر متعدد الضغطات: سنة ← موسم ← شهر ← أسبوع ← يوم ← سنة', () => {
+  const seq = []; let s = 'year';
+  for (let i = 0; i < 5; i++) { s = nextScope(s); seq.push(s); }
+  assert.deepEqual(seq, ['season', 'month', 'week', 'day', 'year']);
+});
+
+test('مواسم النجوم من خارطة النجوم: الخريف ٦ سبتمبر (٩٢ يوماً) ثم الشتاء والربيع والصيف، ٣٦٥ يوماً', () => {
+  const p = SYSTEMS.star.periods(2026);
+  assert.deepEqual(p.map((x) => [x.name, x.start, x.end]), [
+    ['الخريف', '2026-09-06', '2026-12-06'], ['الشتاء', '2026-12-07', '2027-03-07'],
+    ['الربيع', '2027-03-08', '2027-06-06'], ['الصيف', '2027-06-07', '2027-09-05'],
+  ]);
+  assert.equal(periodAt('star', '2026-11-08').name, 'الخريف');
+  assert.equal(periodAt('star', '2026-08-01').name, 'الصيف');     // يقع في سنة نجمية بدأت ٢٠٢٥
+  assert.equal(periodAt('anwa', '2026-12-20').name, 'المربعانية');
+  assert.equal(periodAt('astro', '2026-01-10').name, 'الشتاء');
+  assert.equal(periodAt('quarter', '2026-11-08').name, 'الربع الرابع');
+});
+
+test('نطاقات العرض حول ٨ نوفمبر ٢٠٢٦ (أحد)', () => {
+  assert.deepEqual(rangeFor('year', '2026-11-08'), { start: '2026-01-01', end: '2026-12-31', label: '2026' });
+  assert.equal(rangeFor('month', '2026-11-08').end, '2026-11-30');
+  assert.deepEqual([rangeFor('week', '2026-11-11').start, rangeFor('week', '2026-11-11').end], ['2026-11-08', '2026-11-14']);
+  assert.equal(rangeFor('season', '2026-11-08', 'astro').label, 'الخريف');
+  assert.equal(rangeFor('season', '2026-11-08', 'star').start, '2026-09-06');
+});
+
+test('التنقل بنطاق كامل: الشهر التالي، والموسم السابق، وعبور السنة', () => {
+  assert.equal(shift('month', '2026-12-15', 1), '2027-01-01');
+  assert.equal(shift('week', '2026-11-08', -1), '2026-11-01');
+  assert.equal(shift('season', '2026-11-08', -1, 'star'), '2026-09-05');   // آخر يوم من الصيف السابق
+  assert.equal(periodAt('star', shift('season', '2026-11-08', 1, 'star')).name, 'الشتاء');
+});
+
+test('شريط المهمة داخل النطاق يُقصّ عند الحدود، والسنة تقسّم المهمة على أشهرها', () => {
+  const t = makeTask({ name: ' تحليل البيانات ', start: '2026-11-25', end: '2026-12-10', progress: 40 }, 'a');
+  assert.equal(t.name, 'تحليل البيانات');
+  assert.deepEqual(barFor(t, rangeFor('month', '2026-11-08')), { col: 24, span: 6, clipStart: false, clipEnd: true, fill: 1 }); // ٦٫٤ من ١٦ يوماً منجزة تغطي أيام نوفمبر الستة
+  assert.equal(barFor(t, rangeFor('month', '2026-10-08')), null);
+  const rows = yearRows([t], 2026);
+  assert.deepEqual([rows[10].bars[0].col, rows[10].bars[0].span, rows[11].bars[0].col, rows[11].bars[0].span], [24, 6, 0, 10]);
+});
+
+test('مهمة بتاريخين معكوسين تُصحَّح، والنسبة بين ٠ و١٠٠، وإنجاز النطاق موزون بالأيام', () => {
+  assert.deepEqual([makeTask({ start: '2026-02-10', end: '2026-02-01', progress: 140 }, 'b').start, makeTask({ progress: -3 }, 'c').progress], ['2026-02-01', 0]);
+  const tasks = [makeTask({ start: '2026-11-01', end: '2026-11-10', progress: 100 }, 'x'), makeTask({ start: '2026-11-11', end: '2026-11-30', progress: 25 }, 'y')];
+  assert.equal(rangeProgress(tasks, rangeFor('month', '2026-11-08')), 50);   // (١٠×١٠٠ + ٢٠×٢٥) ÷ ٣٠
+  assert.equal(rangeProgress(tasks, rangeFor('month', '2026-12-08')), null);
+  assert.deepEqual(tasksIn(tasks, rangeFor('week', '2026-11-08')).map((t) => t.id), ['x', 'y']);
+  assert.ok(periodsBetween('quarter', '2026-11-01', '2027-01-10').length === 2);
+});
+
+test('الممتلئ يتبع خط زمن المهمة: مهمة ٢٠ يوماً منجزة ٥٠٪ تملأ أيامها العشرة الأولى فقط', () => {
+  const t = makeTask({ start: '2026-11-21', end: '2026-12-10', progress: 50 }, 'f');   // ١٠ أيام في نوفمبر و١٠ في ديسمبر
+  assert.equal(barFor(t, rangeFor('month', '2026-11-08')).fill, 1);      // نوفمبر: كله منجز
+  assert.equal(barFor(t, rangeFor('month', '2026-12-08')).fill, 0);      // ديسمبر: لم يُنجز منه شيء
+  assert.equal(barFor(makeTask({ start: '2026-11-21', end: '2026-12-10', progress: 75 }, 'g'), rangeFor('month', '2026-12-08')).fill, 0.5);
+});

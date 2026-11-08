@@ -5,6 +5,7 @@ import { icon, setIconBtn } from '../../icons.js';
 import { SEGS, labelsMarkup, pt, segmentsMarkup, ticksMarkup } from './dial.js';
 import { chime, softCue, tick, unlockAudio } from './sound.js';
 import { ROW, TEMPLATE } from './view.js';
+import { sendTimer } from '../../bridge.js';
 import {
   PHASE_LABEL, advance, autoUnit, catchUp, configFor, customWith, dayStats,
   formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, logMinutes, pause, phaseMs, remaining, reset,
@@ -359,6 +360,19 @@ export default {
     // ما انتهى والصفحة مغلقة: يُسجَّل الآن بصمت (والسلسلة تكمل من لحظة الانتهاء)
     settle(Date.now(), false);
 
+    // رقم ولون فوق أيقونة الإضافة: نرسل الحالة عند كل تغيّر (الإضافة تكمل العدّ وحدها)
+    function syncBadge() {
+      const s = store.get();
+      if (s.kind === 'up') {
+        const w = sw();
+        sendTimer({ kind: 'up', status: w.status, startedAt: w.startedAt, elapsedMs: w.elapsedMs });
+      } else {
+        const t = timer();
+        sendTimer({ kind: 'down', status: t.status, phase: t.phase, endsAt: t.endsAt, remainingMs: t.remainingMs, phaseMs: phaseMs(t.phase, cfg()) });
+      }
+    }
+    const unBadge = store.subscribe(syncBadge);
+    syncBadge();
     const unsubscribe = store.subscribe(render);
     const offResize = ctx.onResize(applySize);
     applySize(ctx.size);
@@ -374,6 +388,7 @@ export default {
     return () => {
       clearInterval(interval);
       unsubscribe();
+      unBadge();
       offResize();
       el.innerHTML = '';
     };
