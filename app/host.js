@@ -125,7 +125,8 @@ board.addEventListener('pointerdown', (e) => {
 });
 board.addEventListener('dragstart', (e) => {
   const card = e.target.closest('.card');
-  if (!card?.draggable) return e.preventDefault();
+  if (e.target !== card) return; // سحب داخل الودجة (مثل مهمة إلى يوم في المخطط) — ليس نقل بطاقة
+  if (!card.draggable) return e.preventDefault();
   dragId = card.dataset.id;
   card.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';

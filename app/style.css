@@ -505,3 +505,15 @@ button { font: inherit; cursor: pointer; }
 .pl-wdays button { padding: 2px 8px; min-height: 26px; border: 1px solid var(--beige-300); border-radius: 99px; background: #fff; font: inherit; font-size: 11px; cursor: pointer; }
 .pl-wdays button[aria-pressed="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }
 .pl-btn[aria-expanded="true"] { background: var(--green-800); color: var(--beige-50); border-color: var(--green-800); }
+
+/* ── المخطط: «لاحقاً» (بلا موعد) والسحب إلى يوم */
+.pl-later { border: 1px dashed var(--beige-300); border-radius: 10px; background: #fff; padding: 4px 8px; }
+.pl-later summary { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--green-800); }
+.pl-later summary .ic { font-size: 18px; }
+.pl-later summary em { font-style: normal; font-size: 11px; background: var(--beige-100); border-radius: 99px; padding: 0 7px; }
+.pl-later summary small { font-weight: 400; font-size: 11px; color: var(--muted); }
+.pl-later-list { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0 2px; }
+.pl-later-list > small { color: var(--muted); font-size: 11px; }
+.pl-later-btn { background: var(--beige-100) !important; color: var(--green-800) !important; }
+[draggable="true"] { cursor: grab; }
+.pl-drop { outline: 2px dashed var(--orange) !important; outline-offset: -2px; background: #fff3e6 !important; }

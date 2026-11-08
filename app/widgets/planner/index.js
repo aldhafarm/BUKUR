@@ -1,10 +1,10 @@
 // «المخطط» (جانت) — طلب المالك: منظومة تخطيط تعرض المهام ونسب إنجازها داخل أي تقسيم للتقويم.
 // زر واحد متعدد الضغطات يدور: سنة (شبكة ١٢ شهراً × ٣١ يوماً) ← موسم ← شهر ← أسبوع ← يوم.
 // أنظمة المواسم كلها متاحة بزر ثانٍ: مواسم النجوم · الطوالع · الفصول الفلكية · أرباع السنة.
-// المرحلة الأولى: مهام بمدة وتصنيف ونسبة إنجاز، وفرز بالتصنيف (كـ AnuCal)؛ والخطط والأهداف (عشرية ← سنوية ← يومية) لاحقاً فوقها.
+// المرحلة الأولى: مهام بمدة وتصنيف ونسبة إنجاز، وفرز بالتصنيف (كـ AnuCal)، و«لاحقاً» للمهام بلا موعد تُسحب إلى يوم؛ والخطط والأهداف (عشرية ← سنوية ← يومية) لاحقاً فوقها.
 import { icon, tip } from '../../icons.js';
 import {
-  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW,
+  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule,
   periodAt, rangeFor, rangeProgress, shift, tasksIn, yearRows,
 } from './plan.js';
 
@@ -15,7 +15,7 @@ const NARROW = typeof matchMedia === 'function' ? matchMedia('(max-width: 520px)
 const DOW1 = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']; // حرف اليوم داخل خانة السنة (كـ AnuCal)
 
 /** شريط مهمة: لونها، والجزء المنجز ممتلئ من بدايتها (اليمين). */
-const bar = (t, b, extra = '') => `<button type="button" class="pl-task${b.clipStart ? ' cut-s' : ''}${b.clipEnd ? ' cut-e' : ''}" data-task="${esc(t.id)}"
+const bar = (t, b, extra = '') => `<button type="button" draggable="true" class="pl-task${b.clipStart ? ' cut-s' : ''}${b.clipEnd ? ' cut-e' : ''}" data-task="${esc(t.id)}"
   style="grid-column:${b.col + 1} / span ${b.span};--c:${colorOf(t)};--p:${Math.round(b.fill * 100)}%;${extra}" ${tip(`${t.name} · ${t.progress}٪ · ${t.start} ← ${t.end}`)}>
   <span>${b.span > 2 ? esc(t.name) : ''}</span></button>`;
 
@@ -43,7 +43,7 @@ export default {
           const k = key(d);
           const p = periodAt(s.system, k);
           const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''; // عطلة نهاية الأسبوع بحسب إعداد المستخدم
-          return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}" ${tip(`${i + 1} ${row.name}${p ? ` · ${p.name}` : ''}`)}><b>${i + 1}</b><s>${DOW1[d.getDay()]}</s></i>`;
+          return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}" data-day="${k}" ${tip(`${i + 1} ${row.name}${p ? ` · ${p.name}` : ''}`)}><b>${i + 1}</b><s>${DOW1[d.getDay()]}</s></i>`;
         }).join('');
         const lanes = row.bars.map((b, i) => bar(b.t, b, `grid-row:${i + 2}`)).join('');
         return `<div class="pl-yrow"><b>${row.name.slice(0, 3)}</b><div class="pl-ydays">${cells}${lanes}</div></div>`;
@@ -71,11 +71,11 @@ export default {
         const d = parse(addDays(r.start, i));
         const lab = step === 1 ? d.getDate() : (i % step === 0 ? `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}` : '');
         const minor = step === 1 && d.getDate() !== 1 && d.getDate() % 5 !== 0 ? ' pl-minor' : ''; // يُخفى في العرض الضيق
-        return `<i class="${addDays(r.start, i) === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-fri' : ''}${minor}">${lab}</i>`;
+        return `<i data-day="${addDays(r.start, i)}" class="${addDays(r.start, i) === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-fri' : ''}${minor}">${lab}</i>`;
       }).join('');
       const bands = Array.from({ length: n }, (_, i) => `<i style="--s:${periodAt(s.system, addDays(r.start, i))?.color ?? 'transparent'}"></i>`).join('');
       const list = tasksIn(s.tasks, r);
-      const rows = list.map((t) => `<div class="pl-grow"><b ${tip(t.name)}>${esc(t.name)}</b><div class="pl-cells" style="--n:${n}">${bar(t, barFor(t, r))}</div></div>`).join('');
+      const rows = list.map((t) => `<div class="pl-grow"><b ${tip(t.name)}>${esc(t.name)}</b><div class="pl-cells" data-start="${r.start}" style="--n:${n}">${bar(t, barFor(t, r))}</div></div>`).join('');
       return `<div class="pl-gantt" style="--n:${n}">
         <div class="pl-grow pl-ghead"><b></b><div class="pl-cells pl-band" style="--n:${n}">${bands}</div></div>
         <div class="pl-grow pl-ghead"><b></b><div class="pl-cells pl-days" style="--n:${n}">${head}</div></div>
@@ -97,9 +97,9 @@ export default {
         const k = addDays(r.start, i);
         const d = parse(k);
         const list = tasksIn(s.tasks, { start: k, end: k });
-        return `<li class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}">
+        return `<li data-day="${k}" class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}">
           <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span></b>
-          ${list.map((t) => `<button type="button" class="pl-chipt" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%" ${tip(`${t.name} · ${t.progress}٪`)}>${esc(t.name)}<em>${t.progress}٪</em></button>`).join('') || '<small>—</small>'}
+          ${list.map((t) => `<button type="button" draggable="true" class="pl-chipt" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%" ${tip(`${t.name} · ${t.progress}٪`)}>${esc(t.name)}<em>${t.progress}٪</em></button>`).join('') || '<small>—</small>'}
         </li>`;
       }).join('')}</ol>`;
     }
@@ -115,6 +115,15 @@ export default {
             <b>${esc(t.name)}</b><small>${t.start} ← ${t.end}</small><span class="pl-meter"><i></i></span><em>${t.progress}٪</em></button></li>`).join('')}</ul>` : '<p class="pl-empty">لا مهام.</p>'}
         </section>`;
       }).join('');
+    }
+
+    // «لاحقاً»: المهام بلا موعد — النظام نفسه، فئة خاصة. تُسحب إلى يوم (أو تُفتح وتُعطى تاريخاً)، ويُسحب إليها لإلغاء الموعد.
+    function laterBox(s) {
+      const list = undatedTasks(s.tasks);
+      return `<details class="pl-later" data-drop-later ${list.length ? 'open' : ''}>
+        <summary>${icon('inbox')} لاحقاً <em>${list.length}</em> <small>بلا موعد — اسحب المهمة إلى يوم لجدولتها</small></summary>
+        <div class="pl-later-list">${list.map((t) => `<button type="button" draggable="true" class="pl-chipt" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%" ${tip(`${t.name} · ${t.progress}٪ — اسحبها إلى يوم أو اضغطها لتحديد موعد`)}>${esc(t.name)}${t.progress ? `<em>${t.progress}٪</em>` : ''}</button>`).join('') || '<small>فارغ — أضف مهمة بلا تاريخ بزر «لاحقاً».</small>'}</div>
+      </details>`;
     }
 
     // ⚙ الإعدادات: أيام عطلة نهاية الأسبوع الرسمية (تختلف بين البلدان)
@@ -135,11 +144,12 @@ export default {
       if (!t) return '';
       return `<form class="pl-edit" data-edit="${esc(t.id)}">
         <input name="name" value="${esc(t.name)}" maxlength="60" aria-label="اسم المهمة">
-        <label>${icon('date_range')}<input type="date" name="start" value="${t.start}" aria-label="البداية"><input type="date" name="end" value="${t.end}" aria-label="النهاية"></label>
+        <label>${icon('date_range')}<input type="date" name="start" value="${t.start ?? ''}" aria-label="البداية"><input type="date" name="end" value="${t.end ?? ''}" aria-label="النهاية"></label>
         <label class="pl-prog">${icon('check')}<input type="range" name="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="نسبة الإنجاز"><output>${t.progress}٪</output></label>
         <div class="pl-colors" role="radiogroup" aria-label="التصنيف">${CATEGORIES.map((c) => `<label ${tip(c.label)}><input type="radio" name="category" value="${c.id}" ${c.id === t.category ? 'checked' : ''}><i style="background:${c.color}"></i></label>`).join('')}</div>
         <div class="pl-row">
           <button type="submit" ${tip('حفظ')}>${icon('check')}</button>
+          ${t.start ? `<button type="button" data-act="unschedule" ${tip('أعدها إلى «لاحقاً» (بلا موعد)')}>${icon('move_to_inbox')}</button>` : ''}
           <button type="button" data-act="del" ${tip('حذف المهمة')}>${icon('delete')}</button>
           <button type="button" data-act="close" ${tip('إغلاق')}>${icon('close')}</button>
         </div>
@@ -174,13 +184,15 @@ export default {
         ${settings(s)}
         ${catsBar({ ...s, tasks: all.tasks }, r)}
         <div class="pl-body">${body}</div>
+        ${laterBox(s)}
         ${editor(all)}
         <form class="pl-add" data-size="m l">
           <input name="name" maxlength="60" placeholder="مهمة جديدة…" aria-label="اسم المهمة" required>
           <input type="date" name="start" value="${t0}" aria-label="البداية">
           <input type="date" name="end" value="${addDays(t0, 6)}" aria-label="النهاية">
           <select name="category" aria-label="التصنيف">${CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === all.lastCat ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
-          <button type="submit" ${tip('أضف المهمة')}>${icon('add')}</button>
+          <button type="submit" name="when" value="dated" ${tip('أضف المهمة بتاريخيها')}>${icon('add')}</button>
+          <button type="submit" name="when" value="later" class="pl-later-btn" ${tip('أضفها إلى «لاحقاً» بلا موعد')}>${icon('inbox')}</button>
         </form>
       </div>`;
       for (const n of el.querySelectorAll('[data-size]')) n.hidden = !n.dataset.size.split(' ').includes(ctx.size);
@@ -212,6 +224,7 @@ export default {
       if (act === 'today') store.set({ anchor: null });
       if (act === 'cats-all') store.set({ hidden: (s.hidden ?? []).length ? [] : CATEGORIES.map((c) => c.id) });
       if (act === 'close') { editing = null; render(); }
+      if (act === 'unschedule') { store.set({ tasks: s.tasks.map((t) => (t.id === editing ? unschedule(t) : t)) }); editing = null; render(); }
       if (act === 'del' && confirm('حذف المهمة؟')) { store.set({ tasks: s.tasks.filter((t) => t.id !== editing) }); editing = null; render(); }
     });
     el.addEventListener('change', (e) => {
@@ -225,7 +238,8 @@ export default {
       const f = Object.fromEntries(new FormData(e.target));
       const s = store.get();
       if (e.target.matches('.pl-add')) {
-        store.set({ tasks: [...s.tasks, makeTask({ ...f, progress: 0 }, uid())], lastCat: f.category,
+        const later = e.submitter?.value === 'later';
+        store.set({ tasks: [...s.tasks, makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid())], lastCat: f.category,
           hidden: (s.hidden ?? []).filter((x) => x !== f.category) }); // التصنيف المضاف إليه يظهر
       } else if (e.target.dataset.edit) {
         const id = e.target.dataset.edit;
@@ -234,6 +248,44 @@ export default {
         render();
       }
     });
+
+    // ── السحب والإفلات: مهمة إلى يوم (جدولة أو نقل بمدتها)، أو إلى «لاحقاً» (إلغاء الموعد)
+    let dragId = null;
+    const dayAt = (e) => {
+      const d = e.target.closest('[data-day]');
+      if (d) return d.dataset.day;
+      const row = e.target.closest('.pl-cells[data-start]'); // صف جانت: اليوم من موضع المؤشر (الزمن من اليمين)
+      if (!row) return null;
+      const rc = row.getBoundingClientRect();
+      const n = Number(getComputedStyle(row).getPropertyValue('--n')) || 1;
+      const i = Math.min(n - 1, Math.max(0, Math.floor(((rc.right - e.clientX) / rc.width) * n)));
+      return addDays(row.dataset.start, i);
+    };
+    el.addEventListener('dragstart', (e) => {
+      const t = e.target.closest('[data-task][draggable]');
+      if (!t) return;
+      dragId = t.dataset.task;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragId);
+    });
+    el.addEventListener('dragover', (e) => {
+      if (!dragId) return;
+      const ok = dayAt(e) || e.target.closest('[data-drop-later]');
+      if (!ok) return;
+      e.preventDefault();
+      for (const x of el.querySelectorAll('.pl-drop')) x.classList.remove('pl-drop');
+      (e.target.closest('[data-day], .pl-cells[data-start], [data-drop-later]'))?.classList.add('pl-drop');
+    });
+    el.addEventListener('drop', (e) => {
+      if (!dragId) return;
+      e.preventDefault();
+      const day = dayAt(e);
+      const toLater = !day && e.target.closest('[data-drop-later]');
+      const s = store.get();
+      if (day || toLater) store.set({ tasks: s.tasks.map((t) => (t.id === dragId ? (day ? scheduleOn(t, day) : unschedule(t)) : t)) });
+      dragId = null;
+    });
+    el.addEventListener('dragend', () => { dragId = null; for (const x of el.querySelectorAll('.pl-drop')) x.classList.remove('pl-drop'); });
 
     const unsub = store.subscribe(render);
     const off = ctx.onResize(render);
