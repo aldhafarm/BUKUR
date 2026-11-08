@@ -6,5 +6,6 @@ import proClock from './pro-clock/index.js';
 import starWheel from './star-wheel/index.js';
 import quotes from './quotes/index.js';
 import vocab from './vocab/index.js';
+import habits from './habits/index.js';
 
-export const WIDGETS = [clock, proClock, focusTimer, quotes, vocab, starWheel, notes];
+export const WIDGETS = [clock, proClock, focusTimer, habits, quotes, vocab, starWheel, notes];
