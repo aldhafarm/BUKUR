@@ -22,10 +22,10 @@ export const bezelForTime = (h, m) => wrap(hourDegrees(h, m) - 7.5, 360);
 
 /** الحالة بحسب ساعات اليقظة. level يُستعمل للون. */
 export function awakeStatus(hours) {
-  if (hours < 12) return { level: 'fresh', label: 'نشيط', emoji: '😊' };
-  if (hours < 16) return { level: 'active', label: 'فعّال', emoji: '😐' };
-  if (hours < 20) return { level: 'tired', label: 'متعب', emoji: '😴' };
-  return { level: 'sleep', label: 'نَم!', emoji: '🛏️' };
+  if (hours < 12) return { level: 'fresh', label: 'نشيط', icon: 'sentiment_satisfied' };
+  if (hours < 16) return { level: 'active', label: 'فعّال', icon: 'sentiment_neutral' };
+  if (hours < 20) return { level: 'tired', label: 'متعب', icon: 'sentiment_dissatisfied' };
+  return { level: 'sleep', label: 'نَم!', icon: 'bedtime' };
 }
 
 const pad = (n) => String(n).padStart(2, '0');

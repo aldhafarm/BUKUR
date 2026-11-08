@@ -140,13 +140,14 @@ for (const h of document.querySelectorAll('.sub4 .tiny')) h.classList.add('cx-hi
 // ── الأنماط
 const st = document.createElement('style');
 st.textContent = `
-.ic{width:1.15em;height:1.15em;fill:currentColor;display:block;flex:none}
+.ic{font-size:1.2em;display:block}
+.plans summary .ic,#starF .ic,.mk.ic{display:inline-block;vertical-align:middle}
 .cx-ib{display:inline-flex!important;align-items:center;justify-content:center;gap:4px}
 .cx-s{font-size:.8em;font-weight:600}
 .cx-hide{display:none!important}
 .chk,.inl,.flstat{font-family:var(--f-ar);letter-spacing:0}
 .cx-row{display:inline-grid;place-items:center;padding-top:6px;color:var(--accent)}
-.cx-row .ic{width:20px;height:20px}
+.cx-row .ic{font-size:20px}
 .strow{grid-template-columns:32px minmax(0,1fr)!important}
 @media (max-width:520px){.strow{grid-template-columns:28px minmax(0,1fr)!important}}
 .seg button{min-width:38px}

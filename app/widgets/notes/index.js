@@ -73,9 +73,9 @@ export default {
                   </div>` : ''}`;
               })()}
             </li>`).join('')}</ul>`
-          : `<p class="nt-sub">${cards.length ? 'لا مراجعة اليوم ✓' : 'لا بطاقات بعد. اكتب في «ملاحظة» ثم «أضف السطر للاستذكار».'}</p>`}
+          : `<p class="nt-sub">${cards.length ? `${icon('check')} لا مراجعة اليوم` : 'لا بطاقات بعد. اكتب في «ملاحظة» ثم «أضف السطر للاستذكار».'}</p>`}
         ${upcoming.length ? `<details class="nt-next" data-size="m l"><summary>القادمة (${upcoming.length})</summary>
-          <ul>${upcoming.map((c) => `<li data-id="${esc(c.id)}"><span>${esc(facesOf(c).front)}</span><small>${esc(whenLabel(c, today))} · صندوق ${c.box + 1}</small><button type="button" data-del aria-label="حذف">×</button></li>`).join('')}</ul></details>` : ''}
+          <ul>${upcoming.map((c) => `<li data-id="${esc(c.id)}"><span>${esc(facesOf(c).front)}</span><small>${esc(whenLabel(c, today))} · صندوق ${c.box + 1}</small><button type="button" data-del ${tip('حذف')}>${icon('close')}</button></li>`).join('')}</ul></details>` : ''}
 `;
       applySize(ctx.size);
     }
@@ -118,7 +118,7 @@ export default {
         shown.delete(id);
         const next = cards.map((c) => (c.id === id ? review(c, ok, new Date()) : c));
         const c = next.find((x) => x.id === id);
-        toast = ok ? `✓ المراجعة القادمة ${whenLabel(c, new Date())}` : '↺ تعود غداً من البداية';
+        toast = ok ? `المراجعة القادمة ${whenLabel(c, new Date())}` : 'تعود غداً من البداية';
         save({ cards: next });
         return;
       }
