@@ -66,6 +66,9 @@ button { font: inherit; cursor: pointer; }
   .card[data-width="2"] { grid-column: span 2; }
   .card[data-width="3"] { grid-column: 1 / -1; }
   .card .card-head [data-act="width"] { display: inline-grid; }
+  /* المحتوى يكبر مع العرض (الودجات الأصلية فقط؛ الصفحات المضمّنة تتكيّف بنفسها مع عرضها) */
+  .card[data-width="2"] .card-body:not(:has(.em)) { zoom: 1.2; }
+  .card[data-width="3"] .card-body:not(:has(.em)) { zoom: 1.35; }
 }
 
 /* ── التلميح: اسم الزر يظهر فوقه عند مرور الفأرة أو التركيز */
@@ -300,7 +303,7 @@ button { font: inherit; cursor: pointer; }
 .nt-next li button { grid-row: 1 / span 2; grid-column: 2; border: 0; background: none; color: var(--muted); font-size: 16px; }
 
 /* ── متتبع العادات */
-.hb { padding: 8px 10px 12px; display: grid; gap: 8px; }
+.hb { padding: 8px 10px 12px; display: grid; gap: 8px; max-width: 760px; margin-inline: auto; }
 .hb-head { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .hb-head button { border: 1px solid var(--beige-300); background: #fff; border-radius: 6px; min-width: 30px; min-height: 28px; color: var(--ink); }
 .hb-head .hb-today { font-size: 11px; padding: 0 8px; }
