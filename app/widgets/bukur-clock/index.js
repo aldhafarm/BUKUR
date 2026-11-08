@@ -39,7 +39,7 @@ const TEMPLATE = `
     <div class="bk-chips" data-size="m l">
       <div class="bk-chip" ${tip('وقت الاستيقاظ')}>${icon('alarm')}<b data-ref="wake"></b></div>
       <div class="bk-chip" ${tip('مدة اليقظة')}>${icon('schedule')}<b data-ref="awake"></b></div>
-      <div class="bk-chip" ${tip('الحالة')}>${icon('info')}<b data-ref="status"></b></div>
+      <div class="bk-chip" ${tip('الحالة')}><b data-ref="status" class="bk-status"></b></div>
     </div>
     <div class="bk-bar" data-size="m l"><div data-ref="bar"></div></div>
     <svg class="bk-dial" viewBox="0 0 400 400" role="img" aria-label="قرص البكور — اسحب الإطار لتحديد وقت الاستيقاظ" data-ref="dial"></svg>
@@ -94,7 +94,7 @@ export default {
       ref('sec').textContent = `:${pad(now.getSeconds())}`;
       ref('wake').textContent = formatHM(wakeHourFromBezel(s.bezelRotation));
       ref('awake').textContent = formatDuration(awake);
-      ref('status').textContent = `${status.emoji} ${status.label}`;
+      if (ref('status').dataset.k !== status.level) { ref('status').dataset.k = status.level; ref('status').innerHTML = `${icon(status.icon)}<span>${status.label}</span>`; }
       el.querySelector('.bk-clock').dataset.level = status.level;
       ref('bar').style.width = `${Math.min((awake / 24) * 100, 100)}%`;
       dial.innerHTML = dialMarkup(now, s, awake);

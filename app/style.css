@@ -45,7 +45,7 @@ button { font: inherit; cursor: pointer; }
   min-height: 34px; padding: 4px 10px; border: 1px solid var(--green-600); border-radius: 8px;
   background: var(--green-700); color: var(--beige-50); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
 }
-.top-actions .ic { width: 20px; height: 20px; }
+.top-actions .ic { font-size: 20px; }
 .top-actions button[aria-expanded="true"] { background: var(--orange); border-color: var(--orange); }
 
 /* ── «أدواتي» */
@@ -95,7 +95,7 @@ button { font: inherit; cursor: pointer; }
   .card-head { padding: 3px 4px; gap: 2px; }
   .card-head h2 { font-size: 13px; }
   .card-head .handle, .card-head .icon { min-width: 26px; min-height: 26px; }
-  .card-head .ic { width: 18px; height: 18px; }
+  .card-head .ic { font-size: 18px; }
 }
 .empty { text-align: center; color: var(--muted); padding: 24px; }
 
@@ -109,10 +109,10 @@ button { font: inherit; cursor: pointer; }
   display: inline-grid; place-items: center; min-width: 30px; min-height: 30px; padding: 0; border: 0; border-radius: 6px;
   background: transparent; color: var(--muted); cursor: pointer;
 }
-.card-head .ic { width: 20px; height: 20px; }
+.card-head .ic { font-size: 20px; }
 .card-head .handle { cursor: grab; }
 .card-head .icon[data-act="size"] { grid-auto-flow: column; gap: 2px; padding: 0 6px; font: inherit; font-size: 11px; font-weight: 600; }
-.card-head .icon[data-act="size"] .ic { width: 16px; height: 16px; }
+.card-head .icon[data-act="size"] .ic { font-size: 16px; }
 .card-head [data-act="width"] { display: none; } /* العرض يهمّ في الشبكة فقط (التبويب الكامل) */
 .card-head .handle:hover, .card-head .icon:hover { background: var(--beige-100); color: var(--ink); }
 .card.collapsed .card-body { display: none; }
@@ -120,7 +120,7 @@ button { font: inherit; cursor: pointer; }
 .card.collapsed [data-act="collapse"] .ic { transform: rotate(90deg); }
 .card-body { padding: 0; }
 [hidden] { display: none !important; }
-.ic { display: block; fill: currentColor; flex: none; }
+.ic { display: block; } /* الخط والمحاور في icons.js */
 
 /* ── ودجة الساعة: جسم داكن بهوية خضراء، والقرص كما في الأصل */
 .bk-clock {
@@ -201,7 +201,7 @@ button { font: inherit; cursor: pointer; }
 .em-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; font-size: 12px; border-bottom: 1px solid var(--beige-300); }
 .em-note { color: var(--muted); }
 .em-open { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; color: var(--green-700); }
-.em-open .ic { width: 18px; height: 18px; }
+.em-open .ic { font-size: 18px; }
 .em-open:hover { background: var(--beige-100); }
 .em-bar [data-tip]:hover::after { bottom: auto; top: calc(100% + 6px); left: 0; transform: none; }
 .em-box { overflow: hidden; direction: ltr; } /* الإطار يُصغَّر من زاويته العليا اليسرى */
@@ -337,18 +337,20 @@ button { font: inherit; cursor: pointer; }
 
 /* ── «أقل نص»: أزرار أيقونات داخل الودجات (Material Symbols) */
 .bk-chip { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; }
-.bk-chip .ic { width: 16px; height: 16px; color: #a9bcae; }
+.bk-chip .ic { font-size: 16px; color: #a9bcae; }
 .bk-btn, .ft-btn, .ft-chip, .ft-modes button, .qt-nav button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
-.bk-btn .ic, .ft-btn .ic { width: 22px; height: 22px; }
+.bk-btn .ic, .ft-btn .ic { font-size: 22px; }
 .bk-btn.bk-primary { min-width: 64px; }
 .ft-btn.ft-primary { min-width: 72px; }
-.ft-chip .ic, .ft-modes .ic, .qt-nav .ic { width: 18px; height: 18px; }
+.ft-chip .ic, .ft-modes .ic, .qt-nav .ic { font-size: 18px; }
 .ft-chip { min-width: 36px; font-weight: 600; }
-.bk-daily > span[data-tip] .ic { width: 18px; height: 18px; }
+.bk-daily > span[data-tip] .ic { font-size: 18px; }
 .ft-stats > div { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; }
-.ft-stats .ic { width: 16px; height: 16px; color: var(--muted); }
+.ft-stats .ic { font-size: 16px; color: var(--muted); }
 .nt-tabs button, .nt-switch, .nt-add button, .nt-acts button, .nt-show, .hb-expand, .hb-add button { display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
-.nt-tabs .ic, .nt-switch .ic, .nt-add .ic, .nt-show .ic { width: 18px; height: 18px; }
-.nt-acts .ic, .hb-add .ic { width: 20px; height: 20px; }
-.hb-expand .ic { width: 18px; height: 18px; }
+.nt-tabs .ic, .nt-switch .ic, .nt-add .ic, .nt-show .ic { font-size: 18px; }
+.nt-acts .ic, .hb-add .ic { font-size: 20px; }
+.hb-expand .ic { font-size: 18px; }
 .nt-due:not(:empty) { font-size: 11px; font-weight: 700; }
+.bk-chip b.bk-status { display: inline-flex; align-items: center; gap: 4px; direction: rtl; }
+.bk-status .ic { font-size: 16px; }

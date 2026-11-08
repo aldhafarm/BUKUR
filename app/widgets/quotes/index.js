@@ -34,7 +34,7 @@ function citation(src) {
 function cover(w) {
   const pic = w.image
     ? `<img src="${esc(w.image.thumb)}" alt="${esc(w.title)}" loading="lazy" referrerpolicy="no-referrer">`
-    : '<span class="qt-book-ph" aria-hidden="true">📖</span>';
+    : `<span class="qt-book-ph" aria-hidden="true">${icon('menu_book')}</span>`;
   return `<a class="qt-book" href="${esc(w.image?.page ?? w.url)}" target="_blank" rel="noopener" title="${esc(w.title)}">${pic}<span>${esc(w.title)}</span></a>`;
 }
 function booksMarkup(works, open) {
@@ -43,7 +43,7 @@ function booksMarkup(works, open) {
   const list = open ? works : [first];
   return `<div class="qt-books" data-open="${open}">
       <div class="qt-shelf">${list.map(cover).join('')}</div>
-      ${works.length > 1 ? `<button type="button" class="qt-more" data-books>${open ? 'إخفاء ▴' : `كتبه (${works.length}) ▾`}</button>` : ''}
+      ${works.length > 1 ? `<button type="button" class="qt-more" data-books>${open ? `${icon('keyboard_arrow_up')}إخفاء` : `${icon('menu_book')}كتبه (${works.length})`}</button>` : ''}
       <small class="qt-books-note">من ويكي داتا · الصور من كومنز وقد تكون مخطوطة أو طبعة قديمة لا غلافاً حديثاً</small>
     </div>`;
 }
@@ -135,9 +135,9 @@ export default {
         ${w?.extract ? `<p class="qt-wiki" data-size="l">${esc(w.extract)}<br><small>من <a href="${esc(w.wikipediaUrl)}" target="_blank" rel="noopener">ويكيبيديا</a> · <a href="${esc(w.wikidataUrl)}" target="_blank" rel="noopener">ويكي داتا</a> (معلومات عامة، غير موثّقة كالأقوال)</small></p>` : ''}
         ${a.bioSummary ? `<p class="qt-bio" data-size="l">${esc(a.bioSummary)}<br><small>المصدر: ${citation(a.bioSource)}</small></p>` : ''}
         <div class="qt-nav" data-size="m l">
-          <button type="button" data-step="1" aria-label="السابق">→</button>
+          <button type="button" data-step="1" ${tip('السابق')}>${icon('arrow_forward')}</button>
           <button type="button" data-today ${tip('قول اليوم')}>${icon('today')}</button>
-          <button type="button" data-step="-1" aria-label="التالي">←</button>
+          <button type="button" data-step="-1" ${tip('التالي')}>${icon('arrow_back')}</button>
         </div>
         <div class="qt-chips" data-size="l">${alam.map((x) => `<button type="button" data-alam="${esc(x.id)}" aria-pressed="${x.id === a.id}" ${x.quotes?.length ? '' : 'data-empty'}>${esc(x.name)}</button>`).join('')}</div>`;
       const img = root.querySelector('.qt-img');

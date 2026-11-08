@@ -14,7 +14,7 @@ const DEFAULTS = {
   custom: { focusSec: 1500, breakSec: 300 },
   unit: null,         // 'minutes' | 'hours' | null = حسب المدة
   chain: false,       // السلسلة التلقائية
-  muted: false,       // 🔕 بلا نغمة تنبيه
+  muted: false,       // بلا نغمة تنبيه
   goal: 8,            // «بومودورو: ___/8» من مستند الأدوات
   timer: null,
   log: {},
@@ -168,8 +168,8 @@ export default {
       for (const e of ended) if (e.phase === 'focus') log = logFocus(log, new Date(e.endsAt), cfg().focus);
       const last = ended[ended.length - 1];
       const notice = last.phase === 'focus'
-        ? (s.chain ? 'انتهت جلسة التركيز — بدأت الراحة تلقائياً ☕' : 'انتهت جلسة التركيز — وقت الراحة ☕')
-        : (s.chain ? 'انتهت الراحة — عُد للتركيز، بدأت الجلسة التالية 🍅' : 'انتهت الراحة — جاهز لجلسة تركيز 🍅');
+        ? (s.chain ? 'انتهت جلسة التركيز — بدأت الراحة تلقائياً' : 'انتهت جلسة التركيز — وقت الراحة')
+        : (s.chain ? 'انتهت الراحة — عُد للتركيز، بدأت الجلسة التالية' : 'انتهت الراحة — جاهز لجلسة تركيز');
       store.set({ timer: state, log, notice });
       if (audible && !s.muted) chime(state.phase);
       return true;
@@ -281,7 +281,8 @@ export default {
       ref('time').hidden = showPicker;
       if (showPicker) syncWheels(t.remainingMs);
       const per = c.every || 4;
-      ref('dots').textContent = c.every ? '🍅'.repeat(t.done % per) + '○'.repeat(per - (t.done % per)) : '';
+      const dk = c.every ? `${t.done % per}/${per}` : '';
+      if (ref('dots').dataset.k !== dk) { ref('dots').dataset.k = dk; ref('dots').innerHTML = c.every ? icon('circle', 'fill').repeat(t.done % per) + icon('circle').repeat(per - (t.done % per)) : ''; }
       const tg = el.querySelector('[data-act="toggle"]');
       if (t.status === 'running') setIconBtn(tg, 'pause', 'إيقاف مؤقت');
       else setIconBtn(tg, 'play_arrow', t.status === 'paused' ? 'استئناف' : 'ابدأ');

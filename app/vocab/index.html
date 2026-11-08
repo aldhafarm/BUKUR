@@ -608,7 +608,7 @@ function render(){
   $("faceF").setAttribute("aria-hidden","false"); $("faceB").setAttribute("aria-hidden","true");
   $("en").textContent=c[0]; $("en2").textContent=c[0]; $("ar").textContent=c[1];
   $("tagF").textContent=c[2]; $("tagB").textContent=c[2];
-  $("starF").textContent=c[3]?"★ "+O:"";
+  $("starF").innerHTML=c[3]?'<span class="ic" aria-hidden="true">star</span> '+O:"";
   $("count").textContent=(i+1)+" / "+list.length;
   $("bar").style.width=((i+1)/list.length*100)+"%";
   $("prev").disabled=false;
@@ -742,9 +742,9 @@ const DEF_AR=(window.__DECK&&window.__DECK.ar)||{"Bottleneck": "فقد التن�
   function totalFor(term){let n=0;hist.forEach(h=>{if(h.t===term)n++;});return n;}
   function lineItem(line,res,extra,grp){
     const li=document.createElement("li");
-    if(res.hit){li.className="ok";li.innerHTML='<span class="mk">✓</span><span class="w"></span><span class="ar2"></span>';li.querySelector(".ar2").textContent=res.hit[1]+(extra||"");}
-    else if(res.near){li.className="near";li.innerHTML='<span class="mk">≈</span><span class="w"></span><span class="fix">Correct spelling: <span class="diff">'+diffHTML(line,res.spell)+'</span></span>';}
-    else{li.className="bad";li.innerHTML='<span class="mk">✗</span><span class="w"></span><span class="fix">Not a term in this list</span>';}
+    if(res.hit){li.className="ok";li.innerHTML='<span class="mk ic">check</span><span class="w"></span><span class="ar2"></span>';li.querySelector(".ar2").textContent=res.hit[1]+(extra||"");}
+    else if(res.near){li.className="near";li.innerHTML='<span class="mk ic">spellcheck</span><span class="w"></span><span class="fix">Correct spelling: <span class="diff">'+diffHTML(line,res.spell)+'</span></span>';}
+    else{li.className="bad";li.innerHTML='<span class="mk ic">close</span><span class="w"></span><span class="fix">Not a term in this list</span>';}
     li.querySelector(".w").textContent=line;
     if(grp&&(grp.n>1||grp.total)){
       const c=document.createElement("span");c.className="cnt";c.textContent="×"+grp.n;li.querySelector(".w").appendChild(c);
@@ -1260,7 +1260,7 @@ const DEF_AR=(window.__DECK&&window.__DECK.ar)||{"Bottleneck": "فقد التن�
     $("nPrac").textContent=Object.keys(F.prac).length; $("nMean").textContent=Object.keys(F.mean).length;
     const slow=Object.entries(SP).filter(([,r])=>r.n).map(([t,r])=>[t,r.spl/r.n,r.n]).sort((a,b)=>b[1]-a[1]).slice(0,6);
     $("slowList").innerHTML=slow.length?slow.map(([t,v,n])=>'<li><b>'+esc(t)+'</b> <span>· '+v.toFixed(2)+' s per letter · '+n+' tr'+(n>1?'ies':'y')+'</span></li>').join(""):'<li class="tiny">Type a few words to see your timing.</li>';
-    const row=(list,t)=>'<li><span class="fterm">'+esc(t)+'</span>'+(list==="prac"&&F.prac[t].clean?'<span class="tiny"> '+F.prac[t].clean+'/3 clean</span>':'')+'<button type="button" class="fx" data-l="'+list+'" data-t="'+esc(t)+'" aria-label="Remove '+esc(t)+'">×</button></li>';
+    const row=(list,t)=>'<li><span class="fterm">'+esc(t)+'</span>'+(list==="prac"&&F.prac[t].clean?'<span class="tiny"> '+F.prac[t].clean+'/3 clean</span>':'')+'<button type="button" class="fx" data-l="'+list+'" data-t="'+esc(t)+'" aria-label="Remove '+esc(t)+'"><span class="ic" aria-hidden="true">close</span></button></li>';
     $("pracList").innerHTML=Object.keys(F.prac).sort().map(t=>row("prac",t)).join("")||'<li class="tiny">Empty</li>';
     $("meanList").innerHTML=Object.keys(F.mean).sort().map(t=>row("mean",t)).join("")||'<li class="tiny">Empty</li>';
     $("pracInfo").textContent=O.autoRemove?"(a word leaves after 3 quick, clean tries)":"";
@@ -1309,7 +1309,7 @@ const DEF_AR=(window.__DECK&&window.__DECK.ar)||{"Bottleneck": "فقد التن�
   var plans=window.__PLANS||[];
   if(plans.length){
     var det=document.createElement("details"); det.className="plans";
-    var sm=document.createElement("summary"); sm.textContent="📋 خطط التعلّم ("+plans.length+")"; det.appendChild(sm);
+    var sm=document.createElement("summary"); sm.innerHTML='<span class="ic" aria-hidden="true">list_alt</span> خطط التعلّم ('+plans.length+")"; det.appendChild(sm);
     plans.forEach(function(pl){
       var h=document.createElement("h3"); h.textContent=pl.title; det.appendChild(h);
       var box=document.createElement("div"); box.className="pltab";

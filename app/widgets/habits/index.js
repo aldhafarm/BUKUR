@@ -45,9 +45,9 @@ export default {
       el.innerHTML = `
         <div class="hb">
           <div class="hb-head" ${expanded ? '' : 'hidden'}>
-            <button type="button" data-month="-1" aria-label="الشهر السابق">→</button>
+            <button type="button" data-month="-1" ${tip('الشهر السابق')}>${icon('chevron_right')}</button>
             <b>${MONTHS[view.m]} ${view.y}</b>
-            <button type="button" data-month="1" aria-label="الشهر التالي">←</button>
+            <button type="button" data-month="1" ${tip('الشهر التالي')}>${icon('chevron_left')}</button>
             ${isCurrent ? '' : '<button type="button" data-month="0" class="hb-today">هذا الشهر</button>'}
           </div>
           ${habits.length ? `
@@ -69,7 +69,7 @@ export default {
             <tfoot data-size="m l"><tr><th scope="row" class="hb-day">الشهر</th>${habits.map((h) => {
               const s = monthScore(marks, h.id, view.y, view.m, today);
               const k = streak(marks, h.id, today);
-              return `<td class="hb-score"><b>${s.pct}٪</b>${k > 1 ? `<small>🔥${k}</small>` : ''}</td>`;
+              return `<td class="hb-score"><b>${s.pct}٪</b>${k > 1 ? `<small ${tip('أيام كاملة متتالية')}>${icon('local_fire_department', 'fill')}${k}</small>` : ''}</td>`;
             }).join('')}</tr></tfoot>
           </table></div>` : '<p class="hb-empty">أضف عادة تريد الالتزام بها، ثم اضغط حلقة اليوم كلما أنجزتها.</p>'}
           ${habits.length ? `<button type="button" class="hb-expand" data-expand aria-expanded="${!!expanded}" ${tip(expanded ? 'اليوم فقط' : `الشهر كاملاً (${MONTHS[today.getMonth()]})`)}>${expanded ? `${icon('today')}` : `${icon('calendar_month')}`}</button>` : ''}
@@ -77,7 +77,7 @@ export default {
             <input name="h" maxlength="24" placeholder="عادة جديدة…" aria-label="اسم العادة" ${habits.length >= MAX_HABITS ? 'disabled' : ''}>
             <button type="submit" ${tip('أضف العادة')} ${habits.length >= MAX_HABITS ? 'disabled' : ''}>${icon('add')}</button>
           </form>
-          ${habits.length ? `<div class="hb-list" data-size="l">${habits.map((h) => `<button type="button" data-del="${esc(h.id)}">${armed === h.id ? 'اضغط مرة ثانية للحذف' : `× ${esc(h.name)}`}</button>`).join('')}</div>` : ''}
+          ${habits.length ? `<div class="hb-list" data-size="l">${habits.map((h) => `<button type="button" data-del="${esc(h.id)}">${armed === h.id ? 'اضغط مرة ثانية للحذف' : `${icon('close')}${esc(h.name)}`}</button>`).join('')}</div>` : ''}
           <p class="hb-hint" data-size="l">ضغطة: تمت · ثم ½ · ⅓ · ¼ · تُمسح</p>
         </div>`;
       for (const n of el.querySelectorAll('[data-size]')) n.hidden = !n.dataset.size.split(' ').includes(ctx.size);
