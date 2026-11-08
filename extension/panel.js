@@ -3,23 +3,30 @@ const APP_URL = 'https://bukur.mind8x.com/app/';
 
 const frame = document.getElementById('app');
 const offline = document.getElementById('offline');
+const reason = document.getElementById('reason');
 
-function load() {
+function showProblem(text) {
+  frame.hidden = true;
+  frame.removeAttribute('src');
+  reason.textContent = text;
+  offline.hidden = false;
+}
+
+// لا يمكن قراءة خطأ إطار من نطاق آخر، فنفحص الوصول أولاً: طلب no-cors يفشل عند انقطاع الشبكة
+// أو فشل DNS أو شهادة SSL غير صالحة — فنعرض رسالة مفهومة بدل أيقونة صفحة مكسورة.
+async function load() {
   offline.hidden = true;
+  if (!navigator.onLine) return showProblem('لا يوجد اتصال بالإنترنت.');
+  try {
+    await fetch(APP_URL, { mode: 'no-cors', cache: 'no-store' });
+  } catch {
+    return showProblem('الموقع غير متاح بعد — ربما لم يُنشر، أو شهادة الأمان لم تصدر بعد.');
+  }
   frame.hidden = false;
   frame.src = APP_URL;
 }
 
-// لا يمكن قراءة محتوى إطار من نطاق آخر، لذا نكتفي بمؤشر الاتصال: بلا إنترنت نعرض رسالة بدل صفحة خطأ.
-function check() {
-  if (!navigator.onLine) {
-    frame.hidden = true;
-    offline.hidden = false;
-  }
-}
-
 document.getElementById('retry').addEventListener('click', load);
 window.addEventListener('online', load);
-window.addEventListener('offline', check);
+window.addEventListener('offline', () => showProblem('لا يوجد اتصال بالإنترنت.'));
 load();
-check();

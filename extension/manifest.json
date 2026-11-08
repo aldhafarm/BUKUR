@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "البُكور",
   "short_name": "BUKUR",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "أدواتك في القائمة الجانبية — تبدأ بساعة البكور.",
   "default_locale": "ar",
   "minimum_chrome_version": "116",
