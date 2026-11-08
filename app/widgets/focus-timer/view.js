@@ -1,5 +1,6 @@
 // قالب واجهة المؤقت: الأزرار أيقونات Material Symbols بتلميح الاسم، و[data-down]/[data-up] لكل وضع.
-// الواجهة الأساسية: ابدأ · تخطٍّ · إعادة · كتم؛ ووحدة الحلقة والسلسلة وهدف اليوم في قائمة الإعدادات (⚙).
+// تحت القرص سطر الأزرار: ابدأ · تخطٍّ · إعادة · كتم · الوضع (تنازلي/تصاعدي) · ⚙ أخيراً؛ وتحته سطر الأوقات الثابتة
+// (أو اسم المهمة في التصاعدي). وحدة الحلقة والسلسلة وهدف اليوم في قائمة ⚙.
 import { icon, tip } from '../../icons.js';
 import { PRESETS } from './timer.js';
 
@@ -13,12 +14,6 @@ const wheel = (key, n, label) => `
 
 export const TEMPLATE = `
   <div class="ft">
-    <div class="ft-modes" role="group" aria-label="النموذج">
-      <button type="button" class="ft-kind" data-act="kind"></button>
-      <button type="button" class="ft-gear" data-act="settings" aria-expanded="false" ${tip('الإعدادات')}>${icon('settings')}</button>
-      <input class="ft-task" data-ref="task" data-up maxlength="40" placeholder="المهمة…" aria-label="اسم المهمة">
-      ${MODES.map(([id, short, name]) => `<button type="button" data-mode="${id}" data-down data-size="m l" ${tip(name)}>${short || icon('tune')}</button>`).join('')}
-    </div>
     <div class="ft-face">
       <svg viewBox="-14 -14 228 228" class="ft-disk" data-ref="disk" role="slider" tabindex="0"
            aria-label="اسحب على الحلقة لتحديد المدة">
@@ -38,11 +33,6 @@ export const TEMPLATE = `
         <span class="ft-dots" data-ref="dots" aria-label="جلسات الدورة"></span>
       </div>
     </div>
-    <div class="ft-panel" data-ref="panel" hidden>
-      <div class="ft-row" data-down><span>وحدة الحلقة</span><button type="button" class="ft-chip" data-act="unit"></button></div>
-      <div class="ft-row" data-down><span>سلسلة تلقائية</span><button type="button" class="ft-chip" data-act="chain" ${tip('الراحة ثم الجلسة التالية تبدآن تلقائياً مع تنبيه')}>${icon('sync')}</button></div>
-      <div class="ft-row ft-goal"><span>هدف اليوم</span><label><input type="number" min="1" max="24" inputmode="numeric" data-ref="goal" dir="ltr" aria-label="هدف اليوم من الجلسات"> جلسات</label></div>
-    </div>
     <p class="ft-notice" data-ref="notice" role="status" hidden></p>
     <p class="ft-toast" data-ref="toast" role="status" aria-live="polite" hidden></p>
     <div class="ft-actions">
@@ -52,6 +42,17 @@ export const TEMPLATE = `
       <button type="button" class="ft-btn" data-act="sw-done" data-up ${tip('أنهِ واحفظ الوقت المستغرق')}>${icon('check')}</button>
       <button type="button" class="ft-btn" data-act="sw-reset" data-up ${tip('صفّر دون حفظ')}>${icon('restart_alt')}</button>
       <button type="button" class="ft-btn" data-act="mute"></button>
+      <button type="button" class="ft-btn ft-kind" data-act="kind"></button>
+      <button type="button" class="ft-btn ft-gear" data-act="settings" aria-expanded="false" ${tip('الإعدادات')}>${icon('settings')}</button>
+    </div>
+    <div class="ft-modes" role="group" aria-label="النموذج">
+      <input class="ft-task" data-ref="task" data-up maxlength="40" placeholder="المهمة…" aria-label="اسم المهمة">
+      ${MODES.map(([id, short, name]) => `<button type="button" data-mode="${id}" data-down ${tip(name)}>${short || icon('tune')}</button>`).join('')}
+    </div>
+    <div class="ft-panel" data-ref="panel" hidden>
+      <div class="ft-row" data-down><span>وحدة الحلقة</span><button type="button" class="ft-chip" data-act="unit"></button></div>
+      <div class="ft-row" data-down><span>سلسلة تلقائية</span><button type="button" class="ft-chip" data-act="chain" ${tip('الراحة ثم الجلسة التالية تبدآن تلقائياً مع تنبيه')}>${icon('sync')}</button></div>
+      <div class="ft-row ft-goal"><span>هدف اليوم</span><label><input type="number" min="1" max="24" inputmode="numeric" data-ref="goal" dir="ltr" aria-label="هدف اليوم من الجلسات"> جلسات</label></div>
     </div>
     <div class="ft-stats" data-size="m l">
       <div ${tip('جلسات بومودورو اليوم / الهدف')}>${icon('today')}<b data-ref="today"></b></div>
