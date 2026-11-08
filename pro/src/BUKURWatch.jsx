@@ -58,6 +58,8 @@ export default function BUKURWatch() {
   const [showBezel, setShowBezel] = useState(true); // Show/hide bezel completely
   const svgRef = useRef(null);
   const lastAngleRef = useRef(0);
+  // موضع مؤشر الثواني الناعم: تأخير سالب يُحسب مرة واحدة، فلا تُعاد الحركة مع كل رسم.
+  const secondsAnimDelay = useMemo(() => `-${(Date.now() % 60000) / 1000}s`, []);
   
   // Compass states
   const [compassHeading, setCompassHeading] = useState(0); // Device heading in degrees (0 = North)
@@ -349,8 +351,15 @@ export default function BUKURWatch() {
   // TIME UPDATE
   // ═══════════════════════════════════════════════════════════════
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 50); // 50ms for smooth animation
-    return () => clearInterval(timer);
+    // مرة كل ثانية عند حدّها (كان ٥٠ ملّي ث = ٢٠ إعادة رسم/ث للشجرة كلها). مؤشر الثواني الناعم
+    // يدور بحركة CSS مستقلة لا تحتاج إعادة رسم. لا تحديث والصفحة مخفية.
+    let timer;
+    const tick = () => {
+      if (!document.hidden) setTime(new Date());
+      timer = setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
+    };
+    tick();
+    return () => clearTimeout(timer);
   }, []);
 
   // ═══════════════════════════════════════════════════════════════
@@ -1724,10 +1733,9 @@ export default function BUKURWatch() {
     if (showMinuteMarkers || showSecondMarkers) {
       // Smooth moving second indicator
       if (showSecondMarkers) {
-        const milliseconds = time.getMilliseconds();
-        const smoothSeconds = seconds + (milliseconds / 1000);
-        const smoothSecondAngle = (smoothSeconds * 6) - 90; // 6 degrees per second
-        const smoothAngle = ((smoothSecondAngle * directionMultiplier) + rotationOffset) * Math.PI / 180;
+        // يُرسم عند «الثانية صفر» ثم يدور بحركة CSS (٦٠ ث للدورة) بتأخير سالب ثابت منذ التحميل،
+        // فيبقى ناعماً دون إعادة رسم React.
+        const smoothAngle = ((-90 * directionMultiplier) + rotationOffset) * Math.PI / 180;
         
         const indicatorOuterRadius = outerRadius + 2;
         const indicatorInnerRadius = outerRadius - 14;
@@ -1742,6 +1750,11 @@ export default function BUKURWatch() {
             stroke="#DC2626"
             strokeWidth="3"
             strokeLinecap="round"
+            style={{
+              transformOrigin: '200px 200px',
+              animation: `${directionMultiplier < 0 ? 'bukur-sec-ccw' : 'bukur-sec-cw'} 60s linear infinite`,
+              animationDelay: secondsAnimDelay,
+            }}
           />
         );
       }

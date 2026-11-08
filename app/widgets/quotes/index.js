@@ -68,6 +68,7 @@ export default {
     const inflight = new Set();
     let showBooks = false; // عرض كل كتب العَلَم
     const failedAt = new Map(); // لا إعادة محاولة قبل ٥ دقائق بعد فشل الاتصال
+    const why = new Map(); // سبب غياب الصورة لكل عَلَم — يظهر تحت النجمة ليُعرف الخلل من الواجهة
 
     // صورة العَلَم ومعلوماته من ويكي داتا/ويكيبيديا — عند عرضه أول مرة، ثم من الذاكرة أسبوعاً
     function wikiFor(a) {
@@ -75,12 +76,24 @@ export default {
       if (a.enwiki && (!cached || Date.now() - cached.at > WIKI_TTL) && !inflight.has(a.id) && !(Date.now() - (failedAt.get(a.id) ?? 0) < 300_000)) {
         inflight.add(a.id);
         fetchWiki(a.enwiki)
-          .then((data) => { if (alive) ctx.store.set({ wiki: { ...ctx.store.get().wiki, [a.id]: { data, at: Date.now() } } }); })
-          .catch(() => { failedAt.set(a.id, Date.now()); /* بلا اتصال: تبقى النجمة الرمزية */ })
-          .finally(() => inflight.delete(a.id));
+          .then((data) => {
+            // ردّ بلا كيان (خطأ أو تقييد من ويكي داتا) لا يُحفظ أسبوعاً: يُعاد بعد ٥ دقائق كفشل الاتصال
+            if (!data) { failedAt.set(a.id, Date.now()); why.set(a.id, 'missing'); return; }
+            why.delete(a.id);
+            if (alive) ctx.store.set({ wiki: { ...ctx.store.get().wiki, [a.id]: { data, at: Date.now() } } });
+          })
+          .catch(() => { failedAt.set(a.id, Date.now()); why.set(a.id, 'net'); /* بلا اتصال: تبقى النجمة الرمزية */ })
+          .finally(() => { inflight.delete(a.id); if (alive && why.has(a.id)) render(); });
       }
       return cached?.data ?? null;
     }
+
+    const WHY_LABEL = {
+      net: 'تعذّر الاتصال بويكي داتا', missing: 'لم يُعثر عليه في ويكي داتا',
+      noimage: 'لا صورة له في ويكي داتا', imgerror: 'تعذّر تحميل الصورة',
+    };
+    const starFig = (a, hue, reason) => `<figure class="qt-fig">${star(esc(a.name.replace(/^(ابن|أبو)\s+/, '')[0]), hue)}${
+      reason ? `<figcaption class="qt-why">${WHY_LABEL[reason]}</figcaption>` : ''}</figure>`;
 
     // كل (عَلَم، قول) عنصرٌ يُعرض؛ ومن لا قول له يظهر في القائمة فقط
     const entries = () => alam.flatMap((a) => (a.quotes ?? []).map((q, qi) => ({ a, q, key: `${a.id}:${qi}` })));
@@ -100,7 +113,7 @@ export default {
       const avatar = w?.image
         ? `<figure class="qt-fig"><img class="qt-img" src="${esc(w.image.thumb)}" alt="${esc(a.name)} — صورة تخيّلية" loading="lazy" referrerpolicy="no-referrer">
              <figcaption><a href="${esc(w.image.page)}" target="_blank" rel="noopener">صورة تخيّلية · كومنز</a></figcaption></figure>`
-        : star(esc(a.name.replace(/^(ابن|أبو)\s+/, '')[0]), hue);
+        : starFig(a, hue, why.get(a.id) ?? (w ? 'noimage' : null));
       root.innerHTML = `
         <div class="qt-head">
           ${avatar}
@@ -127,7 +140,7 @@ export default {
         </div>
         <div class="qt-chips" data-size="l">${alam.map((x) => `<button type="button" data-alam="${esc(x.id)}" aria-pressed="${x.id === a.id}" ${x.quotes?.length ? '' : 'data-empty'}>${esc(x.name)}</button>`).join('')}</div>`;
       const img = root.querySelector('.qt-img');
-      img?.addEventListener('error', () => { img.closest('.qt-fig').outerHTML = star(esc(a.name.replace(/^(ابن|أبو)\s+/, '')[0]), hue); });
+      img?.addEventListener('error', () => { img.closest('.qt-fig').outerHTML = starFig(a, hue, 'imgerror'); });
       applySize(ctx.size);
       root.querySelector('[data-step="1"]')?.addEventListener('click', () => step(-1, list, i));
       root.querySelector('[data-step="-1"]')?.addEventListener('click', () => step(1, list, i));

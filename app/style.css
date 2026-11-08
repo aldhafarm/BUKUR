@@ -194,6 +194,7 @@ button { font: inherit; cursor: pointer; }
 .qt-fig { margin: 0; flex: none; width: 64px; text-align: center; }
 .qt-img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--beige-300); background: var(--beige-100); display: block; }
 .qt-fig figcaption { font-size: 9px; line-height: 1.3; margin-top: 2px; }
+.qt-why { color: var(--muted); }
 .qt-fig figcaption a, .qt-wiki a { color: var(--green-700); }
 .qt-desc { font-size: 12px; color: var(--ink) !important; }
 .qt-wiki { margin: 0; font-size: 12px; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
