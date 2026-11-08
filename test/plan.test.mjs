@@ -61,3 +61,17 @@ test('الممتلئ يتبع خط زمن المهمة: مهمة ٢٠ يوماً
   assert.equal(barFor(t, rangeFor('month', '2026-12-08')).fill, 0);      // ديسمبر: لم يُنجز منه شيء
   assert.equal(barFor(makeTask({ start: '2026-11-21', end: '2026-12-10', progress: 75 }, 'g'), rangeFor('month', '2026-12-08')).fill, 0.5);
 });
+
+import { CATEGORIES, colorOf, countByCategory, visibleTasks } from '../app/widgets/planner/plan.js';
+
+test('التصنيفات: اللون من التصنيف، والفرز يخفي التصنيفات المطفأة، والعدّ لكل تصنيف في النطاق', () => {
+  const a = makeTask({ name: 'تقرير', start: '2026-11-02', end: '2026-11-05', category: 'work' }, 'a');
+  const b = makeTask({ name: 'تمرين', start: '2026-11-03', end: '2026-11-03', category: 'health' }, 'b');
+  const old = makeTask({ name: 'قديمة', start: '2026-11-04', end: '2026-11-04', color: '#123456' }, 'c'); // قبل التصنيفات
+  assert.equal(colorOf(a), CATEGORIES.find((c) => c.id === 'work').color);
+  assert.equal(colorOf(old), '#123456');
+  assert.equal(makeTask({ category: 'nope' }, 'd').category, undefined);
+  assert.deepEqual(visibleTasks([a, b, old], ['work']).map((t) => t.id), ['b', 'c']);
+  const n = countByCategory([a, b, old], rangeFor('month', '2026-11-08'));
+  assert.deepEqual([n.work, n.health, n.family], [1, 1, 0]);
+});

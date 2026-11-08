@@ -119,7 +119,29 @@ export function shift(scope, k, dir, system = 'star') {
   return dir > 0 ? addDays(r.end, 1) : addDays(r.start, -1);
 }
 
-// ── المهام: {id, name, start, end, color, progress 0..100}
+// ── التصنيفات (كتقويم AnuCal الذي أعجب المالك): لكل مهمة تصنيف بلونه، وأزرار في الأعلى تُظهر أو تخفي كل تصنيف.
+export const CATEGORIES = [
+  { id: 'work', label: 'عمل', color: '#3b82c4' },
+  { id: 'study', label: 'تعلّم', color: '#16a34a' },
+  { id: 'personal', label: 'شخصي', color: '#8b5cf6' },
+  { id: 'health', label: 'صحة', color: '#0ea5b7' },
+  { id: 'family', label: 'أسرة', color: '#f59e0b' },
+  { id: 'farm', label: 'مزرعة', color: '#a16207' },
+];
+const CAT = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
+export const categoryOf = (t) => CAT[t.category] ?? null;
+/** لون المهمة: من تصنيفها، وإلا لونها المحفوظ (مهام ما قبل التصنيفات). */
+export const colorOf = (t) => categoryOf(t)?.color ?? t.color ?? '#3b82c4';
+/** فرز العرض: تُخفى مهام التصنيفات المطفأة؛ والمهمة بلا تصنيف تبقى ظاهرة. */
+export const visibleTasks = (tasks, hidden = []) => (tasks ?? []).filter((t) => !t.category || !hidden.includes(t.category));
+/** عدد المهام لكل تصنيف داخل النطاق — يظهر على أزرار الفرز. */
+export function countByCategory(tasks, r) {
+  const out = Object.fromEntries(CATEGORIES.map((c) => [c.id, 0]));
+  for (const t of tasksIn(tasks, r)) if (t.category in out) out[t.category] += 1;
+  return out;
+}
+
+// ── المهام: {id, name, start, end, category, progress 0..100} (مهام قديمة قد تحمل color بدل category)
 /** المهام التي تتقاطع مع النطاق، بترتيب البداية. */
 export const tasksIn = (tasks, r) => (tasks ?? []).filter((t) => t.end >= r.start && t.start <= r.end).sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
 
@@ -147,10 +169,12 @@ export function yearRows(tasks, y) {
 }
 
 /** مهمة جديدة سليمة: النهاية لا تسبق البداية، والنسبة بين ٠ و١٠٠. */
-export function makeTask({ name, start, end, color, progress }, id) {
+export function makeTask({ name, start, end, category, color, progress }, id) {
   const s = start <= end ? start : end;
   const e = start <= end ? end : start;
-  return { id, name: String(name ?? '').trim() || 'مهمة', start: s, end: e, color: color || '#3b82c4', progress: Math.max(0, Math.min(100, Math.round(Number(progress) || 0))) };
+  const t = { id, name: String(name ?? '').trim() || 'مهمة', start: s, end: e, progress: Math.max(0, Math.min(100, Math.round(Number(progress) || 0))) };
+  if (CAT[category]) t.category = category; else t.color = color || '#3b82c4';
+  return t;
 }
 
 /** إنجاز النطاق: متوسط نسب المهام فيه موزوناً بأيامها داخله. */
