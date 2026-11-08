@@ -9,10 +9,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false # لا نحتاج git بصلاحيات بعد الجلب
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
+          package-manager-cache: false # سير عمل بأسرار: لا ذاكرة مؤقتة لا نحتاجها (توصية setup-node)
       - run: npm test
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
