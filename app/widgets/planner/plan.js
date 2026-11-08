@@ -62,13 +62,22 @@ export const SYSTEMS = {
       { name: 'الشتاء', start: `${y}-12-21`, end: `${y + 1}-03-19`, color: SEASON_COLOR['الشتاء'] },
     ],
   },
+  // المنازل (النازل): ٢٨ منزلة بأيامها، بلون موسمها
+  manazil: {
+    label: 'المنازل',
+    periods: (y) => {
+      const start = key(new Date(y, 8, 6));
+      let off = 0;
+      return MANAZIL.map((m) => { const p = { name: m[0], start: addDays(start, off), end: addDays(start, off + m[1] - 1), color: SEASON_COLOR[m[3]] }; off += m[1]; return p; });
+    },
+  },
   quarter: {
     label: 'أرباع السنة',
     periods: (y) => [0, 3, 6, 9].map((m, i) => ({ name: `الربع ${['الأول', 'الثاني', 'الثالث', 'الرابع'][i]}`, start: `${y}-${pad(m + 1)}-01`,
       end: key(new Date(y, m + 3, 0)), color: ['#5E8C61', '#A83C3C', '#C4703A', '#4E7C9B'][i] })),
   },
 };
-export const SYSTEM_IDS = Object.keys(SYSTEMS);
+export const SYSTEM_IDS = ['star', 'anwa', 'manazil', 'astro', 'quarter'];
 export const nextSystem = (id) => SYSTEM_IDS[(SYSTEM_IDS.indexOf(id) + 1) % SYSTEM_IDS.length];
 
 /** الفترة (من النظام) التي تحوي اليوم k. */
@@ -87,10 +96,35 @@ export function periodsBetween(system, from, to) {
   return out;
 }
 
-// ── النطاقات: سنة ← موسم ← شهر ← أسبوع ← يوم (زر واحد متعدد الضغطات يدور بينها)
+// ── النطاقات: زر واحد متعدد الضغطات يدور بينها.
+// التطبيق الكامل: سنة ← موسم ← شهر ← أسبوع ← يوم. القائمة الجانبية (قرار المالك): ما يلزم اليوم فقط —
+// اليوم ← الأسبوع يوماً يوماً ← الشهر الحالي والقادم ← الفترة الحالية والتالية (موسم/طالع/منزلة بحسب النظام).
 export const SCOPES = ['year', 'season', 'month', 'week', 'day'];
-export const SCOPE_LABEL = { year: 'سنة', season: 'موسم', month: 'شهر', week: 'أسبوع', day: 'يوم' };
-export const nextScope = (s) => SCOPES[(SCOPES.indexOf(s) + 1) % SCOPES.length];
+export const NARROW_SCOPES = ['day', 'week', 'months2', 'periods2'];
+export const SCOPE_LABEL = { year: 'سنة', season: 'موسم', month: 'شهر', week: 'أسبوع', day: 'يوم', months2: 'شهران', periods2: 'فترتان' };
+export function nextScope(s, narrow = false) {
+  const list = narrow ? NARROW_SCOPES : SCOPES;
+  const i = list.indexOf(s);
+  return list[(i + 1) % list.length]; // نطاق ليس في القائمة (بعد تغيير العرض) ← أول نطاق فيها
+}
+/** النطاق الصالح للعرض الحالي: الشهر الكامل والموسم الكامل والسنة للتطبيق الكامل فقط. */
+export const scopeFor = (s, narrow) => ((narrow ? NARROW_SCOPES : SCOPES).includes(s) ? s : narrow ? 'day' : ({ months2: 'month', periods2: 'season' }[s] ?? 'month'));
+
+/** نطاقان متتاليان (الحالي والتالي): شهران، أو فترتان من نظام المواسم. */
+export function twoRanges(scope, k, system = 'star') {
+  if (scope === 'months2') { const a = rangeFor('month', k); return [a, rangeFor('month', addDays(a.end, 1))]; }
+  const a = rangeFor('season', k, system);
+  return [a, rangeFor('season', addDays(a.end, 1), system)];
+}
+
+// ── أيام نهاية الأسبوع الرسمية (يختارها المستخدم): ٠ الأحد … ٦ السبت
+export const WEEKEND_PRESETS = {
+  sa: { label: 'السعودية والخليج (الجمعة والسبت)', days: [5, 6] },
+  west: { label: 'أمريكا وأوروبا (السبت والأحد)', days: [6, 0] },
+  fri: { label: 'الجمعة فقط', days: [5] },
+  none: { label: 'بلا عطلة', days: [] },
+};
+export const isWeekend = (k, days = [5, 6]) => days.includes(parse(k).getDay());
 
 /** نطاق العرض حول اليوم k: {start, end, label}. الأسبوع يبدأ الأحد. */
 export function rangeFor(scope, k, system = 'star') {
@@ -115,6 +149,7 @@ export function shift(scope, k, dir, system = 'star') {
   if (scope === 'month') return key(new Date(d.getFullYear(), d.getMonth() + dir, 1));
   if (scope === 'week') return addDays(k, 7 * dir);
   if (scope === 'day') return addDays(k, dir);
+  if (scope === 'months2') return key(new Date(d.getFullYear(), d.getMonth() + dir, 1)); // التالي = يتقدم شهراً
   const r = rangeFor('season', k, system);
   return dir > 0 ? addDays(r.end, 1) : addDays(r.start, -1);
 }
