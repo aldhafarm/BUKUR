@@ -115,3 +115,35 @@ button { font: inherit; cursor: pointer; }
 /* ── ودجة الملاحظات */
 .nt-text { display: block; width: 100%; border: 0; padding: 12px; background: transparent; color: var(--ink); font: inherit; resize: vertical; line-height: 1.7; }
 .nt-text:focus { outline: none; background: #fff; }
+
+/* ── ودجة مؤقت التركيز: قطاع يتناقص — برتقالي للتركيز، أخضر للراحة */
+.ft { --ph: var(--orange); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 10px; }
+.ft[data-phase="short"], .ft[data-phase="long"] { --ph: var(--fresh); }
+.ft-modes { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.ft-modes button { padding: 4px 8px; border: 1px solid var(--beige-300); border-radius: 6px; background: #fff; font-size: 12px; min-height: 28px; color: var(--ink); }
+.ft-modes button[aria-pressed="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }
+.ft-custom { display: flex; gap: 10px; font-size: 13px; }
+.ft-custom input, .ft-goal input { width: 52px; padding: 3px; border: 1px solid var(--beige-300); border-radius: 6px; text-align: center; font: inherit; }
+.ft-face { position: relative; width: min(240px, 86%); aspect-ratio: 1; }
+.card[data-size="s"] .ft-face { width: min(170px, 70%); }
+.ft-disk { width: 100%; height: 100%; display: block; }
+.ft-plate { fill: #fff; stroke: var(--beige-300); stroke-width: 2; }
+.ft-tick { stroke: #c9bba3; stroke-width: 1; }
+.ft-tick-l { stroke: #8f8068; stroke-width: 2; }
+.ft-sector { fill: var(--ph); opacity: .92; transition: d .25s linear; }
+.ft-hub { fill: var(--beige-50); stroke: var(--beige-300); stroke-width: 1.5; }
+.ft-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; }
+.ft-phase { font-size: 12px; color: var(--muted); }
+.ft-time { font: 700 30px/1 ui-monospace, "SF Mono", Menlo, monospace; color: var(--ink); }
+.card[data-size="s"] .ft-time { font-size: 22px; }
+.ft-dots { font-size: 11px; letter-spacing: 1px; min-height: 14px; }
+.ft[data-status="paused"] .ft-time { opacity: .55; }
+.ft-notice { margin: 0; padding: 6px 10px; border-radius: 8px; background: #fff4e8; color: #7a3d0e; font-size: 13px; }
+.ft-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.ft-btn { min-height: 34px; padding: 4px 12px; border: 1px solid var(--beige-300); border-radius: 8px; background: #fff; color: var(--ink); font-size: 14px; }
+.ft-btn.ft-primary { background: var(--ph); border-color: var(--ph); color: #fff; font-weight: 700; min-width: 120px; }
+.ft-stats { display: flex; gap: 6px; }
+.ft-stats > div { background: var(--beige-100); border-radius: 8px; padding: 4px 10px; text-align: center; min-width: 78px; }
+.ft-stats span { display: block; font-size: 11px; color: var(--muted); }
+.ft-stats b { display: block; font-size: 14px; direction: ltr; unicode-bidi: plaintext; }
+.ft-goal { font-size: 13px; color: var(--muted); }
