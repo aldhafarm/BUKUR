@@ -30,4 +30,9 @@ export function nextSize(sizes, current) {
   return sizes[(i + 1) % sizes.length];
 }
 
+/** عرض البطاقة في الشبكة: ١ عمود ← ٢ عمودان ← ٣ كامل العرض ← ١. */
+export const WIDTH_LABEL = { 1: 'عمود واحد', 2: 'عمودان', 3: 'كامل العرض' };
+export const nextWidth = (w) => ((Number(w) || 1) % 3) + 1;
+export const widthOf = (saved, fallback = 1) => ([1, 2, 3].includes(Number(saved)) ? Number(saved) : fallback);
+
 export const toggle = (list, id) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
