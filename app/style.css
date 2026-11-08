@@ -383,3 +383,15 @@ button { font: inherit; cursor: pointer; }
 .ft-panel { display: grid; gap: 6px; width: min(300px, 100%); padding: 8px 10px; border: 1px solid var(--beige-300); border-radius: 10px; background: #fff; }
 .ft-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink); }
 .ft-row.ft-goal label { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); }
+
+/* ── المؤقت: الوضع و⚙ ضمن سطر الأزرار تحت القرص (بشكل الأزرار نفسها) */
+.ft-actions .ft-kind, .ft-actions .ft-gear { min-height: 34px; min-width: 40px; padding: 4px 10px; border: 1px solid var(--beige-300); border-radius: 8px; background: #fff; color: var(--ink); }
+.ft-actions .ft-gear[aria-expanded="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }
+.ft-actions .ft-kind .ic, .ft-actions .ft-gear .ic { font-size: 22px; }
+/* القائمة الجانبية الضيقة: سطر الأزرار الستة يبقى سطراً واحداً */
+@media (max-width: 520px) {
+  .ft .ft-actions { flex-wrap: nowrap; gap: 4px; }
+  .ft .ft-actions > .ft-btn { flex: 1 1 0; min-width: 0; padding: 4px 2px; }
+  .ft .ft-actions > .ft-btn.ft-primary { flex-grow: 1.6; min-width: 0; }
+  .ft .ft-actions .ic { font-size: 20px; }
+}
