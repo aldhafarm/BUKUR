@@ -172,3 +172,27 @@ test('السحب المتصل: عبور القمة بعد ٦٠ دقيقة يحو
   assert.equal(wrapUnit('minutes', 6, 350), 'minutes');   // الرجوع عبر القمة في الدقائق لا يغيّر
   assert.equal(wrapUnit('hours', 355, 4), 'hours');
 });
+
+import { detentMs, dragMs, stepDetent } from '../app/widgets/focus-timer/timer.js';
+
+test('وقفات السحب: كل دقيقة حتى ١٠، ثم كل ٥ دقائق، وبعد الساعة بالوتيرة نفسها', () => {
+  const m = (x) => detentMs(x * MIN) / MIN;
+  assert.deepEqual([0.2, 1.4, 3.6, 9.9, 10.4].map(m), [1, 1, 4, 10, 10]);
+  assert.deepEqual([11, 12.4, 12.6, 17, 29, 58].map(m), [10, 10, 15, 15, 30, 60]);
+  assert.deepEqual([63, 66, 71, 92].map(m), [65, 65, 70, 90]);          // ١:٠٥، ١:١٠، ١:٣٠
+  assert.equal(m(999), 720);                                            // لا تزيد على ١٢ ساعة
+});
+
+test('الوقفة التالية والسابقة: ٩ ← ١٠ ← ١٥، و١٥ ← ١٠ ← ٩', () => {
+  const st = (x, d) => stepDetent(x * MIN, d) / MIN;
+  assert.deepEqual([st(9, 1), st(10, 1), st(15, 1), st(60, 1)], [10, 15, 20, 65]);
+  assert.deepEqual([st(15, -1), st(10, -1), st(1, -1)], [10, 9, 1]);
+});
+
+test('السحب على الحلقة يقف عند الوقفات: ٩٠° = ١٥ دقيقة، و١٢° ≈ دقيقتان، والقمة = ساعة', () => {
+  assert.equal(dragMs(90, 'minutes'), 15 * MIN);
+  assert.equal(dragMs(12, 'minutes'), 2 * MIN);
+  assert.equal(dragMs(80, 'minutes'), 15 * MIN);      // ١٣٫٣ دقيقة ← ١٥
+  assert.equal(dragMs(359.9, 'minutes'), 60 * MIN);
+  assert.equal(dragMs(32.5, 'hours'), 65 * MIN);       // حلقة الساعات (١٢ ساعة): ١:٠٥
+});

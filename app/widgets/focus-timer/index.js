@@ -4,9 +4,10 @@
 // • «سلسلة»: الراحة ثم التركيز تتواليان تلقائياً، مع تنبيه عند كل انتقال.
 import { icon, setIconBtn, tip } from '../../icons.js';
 import {
-  PHASE_LABEL, PRESETS, RING, advance, angleToMs, autoUnit, catchUp, configFor, customWith, dayStats,
+  PHASE_LABEL, PRESETS, RING, advance, autoUnit, catchUp, configFor, customWith, dayStats,
   formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, pause, phaseMs, remaining, reset,
   PERCENT_LABELS, nextUnit, remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit, zoneColor,
+  dragMs, stepDetent,
 } from './timer.js';
 
 const DEFAULTS = {
@@ -22,7 +23,7 @@ const DEFAULTS = {
 };
 
 const MODES = [...Object.entries(PRESETS).map(([id, p]) => [id, `${p.focus}/${p.short}`, p.label]), ['custom', '', 'مخصص']];
-const ROW = 26; // ارتفاع صف العجلة بالبكسل
+const ROW = 34; // ارتفاع صف العجلة بالبكسل — صف واحد ظاهر، كالعدّاد أثناء التشغيل
 const range = (n) => Array.from({ length: n }, (_, i) => i);
 const wheel = (key, n, label) => `
   <div class="ft-wheel" data-wheel="${key}" tabindex="0" aria-label="${label}">
@@ -110,6 +111,32 @@ const labelsMarkup = (unit) => (unit === 'percent' ? PERCENT_LABELS : RING[unit]
 
 // نغمة بلا ملفات. المتصفح يسمح بالصوت بعد لمسة، و«ابدأ» لمسة.
 let audio = null;
+
+/** «تكّة» قصيرة عند كل وقفة أثناء الضبط (طلب المالك: صوت متقطع كالتكويك) — ضجيج قصير جداً مُرشَّح. */
+let lastTick = 0;
+function tick() {
+  const now = performance.now();
+  if (now - lastTick < 28) return; // لا أكثر من ~٣٥ تكّة/ث عند السحب السريع
+  lastTick = now;
+  try {
+    audio ??= new AudioContext();
+    audio.resume?.();
+    const t = audio.currentTime;
+    const len = Math.floor(audio.sampleRate * 0.012);
+    const buf = audio.createBuffer(1, len, audio.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 4;
+    const src = audio.createBufferSource();
+    src.buffer = buf;
+    const bp = audio.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = 1.2;
+    const gain = audio.createGain();
+    gain.gain.setValueAtTime(0.35, t);
+    src.connect(bp).connect(gain).connect(audio.destination);
+    src.start(t);
+  } catch { /* بلا صوت */ }
+  try { navigator.vibrate?.(4); } catch { /* بلا اهتزاز */ }
+}
 function chime(kind) {
   try {
     audio ??= new AudioContext();
@@ -154,6 +181,7 @@ export default {
     // ضبط مدة المرحلة الحالية (من الحلقة أو العجلات) ← يصير النموذج «مخصص»
     function setDuration(ms) {
       const t = timer();
+      if (ms !== t.remainingMs && !store.get().muted) tick(); // تكّة عند كل وقفة جديدة
       const custom = customWith(cfg(), t.phase, ms);
       const c = configFor('custom', custom);
       store.set({ mode: 'custom', custom, timer: { ...t, status: 'idle', endsAt: null, remainingMs: phaseMs(t.phase, c) }, notice: null });
@@ -198,6 +226,11 @@ export default {
           if (ms >= 10_000 && editable(timer())) setDuration(ms);
         }, 140);
       });
+      // عجلة الفأرة: رقم واحد لكل حركة (الصف الظاهر واحد)
+      w.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        w.scrollTop += Math.sign(e.deltaY) * ROW;
+      }, { passive: false });
       w.addEventListener('keydown', (e) => {
         if (!['ArrowUp', 'ArrowDown'].includes(e.key)) return;
         e.preventDefault();
@@ -221,7 +254,7 @@ export default {
       const unit = wrapUnit(before, lastDeg, deg);
       lastDeg = deg;
       if (unit !== before) { autoHours = unit === 'hours'; store.set({ unit }); }
-      let ms = angleToMs(deg, unit);
+      let ms = dragMs(deg, unit);
       if (unit === 'hours' && autoHours) ms = Math.max(ms, 60 * 60_000); // بعد العبور: لا تقل عن ساعة
       setDuration(ms);
     }
@@ -234,7 +267,7 @@ export default {
       lastDeg = deg;
       disk.setPointerCapture(e.pointerId);
       disk.classList.add('ft-dragging');
-      setDuration(angleToMs(deg, unitFor(timer())));
+      setDuration(dragMs(deg, unitFor(timer())));
     });
     disk.addEventListener('pointermove', (e) => { if (dragging) dragTo(angleAt(e).deg); });
     const stop = () => { dragging = false; disk.classList.remove('ft-dragging'); };
@@ -244,8 +277,7 @@ export default {
       if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) || !editable(timer()) || unitFor(timer()) === 'percent') return;
       e.preventDefault();
       const t = timer();
-      const step = RING[unitFor(t)].snapMs * (['ArrowUp', 'ArrowRight'].includes(e.key) ? 1 : -1);
-      setDuration(Math.max(RING[unitFor(t)].snapMs, t.remainingMs + step));
+      setDuration(stepDetent(t.remainingMs, ['ArrowUp', 'ArrowRight'].includes(e.key) ? 1 : -1));
     });
 
     function render() {
@@ -279,7 +311,10 @@ export default {
       const showPicker = editable(t) && ctx.size !== 's';
       ref('picker').hidden = !showPicker;
       ref('time').hidden = showPicker;
-      if (showPicker) syncWheels(t.remainingMs);
+      if (showPicker) {
+        syncWheels(t.remainingMs);
+        ref('picker').dataset.hours = String(t.remainingMs >= 60 * 60_000 || unit === 'hours');
+      }
       const per = c.every || 4;
       const dk = c.every ? `${t.done % per}/${per}` : '';
       if (ref('dots').dataset.k !== dk) { ref('dots').dataset.k = dk; ref('dots').innerHTML = c.every ? icon('circle', 'fill').repeat(t.done % per) + icon('circle').repeat(per - (t.done % per)) : ''; }
