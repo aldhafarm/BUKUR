@@ -124,6 +124,9 @@ export const WEEKEND_PRESETS = {
   fri: { label: 'الجمعة فقط', days: [5] },
   none: { label: 'بلا عطلة', days: [] },
 };
+/** يوم إعادة التوازن والتخطيط الأسبوعي (يختاره المستخدم؛ الجمعة افتراضاً عند المالك، و null = بلا يوم). */
+export const isBalanceDay = (k, balanceDay) => balanceDay != null && balanceDay !== '' && parse(k).getDay() === Number(balanceDay);
+
 export const isWeekend = (k, days = [5, 6]) => days.includes(parse(k).getDay());
 
 /** نطاق العرض حول اليوم k: {start, end, label}. الأسبوع يبدأ الأحد. */
@@ -273,6 +276,20 @@ export function monthCells(y, m, weekStart = 0) {
 // ════════════════════════════════════════════════════════════════════════════
 
 /** الوحدات: label للعرض، rank للحجم (الصف يجب أن يكون أكبر من العمود)، وsegments تقسّم [from, to] إلى قطع متتالية. */
+// ── دورة ٨–١٨–٢٨ (منهج البكور، معيار المالك): الشهر الميلادي أربع مراحل، كل مرحلة «موقع» توزَّع فيه المهام والمشاريع.
+//   ١–٧ تهيئة (RESET) · ٨ انطلاق (START) ← ١٧ · ١٨ مراجعة (CHECK) ← ٢٧ · ٢٨ ختام (CLOSE) ← آخر الشهر.
+//   المشاركة (SHARE) بلا يوم ثابت: تكون عادية في الشهر التالي (قرار المالك).
+export const CYCLE = [
+  { id: 'reset', from: 1, label: 'تهيئة', en: 'RESET', color: '#94a3b8', hint: 'مراجعة الشهر السابق والأفكار الأولية' },
+  { id: 'start', from: 8, label: 'انطلاق', en: 'START', color: '#16a34a', hint: 'رؤية الشهر، أهم ٣ أهداف ومشاريع، وأول مهمة' },
+  { id: 'check', from: 18, label: 'مراجعة', en: 'CHECK', color: '#d97706', hint: 'نسبة إنجاز كل هدف، العقبات، والتعديلات' },
+  { id: 'close', from: 28, label: 'ختام', en: 'CLOSE', color: '#7c3aed', hint: 'الإنجازات، ما لم يُنجز ولماذا، والدروس' },
+];
+/** مرحلة اليوم في دورة ٨–١٨–٢٨. */
+export const cyclePhase = (k) => { const d = parse(k).getDate(); return [...CYCLE].reverse().find((c) => d >= c.from); };
+/** محطة الدورة إن كان اليوم ٨ أو ١٨ أو ٢٨، وإلا null. */
+export const cycleStation = (k) => { const d = parse(k).getDate(); return CYCLE.find((c) => c.from === d && d > 1) ?? null; };
+
 export const UNITS = {
   day: { label: 'أيام', rank: 0, segments: (from, to) => Array.from({ length: diffDays(from, to) + 1 }, (_, i) => { const k = addDays(from, i); const d = parse(k); return { start: k, end: k, label: String(d.getDate()) }; }) },
   week: { label: 'أسابيع', rank: 1, segments: (from, to, o) => {
@@ -282,6 +299,21 @@ export const UNITS = {
     return out;
   } },
   manzil: { label: 'منازل', rank: 1, system: 'manazil' },
+  // مراحل ٨–١٨–٢٨: أربع قطع لكل شهر (تُقصّ على حدود النطاق)
+  cycle: { label: 'مراحل ٨–١٨–٢٨', rank: 1, segments: (from, to) => {
+    const out = [];
+    for (let m = parse(from); key(m) <= to; m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) {
+      const y = m.getFullYear(), mo = m.getMonth();
+      const last = new Date(y, mo + 1, 0).getDate();
+      CYCLE.forEach((c, i) => {
+        const s = key(new Date(y, mo, c.from));
+        const e = key(new Date(y, mo, i < CYCLE.length - 1 ? CYCLE[i + 1].from - 1 : last));
+        if (e < from || s > to) return;
+        out.push({ start: s < from ? from : s, end: e > to ? to : e, label: `${c.label} ${c.from}`, color: c.color, phase: c.id });
+      });
+    }
+    return out;
+  } },
   month: { label: 'أشهر', rank: 2, segments: (from, to) => {
     const out = [];
     for (let d = parse(from); key(d) <= to; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
@@ -415,6 +447,8 @@ export const GRID_PRESETS = {
   monthCal: { label: 'شهر × أسابيع', span: 'month', rows: 'week', cols: 'weekday' },
   decadeYears: { label: 'عشر سنوات (١٠ خلايا)', span: 'decade', rows: 'decade', cols: 'year' },
   decade: { label: 'الخطة العشرية (١٠ × ١٢)', span: 'decade', rows: 'year', cols: 'month' },
+  cycleYear: { label: 'سنة × مراحل ٨–١٨–٢٨', span: 'year', rows: 'month', cols: 'cycle' },
+  cycleMonth: { label: 'شهر بمراحل ٨–١٨–٢٨', span: 'month', rows: 'cycle', cols: 'dayNum' },
 };
 export const PRESET_IDS = [...Object.keys(GRID_PRESETS), 'months']; // months: ١٢ تقويماً صغيراً (عرض خاص)
 /** القالب المطابق لإعداد الشبكة (إن وُجد) — لإبراز اسمه في الزر. */

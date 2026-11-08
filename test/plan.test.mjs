@@ -189,10 +189,10 @@ test('أشرطة المهام في خلايا الشبكة: مهمة ١٥ أكت
 import { PRESET_IDS, SPAN_IDS, colsFor, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, rowsFor, shiftSpan } from '../app/widgets/planner/plan.js';
 
 test('الأزرار الثلاثة تعرض الصالح فقط: الصفوف لا تتجاوز الفترة، والأعمدة يحتويها الصف', () => {
-  assert.deepEqual(rowsFor('year'), ['year', 'season', 'month', 'tali', 'week', 'manzil']);   // «سنة» صفاً واحداً مسموح
-  assert.deepEqual(rowsFor('month'), ['month', 'tali', 'week', 'manzil']);
+  assert.deepEqual(rowsFor('year'), ['year', 'season', 'month', 'tali', 'week', 'manzil', 'cycle']);   // «سنة» صفاً واحداً مسموح
+  assert.deepEqual(rowsFor('month'), ['month', 'tali', 'week', 'manzil', 'cycle']);
   assert.ok(!rowsFor('month').includes('season'));
-  assert.deepEqual(colsFor('season'), ['dayNum', 'weekday', 'month', 'tali', 'week', 'manzil', 'day']);
+  assert.deepEqual(colsFor('season'), ['dayNum', 'weekday', 'month', 'tali', 'week', 'manzil', 'cycle', 'day']);
   assert.deepEqual(colsFor('week'), ['dayNum', 'weekday', 'day']);
   assert.ok(!colsFor('month').includes('season'));
   // تغيير الفترة يصحّح الصفوف والأعمدة إن لم تعودا صالحتين

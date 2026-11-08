@@ -10,7 +10,7 @@ import {
 import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
   CATEGORIES, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
-  periodAt, rangeFor, rangeProgress, shift, tasksIn,
+  periodAt, rangeFor, rangeProgress, shift, tasksIn, cycleStation, isBalanceDay,
 } from './plan.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -39,7 +39,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal', projects: [], project: null, lastProject: '', goals: [] }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, balanceDay: 5, grid: null, view: 'cal', projects: [], project: null, lastProject: '', goals: [] }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -49,12 +49,24 @@ export default {
 
     // خانة يوم: رقمه وحرفه، وظل العطلة، وخط لون الموسم، والأحمر لليوم.
     // bare: بلا رقم ولا حرف حين يكونان في رأس العمود (رقم اليوم، أو محاذاة يوم الأسبوع لصفوف غير الأسابيع) — طلب المالك
+    // علامات منهج البكور على اليوم: محطات ٨–١٨–٢٨، ويوم التوازن والتخطيط الأسبوعي الذي يختاره المستخدم
+    function marks(s, k) {
+      const st = cycleStation(k);
+      const bal = isBalanceDay(k, s.balanceDay === undefined ? 5 : s.balanceDay);
+      return {
+        cls: `${st ? ` pl-st pl-st-${st.id}` : ''}${bal ? ' pl-bal' : ''}`,
+        style: st ? `;--st:${st.color}` : '',
+        text: `${st ? ` · ${st.label} ${st.from} (${st.en}): ${st.hint}` : ''}${bal ? ' · يوم التوازن والتخطيط' : ''}`,
+        st,
+      };
+    }
     function dayCell(s, d, t0, bare = false) {
       const k = key(d);
       const p = periodAt(s.system, k);
       const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : '';
-      const full = `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}${p ? ` · ${p.name}` : ''}`;
-      return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}${bare ? ' pl-bare' : ''}" data-day="${k}" ${tip(full)}>${bare ? '' : `<b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s>`}</i>`;
+      const m = marks(s, k);
+      const full = `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}${p ? ` · ${p.name}` : ''}${m.text}`;
+      return `<i style="--s:${p?.color ?? 'transparent'}${m.style}" class="${k === t0 ? 'pl-now' : ''}${wk}${m.cls}${bare ? ' pl-bare' : ''}" data-day="${k}" ${tip(full)}>${bare ? '' : `<b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s>`}</i>`;
     }
 
     // ── العارض العام: كل تقويم = فترة × صفوف × أعمدة (buildGrid). الخلية يوماً (رقم اليوم، يوم الأسبوع، أيام)
@@ -63,9 +75,12 @@ export default {
       if (G.months) return yearMonthsView(s, parse(range.start).getFullYear(), t0);
       const g = buildGrid(range, G.rows, G.cols, { system: s.system, weekStart: s.weekStart });
       const dayCols = G.cols === 'dayNum' || G.cols === 'weekday' || G.cols === 'day';
-      const bare = G.cols === 'dayNum' || (G.cols === 'weekday' && G.rows !== 'week');
+      // مراحل ٨–١٨–٢٨ صفوفاً: أعمدة «رقم اليوم» مواضع لا تواريخ (المرحلة تبدأ ١ أو ٨ أو ١٨ أو ٢٨)، فالخلية تحمل تاريخها بلا رأس مشترك
+      const cyc = G.rows === 'cycle';
+      if (cyc) g.header = null;
+      const bare = !cyc && (G.cols === 'dayNum' || (G.cols === 'weekday' && G.rows !== 'week'));
       const fmt = (k) => `${parse(k).getDate()} ${MONTHS[parse(k).getMonth()].slice(0, 3)}`;
-      const todayCol = G.cols === 'dayNum' && t0 >= range.start && t0 <= range.end ? parse(t0).getDate() - 1 : -1;
+      const todayCol = !cyc && G.cols === 'dayNum' && t0 >= range.start && t0 <= range.end ? parse(t0).getDate() - 1 : -1;
       // أعمدة مشتركة بين كل الصفوف (مثل أشهر الخطة العشرية): أسماؤها في الرأس، والخلايا بلا نص (طلب المالك)
       const shared = !g.header && !dayCols && g.rows.length > 1 && Array.from({ length: g.cols }, (_, i) => new Set(g.rows.map((rw) => rw.cells.find((c) => c.col === i)?.label)).size === 1).every(Boolean);
       if (shared) g.header = Array.from({ length: g.cols }, (_, i) => g.rows[0].cells.find((c) => c.col === i).label);
@@ -98,7 +113,8 @@ export default {
           const list = tasksIn(s.tasks, { start: k, end: k });
           const dots = list.slice(0, 3).map((t) => `<u style="background:${colorOf(t)}"></u>`).join('');
           const p = periodAt(s.system, k);
-          return `<button type="button" data-goto="${k}" data-day="${k}" style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''}" ${tip(`${d.getDate()} ${name}${list.length ? ` · ${list.map((t) => t.name).join('، ')}` : ''}`)}><b>${d.getDate()}</b><span>${dots}</span></button>`;
+          const m = marks(s, k);
+          return `<button type="button" data-goto="${k}" data-day="${k}" style="--s:${p?.color ?? 'transparent'}${m.style}" class="${k === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''}${m.cls}" ${tip(`${d.getDate()} ${name}${m.text}${list.length ? ` · ${list.map((t) => t.name).join('، ')}` : ''}`)}><b>${d.getDate()}</b><span>${dots}</span></button>`;
         }).join('');
         return `<section class="pl-mini"><h5>${name}</h5><div class="pl-mgrid">${Array.from({ length: 7 }, (_, i) => `<em>${DOW1[(i + s.weekStart) % 7]}</em>`).join('')}${cells}</div></section>`;
       }).join('')}</div>`;
@@ -211,7 +227,8 @@ export default {
         const d = parse(addDays(r.start, i));
         const lab = step === 1 ? d.getDate() : (i % step === 0 ? `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}` : '');
         const minor = step === 1 && d.getDate() !== 1 && d.getDate() % 5 !== 0 ? ' pl-minor' : ''; // يُخفى في العرض الضيق
-        return `<i data-day="${addDays(r.start, i)}" class="${addDays(r.start, i) === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-fri' : ''}${minor}">${lab}</i>`;
+        const m = marks(s, addDays(r.start, i));
+        return `<i data-day="${addDays(r.start, i)}" style="${m.style.slice(1)}" class="${addDays(r.start, i) === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-fri' : ''}${m.st ? ' pl-st' : minor}${m.cls.includes('pl-bal') ? ' pl-bal' : ''}" ${m.text ? tip(m.text.slice(3)) : ''}>${lab}</i>`;
       }).join('');
       const bands = Array.from({ length: n }, (_, i) => `<i style="--s:${periodAt(s.system, addDays(r.start, i))?.color ?? 'transparent'}"></i>`).join('');
       const list = tasksIn(s.tasks, r);
@@ -237,8 +254,9 @@ export default {
         const k = addDays(r.start, i);
         const d = parse(k);
         const list = tasksIn(s.tasks, { start: k, end: k });
-        return `<li data-day="${k}" class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}">
-          <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span></b>
+        const m = marks(s, k);
+        return `<li data-day="${k}" style="${m.style.slice(1)}" class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}${m.cls}">
+          <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span>${m.st ? `<em class="pl-sttag" ${tip(m.st.hint)}>${m.st.label} ${m.st.from}</em>` : ''}${m.cls.includes('pl-bal') ? `<em class="pl-baltag">توازن وتخطيط</em>` : ''}</b>
           ${list.map((t) => `<button type="button" draggable="true" class="pl-chipt" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%" ${tip(`${t.name} · ${t.progress}٪`)}>${esc(t.name)}<em>${t.progress}٪</em></button>`).join('') || '<small>—</small>'}
         </li>`;
       }).join('')}</ol>`;
@@ -276,6 +294,7 @@ export default {
           <select data-weekend-preset>${Object.entries(WEEKEND_PRESETS).map(([id, v]) => `<option value="${id}" ${id === preset ? 'selected' : ''}>${v.label}</option>`).join('')}
             <option value="custom" ${preset === 'custom' ? 'selected' : ''} disabled>مخصص</option></select></label>
         <label>بداية الأسبوع <select data-week-start>${DOW.map((n, i) => `<option value="${i}" ${i === s.weekStart ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        <label ${tip('يوم أسبوعي لإعادة التوازن والتخطيط (منهج البكور) — اختياري')}>يوم التوازن <select data-balance-day><option value="" ${s.balanceDay === null ? 'selected' : ''}>بلا</option>${DOW.map((n, i) => `<option value="${i}" ${i === (s.balanceDay === undefined ? 5 : s.balanceDay) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <div class="pl-wdays" role="group" aria-label="أيام العطلة">${DOW.map((n, i) => `<button type="button" data-wday="${i}" aria-pressed="${s.weekend.includes(i)}">${n}</button>`).join('')}</div>
       </div>`;
     }
@@ -452,6 +471,7 @@ export default {
     el.addEventListener('change', (e) => {
       if (e.target.matches('[data-weekend-preset]') && WEEKEND_PRESETS[e.target.value]) store.set({ weekend: [...WEEKEND_PRESETS[e.target.value].days] });
       if (e.target.matches('[data-week-start]')) store.set({ weekStart: Number(e.target.value) });
+      if (e.target.matches('[data-balance-day]')) store.set({ balanceDay: e.target.value === '' ? null : Number(e.target.value) });
       const st = store.get();
       const setG = (id, patch) => store.set({ goals: (st.goals ?? []).map((g) => (g.id === id ? makeGoal({ ...g, ...patch }, id) : g)) });
       if (e.target.dataset.gweight) setG(e.target.dataset.gweight, { weight: e.target.value });

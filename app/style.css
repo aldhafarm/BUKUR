@@ -615,3 +615,12 @@ button { font: inherit; cursor: pointer; }
 .pl-gadd input[name="gname"] { flex: 1 1 140px; min-width: 0; }
 .pl-gadd input[name="unit"] { width: 5em; }
 .pl-gadd > button { display: inline-grid; place-items: center; min-width: 30px; min-height: 28px; border: 0; border-radius: 8px; background: var(--green-700); color: var(--beige-50); cursor: pointer; }
+
+/* ── منهج البكور في التقويم: محطات ٨–١٨–٢٨ (شريط ملوّن أسفل اليوم ورقم بلونه)، ويوم التوازن الأسبوعي (إطار داخلي متقطع) */
+.pl-st { box-shadow: inset 0 -3px 0 var(--st, #16a34a); }
+.pl-ydays > i.pl-st b, .pl-mgrid button.pl-st b, .pl-gantt i.pl-st { color: var(--st); font-weight: 800; }
+.pl-mgrid button.pl-st { box-shadow: inset 0 -2px 0 var(--st); }
+.pl-bal { outline: 1px dashed #0f766e; outline-offset: -2px; }
+.pl-week li.pl-st { border-inline-start: 4px solid var(--st); }
+.pl-sttag, .pl-baltag { margin-inline-start: 6px; padding: 0 6px; border-radius: 99px; font-size: 10px; font-style: normal; font-weight: 700; color: #fff; background: var(--st, #16a34a); }
+.pl-baltag { background: #0f766e; }
