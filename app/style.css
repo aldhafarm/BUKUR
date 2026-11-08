@@ -147,3 +147,10 @@ button { font: inherit; cursor: pointer; }
 .ft-stats span { display: block; font-size: 11px; color: var(--muted); }
 .ft-stats b { display: block; font-size: 14px; direction: ltr; unicode-bidi: plaintext; }
 .ft-goal { font-size: 13px; color: var(--muted); }
+
+/* ── ودجة التضمين (الساعة الاحترافية، خارطة النجوم) */
+.em-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; font-size: 12px; border-bottom: 1px solid var(--beige-300); }
+.em-note { color: var(--muted); }
+.em-open { color: var(--green-700); text-decoration: none; white-space: nowrap; }
+.em-open:hover { text-decoration: underline; }
+.em-frame { display: block; width: 100%; border: 0; background: #18181b; }
