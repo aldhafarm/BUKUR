@@ -120,11 +120,7 @@ test('«لاحقاً»: مهمة بلا تاريخ في النظام نفسه، 
   assert.equal(isUndated(unschedule(moved)), true);
 });
 
-import { WEEKDAY_COLS, monthCells, monthOffset, nextYearLayout, yearWeeks } from '../app/widgets/planner/plan.js';
-
-test('ترتيبات السنة تدور: بالتاريخ ← باليوم ← أشهراً ← أسابيع ← مواسم × أشهر ← طوالع × منازل', () => {
-  assert.deepEqual(['date', 'weekday', 'months', 'weeks', 'seasonsMonths', 'tawaliManazil'].map(nextYearLayout), ['weekday', 'months', 'weeks', 'seasonsMonths', 'tawaliManazil', 'date']);
-});
+import { WEEKDAY_COLS, monthCells, monthOffset, yearWeeks } from '../app/widgets/planner/plan.js';
 
 test('المحاذاة باليوم: ١ نوفمبر ٢٠٢٦ أحد (إزاحة ٠ والأسبوع يبدأ الأحد)، و١ يناير ٢٠٢٦ خميس (إزاحة ٤)', () => {
   assert.equal(monthOffset(2026, 10, 0), 0);
@@ -178,7 +174,7 @@ test('سنة نجمية × طوالع × منازل: ٣٦٥ يوماً، ٢٨ م
   assert.equal(g.rows.reduce((n, r) => n + r.cells.length, 0), 28);
   assert.deepEqual(g.rows.map((r) => r.label).slice(0, 4), ['سهيل', 'الوسم', 'المربعانية', 'الشبط']);
   assert.deepEqual(g.rows[1].cells.map((c) => c.label), ['العواء', 'السماك', 'الغفر', 'الزبانا']);
-  assert.equal(GRID_PRESETS.tawaliManazil.rows, 'tali');
+  assert.equal(GRID_PRESETS.tawaliManazil.rows, 'tali');   // قالب جاهز
   assert.equal(segmentsOf('manzil', span.start, span.end).length, 28);
 });
 
@@ -188,4 +184,41 @@ test('أشرطة المهام في خلايا الشبكة: مهمة ١٥ أكت
   const [b] = gridBars([t], g.rows[3]);
   assert.deepEqual([b.col, b.span], [1, 2]);
   assert.equal(gridBars([t], g.rows[1]).length, 0);
+});
+
+import { PRESET_IDS, SPAN_IDS, colsFor, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, rowsFor, shiftSpan } from '../app/widgets/planner/plan.js';
+
+test('الأزرار الثلاثة تعرض الصالح فقط: الصفوف لا تتجاوز الفترة، والأعمدة يحتويها الصف', () => {
+  assert.deepEqual(rowsFor('year'), ['year', 'season', 'month', 'tali', 'week', 'manzil']);   // «سنة» صفاً واحداً مسموح
+  assert.deepEqual(rowsFor('month'), ['month', 'tali', 'week', 'manzil']);
+  assert.ok(!rowsFor('month').includes('season'));
+  assert.deepEqual(colsFor('season'), ['dayNum', 'weekday', 'month', 'tali', 'week', 'manzil', 'day']);
+  assert.deepEqual(colsFor('week'), ['dayNum', 'weekday', 'day']);
+  assert.ok(!colsFor('month').includes('season'));
+  // تغيير الفترة يصحّح الصفوف والأعمدة إن لم تعودا صالحتين
+  assert.deepEqual(normalizeGrid({ span: 'week', rows: 'season', cols: 'month' }), { span: 'week', rows: 'week', cols: 'dayNum' });
+  assert.deepEqual(nextSpan({ span: 'year', rows: 'month', cols: 'dayNum' }), { span: 'starYear', rows: 'month', cols: 'dayNum' });
+  assert.equal(nextRows({ span: 'year', rows: 'month', cols: 'dayNum' }).rows, 'tali');
+  assert.equal(nextCols({ span: 'year', rows: 'month', cols: 'dayNum' }).cols, 'weekday');
+  assert.equal(SPAN_IDS.length, 8);
+});
+
+test('الفترات الجديدة: عشر سنوات، موسم، طالع، منزلة، شهر، أسبوع — والتنقل بينها', () => {
+  const k = '2026-11-08';
+  assert.deepEqual(SPANS.decade.range(k), { start: '2026-01-01', end: '2035-12-31', label: '2026–2035' });
+  assert.deepEqual([SPANS.season.range(k, { system: 'star' }).label, SPANS.tali.range(k).label, SPANS.manzil.range(k).label], ['الخريف', 'الوسم', 'السماك']);
+  assert.deepEqual([SPANS.week.range(k).start, SPANS.month.range(k).end], ['2026-11-08', '2026-11-30']);
+  assert.equal(SPANS.manzil.range(shiftSpan('manzil', k, 1)).label, 'الغفر');
+  assert.equal(SPANS.decade.range(shiftSpan('decade', k, 1)).label, '2036–2045');
+  assert.equal(SPANS.decade.range(shiftSpan('decade', k, -1)).label, '2016–2025');
+});
+
+test('الخطة العشرية (سنوات × أشهر) وشهر × أسابيع، والقوالب تطابق إعداداتها', () => {
+  const g = buildGrid(SPANS.decade.range('2026-11-08'), 'year', 'month');
+  assert.deepEqual([g.rows.length, g.cols, g.rows[0].label, g.rows[0].cells[10].label], [10, 12, '2026', 'نوفمبر']);
+  const m = buildGrid(SPANS.month.range('2026-11-08'), 'week', 'weekday');
+  assert.deepEqual([m.rows.length, m.rows[0].cells[0].start, m.cols], [5, '2026-11-01', 7]);
+  assert.equal(presetOf({ span: 'decade', rows: 'year', cols: 'month' }), 'decade');
+  assert.equal(presetOf({ span: 'year', rows: 'tali', cols: 'week' }), null);
+  assert.equal(PRESET_IDS.at(-1), 'months');
 });
