@@ -195,3 +195,27 @@ export function wrapUnit(unit, prevDeg, deg) {
   if (unit === 'hours' && crossedBack) return 'minutes';
   return unit;
 }
+
+/**
+ * «وقفات» السحب (طلب المالك): كل دقيقة حتى ١٠ دقائق، ثم كل ٥ دقائق (١٥، ٢٠، ٢٥ …)، وبعد الساعة
+ * بالوتيرة نفسها (١:٠٥، ١:١٠ …). تأخذ مدة خاماً وتعيد أقرب وقفة، لا تقل عن دقيقة ولا تزيد على ١٢ ساعة.
+ */
+export function detentMs(ms) {
+  const min = Math.max(0, ms) / MIN;
+  const snapped = min <= 10.5 ? Math.round(min) : Math.round(min / 5) * 5;
+  return Math.min(MAX_SEC * 1000, Math.max(1, snapped, min > 10.5 ? 10 : 1) * MIN);
+}
+
+/** الوقفة التالية (+1) أو السابقة (-1) — للأسهم وعجلة الفأرة. */
+export function stepDetent(ms, dir) {
+  const cur = detentMs(ms) / MIN;
+  const step = dir > 0 ? (cur < 10 ? 1 : 5) : (cur <= 10 ? 1 : 5);
+  return detentMs((cur + dir * step) * MIN);
+}
+
+/** مدة السحب من الزاوية: موضع خام على الحلقة ثم أقرب وقفة. الالتفاف عند القمة = حلقة كاملة. */
+export function dragMs(angleDeg, unit) {
+  const a = ((angleDeg % 360) + 360) % 360;
+  const raw = (a / 360) * RING[unit].spanMs;
+  return detentMs(raw < RING[unit].spanMs * 0.01 && a > 300 ? RING[unit].spanMs : raw);
+}
