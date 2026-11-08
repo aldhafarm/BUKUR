@@ -101,7 +101,7 @@ export function periodsBetween(system, from, to) {
 // اليوم ← الأسبوع يوماً يوماً ← الشهر الحالي والقادم ← الفترة الحالية والتالية (موسم/طالع/منزلة بحسب النظام).
 export const SCOPES = ['year', 'season', 'month', 'week', 'day'];
 export const NARROW_SCOPES = ['day', 'week', 'months2', 'periods2'];
-export const SCOPE_LABEL = { year: 'سنة', season: 'موسم', month: 'شهر', week: 'أسبوع', day: 'يوم', months2: 'شهران', periods2: 'فترتان' };
+export const SCOPE_LABEL = { year: 'تقويم', season: 'موسم', month: 'شهر', week: 'أسبوع', day: 'يوم', months2: 'شهران', periods2: 'فترتان' };
 export function nextScope(s, narrow = false) {
   const list = narrow ? NARROW_SCOPES : SCOPES;
   const i = list.indexOf(s);
@@ -238,9 +238,7 @@ export function rangeProgress(tasks, r) {
 //   weekday: صف لكل شهر محاذىً بيوم الأسبوع (عمود واحد لكل يوم أسبوع، ٣٧ عموداً)
 //   months: ١٢ تقويماً شهرياً صغيراً
 //   weeks: صف لكل أسبوع (٥٢–٥٤ أسبوعاً) × ٧ أيام
-export const YEAR_LAYOUTS = ['date', 'weekday', 'months', 'weeks', 'seasonsMonths', 'tawaliManazil'];
-export const YEAR_LAYOUT_LABEL = { date: 'بالتاريخ ١–٣١', weekday: 'محاذاة باليوم', months: 'مقسّم أشهراً', weeks: 'مقسّم أسابيع', seasonsMonths: 'مواسم × أشهر', tawaliManazil: 'طوالع × منازل' };
-export const nextYearLayout = (l) => YEAR_LAYOUTS[(YEAR_LAYOUTS.indexOf(l) + 1) % YEAR_LAYOUTS.length];
+// (ترتيبات السنة السابقة صارت قوالب في GRID_PRESETS أدناه.)
 
 /** إزاحة أول الشهر عن بداية الأسبوع (٠ = يبدأ الشهر في أول عمود). weekStart: ٠ الأحد … ٦ السبت. */
 export const monthOffset = (y, m, weekStart = 0) => (new Date(y, m, 1).getDay() - weekStart + 7) % 7;
@@ -295,6 +293,11 @@ export const UNITS = {
   } },
   tali: { label: 'طوالع', rank: 2, system: 'anwa' },
   season: { label: 'مواسم', rank: 3 }, // نظامها نظام المواسم المختار (نجوم/فلكي/أرباع)
+  year: { label: 'سنوات', rank: 4, segments: (from, to) => {
+    const out = [];
+    for (let y = parse(from).getFullYear(); `${y}-01-01` <= to; y++) out.push({ start: `${y}-01-01` < from ? from : `${y}-01-01`, end: `${y}-12-31` > to ? to : `${y}-12-31`, label: String(y) });
+    return out;
+  } },
 };
 const SEASON_SYS = (o) => (['star', 'astro', 'quarter'].includes(o.system) ? o.system : 'star');
 
@@ -306,15 +309,51 @@ export function segmentsOf(unit, from, to, o = {}) {
   return periodsBetween(sys, from, to).map((p) => ({ start: p.start < from ? from : p.start, end: p.end > to ? to : p.end, label: p.name, color: p.color }));
 }
 
-/** الفترات: السنة الميلادية، والسنة النجمية (تبدأ ٦ سبتمبر بالجبهة — كخارطة النجوم). */
+/** الفترات: عشر سنوات · سنة ميلادية · سنة نجمية (تبدأ ٦ سبتمبر بالجبهة) · موسم · طالع · منزلة · شهر · أسبوع.
+ *  rank: حجم الفترة — الصفوف لا تكون أكبر منها. */
+const periodSpan = (sys) => (k, o = {}) => { const p = periodAt(typeof sys === 'function' ? sys(o) : sys, k); return { start: p.start, end: p.end, label: p.name }; };
 export const SPANS = {
+  decade: { label: 'عشر سنوات', rank: 5, range: (k) => { const y = parse(k).getFullYear(); return { start: `${y}-01-01`, end: `${y + 9}-12-31`, label: `${y}–${y + 9}` }; } },
   year: { label: 'سنة ميلادية', range: (k) => { const y = parse(k).getFullYear(); return { start: `${y}-01-01`, end: `${y}-12-31`, label: String(y) }; } },
   starYear: { label: 'سنة نجمية', range: (k) => {
     const d = parse(k);
     const y = d < new Date(d.getFullYear(), 8, 6) ? d.getFullYear() - 1 : d.getFullYear();
     return { start: `${y}-09-06`, end: addDays(`${y + 1}-09-06`, -1), label: `${y}/${y + 1} نجمية` };
   } },
+  season: { label: 'موسم', rank: 3, range: periodSpan(SEASON_SYS) },
+  tali: { label: 'طالع', rank: 2, range: periodSpan('anwa') },
+  month: { label: 'شهر', rank: 2, range: (k) => rangeFor('month', k) },
+  manzil: { label: 'منزلة', rank: 1, range: periodSpan('manazil') },
+  week: { label: 'أسبوع', rank: 1, range: (k, o = {}) => { const s = addDays(k, -((parse(k).getDay() - (o.weekStart ?? 0) + 7) % 7)); return { start: s, end: addDays(s, 6), label: `أسبوع ${parse(s).getDate()} ${MONTHS[parse(s).getMonth()]}` }; } },
 };
+SPANS.year.rank = 4; SPANS.starYear.rank = 4;
+export const SPAN_IDS = ['decade', 'year', 'starYear', 'season', 'tali', 'month', 'manzil', 'week'];
+
+/** الفترة التالية/السابقة: بعد نهاية الحالية أو قبل بدايتها. */
+export function shiftSpan(span, k, dir, o = {}) {
+  const r = SPANS[span].range(k, o);
+  if (span === 'decade') return `${parse(r.start).getFullYear() + 10 * dir}-01-01`; // بالسنوات لا بالأيام (السنوات الكبيسة)
+  return dir > 0 ? addDays(r.end, 1) : addDays(r.start, -1);
+}
+
+/** خيارات الصفوف للفترة: وحدات لا تتجاوز حجمها (الأكبر أولاً). */
+export const rowsFor = (span) => Object.keys(UNITS).filter((u) => UNITS[u].rank >= 1 && UNITS[u].rank <= SPANS[span].rank).sort((a, b) => UNITS[b].rank - UNITS[a].rank);
+/** خيارات الأعمدة للصفوف: ما يحتويه الصف فقط (القاعدة)، والموضعيان أولاً. */
+export const colsFor = (rows) => ['dayNum', 'weekday', ...Object.keys(UNITS).sort((a, b) => UNITS[b].rank - UNITS[a].rank)].filter((c) => validCombo(rows, c));
+export const COL_LABEL = { dayNum: 'رقم اليوم', weekday: 'يوم الأسبوع' };
+export const colLabel = (c) => COL_LABEL[c] ?? UNITS[c].label;
+
+/** إعداد شبكة سليم: يصحّح الصفوف والأعمدة إن لم تعودا صالحتين بعد تغيير الفترة أو الصفوف. */
+export function normalizeGrid(g = {}) {
+  const span = SPANS[g.span] ? g.span : 'year';
+  const rows = rowsFor(span).includes(g.rows) ? g.rows : rowsFor(span)[0];
+  const cols = colsFor(rows).includes(g.cols) ? g.cols : colsFor(rows)[0];
+  return { span, rows, cols };
+}
+const cycle = (list, v) => list[(list.indexOf(v) + 1) % list.length];
+export const nextSpan = (g) => normalizeGrid({ ...g, span: cycle(SPAN_IDS, g.span) });
+export const nextRows = (g) => normalizeGrid({ ...g, rows: cycle(rowsFor(g.span), g.rows) });
+export const nextCols = (g) => normalizeGrid({ ...g, cols: cycle(colsFor(g.rows), g.cols) });
 
 /** هل التركيبة صالحة؟ الصف يحتوي العمود (رتبة أكبر)؛ والأعمدة الموضعية (رقم اليوم ويوم الأسبوع) خلاياها أيام. */
 export function validCombo(rows, cols) {
@@ -356,8 +395,16 @@ export function gridBars(tasks, row) {
   });
 }
 
-/** قوالب جاهزة لتركيبات السنة (تظهر في زر ترتيب السنة). */
+/** قوالب جاهزة (زر القوالب): كل العروض السابقة صارت تركيبات في المحرّك نفسه، عدا الأشهر الصغيرة. */
 export const GRID_PRESETS = {
+  date: { label: 'سنة بالتاريخ ١–٣١', span: 'year', rows: 'month', cols: 'dayNum' },
+  weekday: { label: 'سنة محاذاة باليوم', span: 'year', rows: 'month', cols: 'weekday' },
+  weeks: { label: 'سنة مقسّمة أسابيع', span: 'year', rows: 'week', cols: 'weekday' },
   seasonsMonths: { label: 'مواسم × أشهر', span: 'year', rows: 'season', cols: 'month' },
   tawaliManazil: { label: 'طوالع × منازل', span: 'starYear', rows: 'tali', cols: 'manzil' },
+  monthCal: { label: 'شهر × أسابيع', span: 'month', rows: 'week', cols: 'weekday' },
+  decade: { label: 'الخطة العشرية', span: 'decade', rows: 'year', cols: 'month' },
 };
+export const PRESET_IDS = [...Object.keys(GRID_PRESETS), 'months']; // months: ١٢ تقويماً صغيراً (عرض خاص)
+/** القالب المطابق لإعداد الشبكة (إن وُجد) — لإبراز اسمه في الزر. */
+export const presetOf = (g) => Object.keys(GRID_PRESETS).find((k) => ['span', 'rows', 'cols'].every((x) => GRID_PRESETS[k][x] === g[x])) ?? null;

@@ -4,14 +4,20 @@
 // المرحلة الأولى: مهام بمدة وتصنيف ونسبة إنجاز، وفرز بالتصنيف (كـ AnuCal)، و«لاحقاً» للمهام بلا موعد تُسحب إلى يوم؛ والخطط والأهداف (عشرية ← سنوية ← يومية) لاحقاً فوقها.
 import { icon, tip } from '../../icons.js';
 import {
-  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, YEAR_LAYOUT_LABEL, nextYearLayout, monthOffset, WEEKDAY_COLS, yearWeeks, monthCells, GRID_PRESETS, SPANS, buildGrid, gridBars,
-  periodAt, rangeFor, rangeProgress, shift, tasksIn, yearRows,
+  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
+  periodAt, rangeFor, rangeProgress, shift, tasksIn,
 } from './plan.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = () => Math.random().toString(36).slice(2, 10);
 const SCOPE_ICON = { year: 'grid_view', season: 'filter_vintage', month: 'calendar_view_month', week: 'calendar_view_week', day: 'calendar_view_day', months2: 'date_range', periods2: 'eco' };
 const NARROW = typeof matchMedia === 'function' ? matchMedia('(max-width: 520px)') : { matches: false, addEventListener() {}, removeEventListener() {} }; // القائمة الجانبية
+/** إعداد التقويم المبني من الحالة؛ الترتيبات القديمة (yearLayout) تُرحَّل إلى قوالبها. */
+function gridOf(state) {
+  const legacy = state.yearLayout === 'months' ? { ...GRID_PRESETS.date, months: true } : GRID_PRESETS[state.yearLayout];
+  const g0 = state.grid ?? legacy ?? GRID_PRESETS.date;
+  return { ...normalizeGrid(g0), months: Boolean(g0.months) };
+}
 const DOW1 = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']; // حرف اليوم داخل خانة السنة (كـ AnuCal)
 
 /** شريط مهمة: لونها، والجزء المنجز ممتلئ من بدايتها (اليمين). */
@@ -25,7 +31,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, yearLayout: 'date' }, // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null }, // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -33,71 +39,47 @@ export default {
     const today = () => key(new Date());
     const anchor = () => store.get().anchor ?? today();
 
-    // خانة يوم في السنة: رقمه وحرفه، وظل العطلة، وخط لون الموسم، ودائرة حمراء لليوم
-    // bare: خانة بلا رقم ولا حرف (الرقم أو الحرف في رأس العمود) — في ترتيبي «بالتاريخ» و«محاذاة باليوم»
-    function dayCell(s, d, t0, label, bare = false) {
+    // خانة يوم: رقمه وحرفه، وظل العطلة، وخط لون الموسم، والأحمر لليوم.
+    // bare: بلا رقم ولا حرف حين يكونان في رأس العمود (رقم اليوم، أو محاذاة يوم الأسبوع لصفوف غير الأسابيع) — طلب المالك
+    function dayCell(s, d, t0, bare = false) {
       const k = key(d);
       const p = periodAt(s.system, k);
       const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : '';
-      const full = `${DOW[d.getDay()]} ${label}${p ? ` · ${p.name}` : ''}`;
+      const full = `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}${p ? ` · ${p.name}` : ''}`;
       return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}${bare ? ' pl-bare' : ''}" data-day="${k}" ${tip(full)}>${bare ? '' : `<b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s>`}</i>`;
     }
 
-    function yearView(s, r) {
-      const y = parse(r.start).getFullYear();
-      const t0 = today();
-      const L = s.yearLayout;
-      if (L === 'months') return yearMonthsView(s, y, t0);
-      if (L === 'weeks') return yearWeeksView(s, y, t0);
-      if (GRID_PRESETS[L]) return gridView(s, r, GRID_PRESETS[L], t0);
-      // بالتاريخ (١–٣١) أو محاذاة بيوم الأسبوع (٣٧ عموداً، يُزاح أول كل شهر إلى عمود يومه)
-      const aligned = L === 'weekday';
-      const cols = aligned ? WEEKDAY_COLS : 31;
-      const rows = yearRows(s.tasks, y).map((row) => {
-        const off = aligned ? monthOffset(y, row.m, s.weekStart) : 0;
-        const cells = Array.from({ length: cols }, (_, i) => {
-          const day = i - off + 1;
-          if (day < 1 || day > row.days) return '<i class="pl-off"></i>';
-          return dayCell(s, new Date(y, row.m, day), t0, `${day} ${row.name}`, true);
-        }).join('');
-        const lanes = row.bars.map((b, i) => bar(b.t, { ...b, col: b.col + off }, `grid-row:${i + 2}`)).join('');
-        return `<div class="pl-yrow"><b>${row.name.slice(0, 3)}</b><div class="pl-ydays" style="--cols:${cols}">${cells}${lanes}</div></div>`;
-      }).join('');
-      // رأس الأعمدة (طلب المالك): أرقام الأيام ١–٣١ في «بالتاريخ»، وحروف الأيام في «محاذاة باليوم» — والخانات بلا نص
-      const head = `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:${cols}">${Array.from({ length: cols }, (_, i) => `<i${!aligned && (y === parse(t0).getFullYear()) && i + 1 === parse(t0).getDate() ? ' class="pl-hnow"' : ''}>${aligned ? DOW1[(i + s.weekStart) % 7] : i + 1}</i>`).join('')}</div></div>`;
-      return `<div class="pl-year">${head}${rows}</div>`;
-    }
-
-    // العارض العام (فترة × صفوف × أعمدة): صف لكل قطعة من وحدة الصفوف، وخلاياه بوحدة الأعمدة باسمها،
-    // وأشرطة المهام تمتد على الخلايا التي تمسّها. التركيبات الجديدة = بيانات في GRID_PRESETS.
-    function gridView(s, range, preset, t0) {
-      const g = buildGrid(range, preset.rows, preset.cols, { system: s.system, weekStart: s.weekStart });
+    // ── العارض العام: كل تقويم = فترة × صفوف × أعمدة (buildGrid). الخلية يوماً (رقم اليوم، يوم الأسبوع، أيام)
+    // أو وحدة باسمها (شهر، منزلة، طالع…)، وأشرطة المهام تمتد على الخلايا التي تمسّها.
+    function calView(s, range, t0) {
+      const G = s.grid;
+      if (G.months) return yearMonthsView(s, parse(range.start).getFullYear(), t0);
+      const g = buildGrid(range, G.rows, G.cols, { system: s.system, weekStart: s.weekStart });
+      const dayCols = G.cols === 'dayNum' || G.cols === 'weekday' || G.cols === 'day';
+      const bare = G.cols === 'dayNum' || (G.cols === 'weekday' && G.rows !== 'week');
       const fmt = (k) => `${parse(k).getDate()} ${MONTHS[parse(k).getMonth()].slice(0, 3)}`;
-      const head = g.header ? `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:${g.cols}">${g.header.map((h) => `<i>${h}</i>`).join('')}</div></div>` : '';
-      return `<div class="pl-year pl-grid">${head}${g.rows.map((row) => {
+      const todayCol = G.cols === 'dayNum' && t0 >= range.start && t0 <= range.end ? parse(t0).getDate() - 1 : -1;
+      // أعمدة مشتركة بين كل الصفوف (مثل أشهر الخطة العشرية): أسماؤها في الرأس، والخلايا بلا نص (طلب المالك)
+      const shared = !g.header && !dayCols && g.rows.length > 1 && Array.from({ length: g.cols }, (_, i) => new Set(g.rows.map((rw) => rw.cells.find((c) => c.col === i)?.label)).size === 1).every(Boolean);
+      if (shared) g.header = Array.from({ length: g.cols }, (_, i) => g.rows[0].cells.find((c) => c.col === i).label);
+      const head = g.header ? `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:${g.cols}">${g.header.map((h, i) => `<i${i === todayCol ? ' class="pl-hnow"' : ''}>${G.cols === 'weekday' && g.cols > 7 ? DOW1[(i + s.weekStart) % 7] : h}</i>`).join('')}</div></div>` : '';
+      const rowLabel = (row) => {
+        if (G.rows === 'week') { const first = row.cells.find((c) => c.start.endsWith('-01')); return first ? MONTHS[parse(first.start).getMonth()].slice(0, 3) : `<small>${parse(row.start).getDate()}</small>`; }
+        return esc(dayCols && G.rows === 'month' ? row.label.slice(0, 3) : row.label);
+      };
+      const rows = g.rows.map((row) => {
         const cells = Array.from({ length: g.cols }, (_, i) => {
           const c = row.cells.find((x) => x.col === i);
           if (!c) return '<i class="pl-off"></i>';
+          if (dayCols) return dayCell(s, parse(c.start), t0, bare);
           const now = c.start <= t0 && t0 <= c.end;
-          return `<i class="pl-gcell${now ? ' pl-gnow' : ''}" style="--s:${c.color ?? row.color ?? 'transparent'}" data-day="${c.start}" ${tip(`${c.label}: ${fmt(c.start)} ← ${fmt(c.end)} (${diffDays(c.start, c.end) + 1} يوماً)`)}><b>${esc(c.label)}</b><small>${fmt(c.start)}</small></i>`;
+          return `<i class="pl-gcell${now ? ' pl-gnow' : ''}" style="--s:${c.color ?? row.color ?? 'transparent'}" data-day="${c.start}" ${tip(`${c.label}: ${fmt(c.start)} ← ${fmt(c.end)} (${diffDays(c.start, c.end) + 1} يوماً)`)}>${shared ? '' : `<b>${esc(c.label)}</b><small>${fmt(c.start)}</small>`}</i>`;
         }).join('');
-        const lanes = gridBars(s.tasks, row).map((b, i) => bar(b.t, { ...b, wide: true }, `grid-row:${i + 2}`)).join(''); // خلايا عريضة: الاسم دائماً
-        return `<div class="pl-yrow" style="--rc:${row.color ?? 'var(--green-700)'}"><b class="pl-rlabel" ${tip(`${row.label}: ${fmt(row.start)} ← ${fmt(row.end)}`)}>${esc(row.label)}</b><div class="pl-ydays" style="--cols:${g.cols}">${cells}${lanes}</div></div>`;
-      }).join('')}</div>`;
-    }
-
-    // مقسّم أسابيع: صف لكل أسبوع × ٧ أيام، وعلامة الشهر عند أوله
-    function yearWeeksView(s, y, t0) {
-      const head = `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:7">${Array.from({ length: 7 }, (_, i) => `<i>${DOW[(i + s.weekStart) % 7]}</i>`).join('')}</div></div>`;
-      return `<div class="pl-year pl-yweeks">${head}${yearWeeks(y, s.weekStart).map((w) => {
-        const cells = Array.from({ length: 7 }, (_, i) => {
-          const k = addDays(w.start, i);
-          const d = parse(k);
-          return d.getFullYear() === y ? dayCell(s, d, t0, `${d.getDate()} ${MONTHS[d.getMonth()]}`) : '<i class="pl-off"></i>';
-        }).join('');
-        const lanes = tasksIn(s.tasks, w).map((t, i) => bar(t, barFor(t, w), `grid-row:${i + 2}`)).join('');
-        return `<div class="pl-yrow${w.monthStart != null ? ' pl-mstart' : ''}"><b ${tip(`الأسبوع ${w.n}`)}>${w.monthStart != null ? MONTHS[w.monthStart].slice(0, 3) : `<small>${w.n}</small>`}</b><div class="pl-ydays" style="--cols:7">${cells}${lanes}</div></div>`;
-      }).join('')}</div>`;
+        const lanes = gridBars(s.tasks, row).map((b, i) => bar(b.t, { ...b, wide: !dayCols }, `grid-row:${i + 2}`)).join('');
+        const mstart = G.rows === 'week' && row.cells.some((c) => c.start.endsWith('-01')) ? ' pl-mstart' : '';
+        return `<div class="pl-yrow${mstart}" style="--rc:${row.color ?? 'var(--green-700)'}"><b class="${dayCols ? '' : 'pl-rlabel'}" ${tip(`${row.label}: ${fmt(row.start)} ← ${fmt(row.end)}`)}>${rowLabel(row)}</b><div class="pl-ydays" style="--cols:${g.cols}">${cells}${lanes}</div></div>`;
+      }).join('');
+      return `<div class="pl-year${dayCols ? (g.cols <= 7 ? ' pl-yweeks' : '') : ' pl-grid'}">${head}${rows}</div>`;
     }
 
     // مقسّم أشهراً: ١٢ تقويماً صغيراً؛ تحت كل يوم نقاط بألوان تصنيفات مهامه، والضغط يفتح ذلك اليوم
@@ -113,6 +95,19 @@ export default {
         }).join('');
         return `<section class="pl-mini"><h5>${name}</h5><div class="pl-mgrid">${Array.from({ length: 7 }, (_, i) => `<em>${DOW1[(i + s.weekStart) % 7]}</em>`).join('')}${cells}</div></section>`;
       }).join('')}</div>`;
+    }
+
+    // أزرار بناء التقويم (نموذج المالك): القوالب · الفترة · الصفوف · الأعمدة — كل زر يدور على الصالح فقط
+    function builderBar(s) {
+      const G = s.grid;
+      const pid = G.months ? 'months' : presetOf(G);
+      const pLabel = pid === 'months' ? '١٢ شهراً صغيراً' : pid ? GRID_PRESETS[pid].label : 'مخصص';
+      return `<span class="pl-builder">
+        <button type="button" class="pl-btn" data-act="preset" ${tip('القوالب الجاهزة — اضغط للتالي')}>${icon('view_quilt')}<span>${pLabel}</span></button>
+        ${G.months ? '' : `<button type="button" class="pl-btn pl-ax" data-act="g-span" ${tip('الفترة — اضغط للتبديل')}><em>الفترة</em>${SPANS[G.span].label}</button>
+        <button type="button" class="pl-btn pl-ax" data-act="g-rows" ${tip('الصفوف (لا تتجاوز الفترة) — اضغط للتبديل')}><em>الصفوف</em>${UNITS[G.rows].label}</button>
+        <button type="button" class="pl-btn pl-ax" data-act="g-cols" ${tip('الأعمدة (يحتويها الصف) — اضغط للتبديل')}><em>الأعمدة</em>${colLabel(G.cols)}</button>`}
+      </span>`;
     }
 
     // أزرار الفرز بالتصنيف: كل زر يُظهر أو يخفي مهام تصنيفه، وعليه عددها في النطاق المعروض
@@ -225,21 +220,21 @@ export default {
       const s = { ...all, tasks: visibleTasks(all.tasks, all.hidden ?? []), hidden: all.hidden ?? [] }; // الفرز يسري على كل العروض والنسبة
       s.weekend = Array.isArray(all.weekend) ? all.weekend : [5, 6];
       s.weekStart = Number.isInteger(all.weekStart) ? all.weekStart : 0;
-      s.yearLayout = all.yearLayout ?? 'date';
+      s.grid = gridOf(all);
       const narrow = NARROW.matches;
       s.scope = scopeFor(all.scope, narrow); // السنة والشهر الكامل والموسم الكامل للتطبيق الكامل فقط
       const two = s.scope === 'months2' || s.scope === 'periods2' ? twoRanges(s.scope, anchor(), s.system) : null;
-      const preset = s.scope === 'year' ? GRID_PRESETS[s.yearLayout] : null;
+      const spanOpts = { system: s.system, weekStart: s.weekStart };
       const r = two ? { start: two[0].start, end: two[1].end, label: `${two[0].label} ← ${two[1].label}` }
-        : preset ? SPANS[preset.span].range(anchor()) : rangeFor(s.scope, anchor(), s.system);
+        : s.scope === 'year' ? SPANS[s.grid.months ? 'year' : s.grid.span].range(anchor(), spanOpts) : rangeFor(s.scope, anchor(), s.system);
       const prog = rangeProgress(s.tasks, r);
-      const body = s.scope === 'year' ? yearView(s, r) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
+      const body = s.scope === 'year' ? calView(s, r, today()) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
         : s.scope === 'week' && narrow ? weekDaysView(s, r) : ganttView(s, r);
       const t0 = today();
       el.innerHTML = `<div class="pl">
         <div class="pl-top">
           <button type="button" class="pl-btn pl-scope" data-act="scope" ${tip(narrow ? 'بدّل العرض: يوم ← أسبوع ← شهران ← فترتان (السنة والشهر الكامل في التبويب الكامل)' : 'بدّل العرض: سنة ← موسم ← شهر ← أسبوع ← يوم')}>${icon(SCOPE_ICON[s.scope])}<span>${SCOPE_LABEL[s.scope]}</span></button>
-          ${s.scope === 'year' ? `<button type="button" class="pl-btn" data-act="ylayout" ${tip('ترتيب السنة — اضغط للتبديل: بالتاريخ ← محاذاة باليوم ← أشهر ← أسابيع ← مواسم × أشهر ← طوالع × منازل')}>${icon({ date: 'format_list_numbered', weekday: 'view_week', months: 'calendar_view_month', weeks: 'view_agenda', seasonsMonths: 'filter_vintage', tawaliManazil: 'eco' }[s.yearLayout])}<span>${YEAR_LAYOUT_LABEL[s.yearLayout]}</span></button>` : ''}
+          ${s.scope === 'year' ? builderBar(s) : ''}
           <button type="button" class="pl-btn" data-act="system" ${tip('نظام المواسم — اضغط للتبديل')}>${icon('eco')}<span>${SYSTEMS[s.system].label}</span></button>
           <span class="pl-nav">
             <button type="button" class="pl-btn" data-act="prev" ${tip('السابق')}>${icon('chevron_right')}</button>
@@ -290,9 +285,23 @@ export default {
       const s = store.get();
       if (act === 'scope') store.set({ scope: nextScope(scopeFor(s.scope, NARROW.matches), NARROW.matches) });
       if (act === 'settings') { showSettings = !showSettings; render(); }
-      if (act === 'ylayout') store.set({ yearLayout: nextYearLayout(s.yearLayout ?? 'date') });
+      const curGrid = () => gridOf(s);
+      if (act === 'preset') {
+        const G = curGrid();
+        const cur = G.months ? 'months' : presetOf(G);
+        const next = PRESET_IDS[(PRESET_IDS.indexOf(cur) + 1) % PRESET_IDS.length];
+        store.set({ grid: next === 'months' ? { ...GRID_PRESETS.date, months: true } : { ...GRID_PRESETS[next] }, anchor: null });
+      }
+      if (act === 'g-span') store.set({ grid: nextSpan(curGrid()), anchor: null });
+      if (act === 'g-rows') store.set({ grid: nextRows(curGrid()) });
+      if (act === 'g-cols') store.set({ grid: nextCols(curGrid()) });
       if (act === 'system') store.set({ system: nextSystem(s.system) });
-      if (act === 'prev' || act === 'next') store.set({ anchor: shift(scopeFor(s.scope, NARROW.matches), anchor(), act === 'next' ? 1 : -1, s.system) });
+      if (act === 'prev' || act === 'next') {
+        const sc = scopeFor(s.scope, NARROW.matches);
+        const dir = act === 'next' ? 1 : -1;
+        const G = sc === 'year' ? curGrid() : null;
+        store.set({ anchor: G ? shiftSpan(G.months ? 'year' : G.span, anchor(), dir, { system: s.system, weekStart: s.weekStart ?? 0 }) : shift(sc, anchor(), dir, s.system) });
+      }
       if (act === 'today') store.set({ anchor: null });
       if (act === 'cats-all') store.set({ hidden: (s.hidden ?? []).length ? [] : CATEGORIES.map((c) => c.id) });
       if (act === 'close') { editing = null; render(); }
