@@ -306,6 +306,12 @@ export default {
       const act = e.target.closest('[data-act]')?.dataset.act;
       if (!act) return;
       const now = Date.now();
+      if (act === 'settings') {
+        const panel = ref('panel');
+        panel.hidden = !panel.hidden;
+        e.target.closest('[data-act]').setAttribute('aria-expanded', String(!panel.hidden));
+        return;
+      }
       if (act === 'kind') {
         if ((timer().status === 'running' || sw().status === 'running') && !confirm('التبديل يوقف العدّ الجاري مؤقتاً. متابعة؟')) return;
         store.set({ kind: isUp() ? 'down' : 'up', timer: timer().status === 'running' ? pause(timer(), now) : timer(),

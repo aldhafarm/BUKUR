@@ -375,3 +375,11 @@ button { font: inherit; cursor: pointer; }
   background: color-mix(in srgb, var(--pulse) 30%, #fff); border: 1px solid var(--pulse); }
 @media (prefers-reduced-motion: reduce) { .ft-face.ft-pulse { animation: none; } }
 .ft-labels text.ft-inf { font-size: 15px; font-weight: 700; fill: #e0393e; font-family: system-ui, sans-serif; } /* ∞ في القمة كساعة البكور */
+
+/* ── المؤقت: قائمة الإعدادات (⚙) — ما ليس أساسياً */
+.ft-gear { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 28px; padding: 0 4px; border: 1px solid var(--beige-300); border-radius: 6px; background: #fff; color: var(--ink); }
+.ft-gear .ic { font-size: 18px; }
+.ft-gear[aria-expanded="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }
+.ft-panel { display: grid; gap: 6px; width: min(300px, 100%); padding: 8px 10px; border: 1px solid var(--beige-300); border-radius: 10px; background: #fff; }
+.ft-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink); }
+.ft-row.ft-goal label { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); }
