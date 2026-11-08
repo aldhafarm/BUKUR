@@ -52,9 +52,10 @@ export default {
       const list = entries();
       const pick = ctx.store.get().pick;
       let i = list.findIndex((e) => e.key === pick);
+      // اختيار عَلَم بلا قول موثّق: تظهر بطاقته وحدها (لا «قول اليوم» بدلاً منه)
+      const chosenAlam = pick && i < 0 ? alam.find((a) => a.id === pick) ?? null : null;
       if (i < 0) i = dailyIndex(list, new Date());
-      const cur = list[i];
-      const chosenAlam = pick && !cur ? alam.find((a) => a.id === pick) : null;
+      const cur = chosenAlam ? null : list[i];
       const a = chosenAlam ?? cur?.a;
       if (!a) { root.innerHTML = '<p class="qt-empty">لا بيانات بعد.</p>'; return; }
       const hue = (alam.indexOf(a) * 36) % 360;
@@ -70,7 +71,7 @@ export default {
         ${cur && !chosenAlam ? `
           <blockquote class="qt-text">${esc(cur.q.text)}</blockquote>
           <p class="qt-src">${cur.q.kind === 'reported' ? 'نُقل عنه في ' : 'من '}${citation(cur.q.source)}</p>
-          ${cur.q.note ? `<p class="qt-note" data-size="l">${esc(cur.q.note)}</p>` : ''}` :
+          ${cur.q.note ? `<p class="qt-note">${esc(cur.q.note)}</p>` : ''}` :
           `<p class="qt-empty">${STATUS_LABEL.unverified} — لا نعرض قولاً منسوباً حتى يُوثَّق من مصدره.</p>`}
         <p class="qt-badge" data-status="${esc(a.status)}">${STATUS_LABEL[a.status] ?? ''}</p>
         ${a.bioSummary ? `<p class="qt-bio" data-size="l">${esc(a.bioSummary)}<br><small>المصدر: ${citation(a.bioSource)}</small></p>` : ''}
