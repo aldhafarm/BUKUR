@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json", "package.json", "**/.*", "**/node_modules/**",
+      "docs/**", "test/**", "scripts/**", "extension/**", "README.md"
+    ],
+    "headers": [
+      { "source": "/app/**", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+/* هوية Mind8x: أخضر داكن ملكي · برتقالي للإبراز · بيج للأرضية. العربية أولاً، RTL. */
+:root {
+  --green-900: #0d261a;
+  --green-800: #123524;
+  --green-700: #1b4a33;
+  --green-600: #24603f;
+  --beige-50: #fbf7f0;
+  --beige-100: #f4ede1;
+  --beige-300: #e2d5bf;
+  --orange: #e8742c;
+  --orange-dark: #c95f1c;
+  --ink: #1d2a22;
+  --muted: #6b7a70;
+  --radius: 10px;
+  --fresh: #3fbf6a;
+  --active: #e5c33b;
+  --tired: #ef8a35;
+  --sleep: #e0483e;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Arabic", Tahoma, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--beige-100); color: var(--ink); min-height: 100vh; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+
+/* ── الشريط العلوي */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--green-800); color: var(--beige-50);
+}
+.top h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+.top-actions { display: flex; gap: 6px; }
+.top-actions button {
+  min-height: 34px; padding: 4px 12px; border: 1px solid var(--green-600); border-radius: 8px;
+  background: var(--green-700); color: var(--beige-50);
+}
+.top-actions button[aria-expanded="true"] { background: var(--orange); border-color: var(--orange); }
+
+/* ── «أدواتي» */
+.menu { margin: 8px 12px 0; padding: 10px 14px; background: var(--beige-50); border: 1px solid var(--beige-300); border-radius: var(--radius); }
+.menu p { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+.menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.menu label { display: flex; align-items: center; gap: 6px; min-height: 32px; }
+.menu-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.menu-actions button, .file-btn {
+  padding: 6px 10px; border: 1px solid var(--beige-300); border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer;
+}
+
+/* ── اللوحة: عمود في القائمة الجانبية، وشبكة في التبويب الكامل */
+.board { display: grid; gap: 12px; padding: 12px; align-items: start; }
+@media (min-width: 760px) {
+  .board { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); max-width: 1400px; margin: 0 auto; }
+}
+.empty { text-align: center; color: var(--muted); padding: 24px; }
+
+/* ── البطاقة */
+.card { background: var(--beige-50); border: 1px solid var(--beige-300); border-radius: var(--radius); overflow: hidden; }
+.card.dragging { opacity: .45; }
+.card.drop-before { box-shadow: 0 -3px 0 0 var(--orange); }
+.card-head { display: flex; align-items: center; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--beige-300); }
+.card-head h2 { flex: 1; margin: 0; font-size: 14px; font-weight: 700; color: var(--green-800); }
+.card-head .handle, .card-head .icon {
+  min-width: 32px; min-height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--muted);
+}
+.card-head .handle { cursor: grab; letter-spacing: -2px; }
+.card-head .icon[data-act="size"] { font-size: 12px; padding: 0 8px; }
+.card-head .handle:hover, .card-head .icon:hover { background: var(--beige-100); color: var(--ink); }
+.card.collapsed .card-body { display: none; }
+.card.collapsed [data-act="collapse"] span { display: inline-block; transform: rotate(90deg); }
+.card-body { padding: 0; }
+[hidden] { display: none !important; }
+
+/* ── ودجة الساعة: جسم داكن بهوية خضراء، والقرص كما في الأصل */
+.bk-clock {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 12px 10px 10px; background: var(--green-900); color: var(--beige-50);
+  --lvl: var(--fresh);
+}
+.bk-clock[data-level="active"] { --lvl: var(--active); }
+.bk-clock[data-level="tired"] { --lvl: var(--tired); }
+.bk-clock[data-level="sleep"] { --lvl: var(--sleep); }
+.bk-digital { direction: ltr; font: 700 30px/1 ui-monospace, "SF Mono", Menlo, monospace; }
+.bk-digital small { font-size: 15px; color: #8fa596; }
+.bk-chips { display: flex; gap: 6px; }
+.bk-chip { background: var(--green-700); padding: 4px 10px; border-radius: 8px; text-align: center; min-width: 74px; }
+.bk-chip span { display: block; font-size: 11px; color: #a9bcae; }
+.bk-chip b { display: block; font-size: 14px; direction: ltr; unicode-bidi: plaintext; }
+.bk-chip:nth-child(n+2) b { color: var(--lvl); }
+.bk-bar { width: min(260px, 90%); height: 6px; background: var(--green-700); border-radius: 99px; overflow: hidden; }
+.bk-bar div { height: 100%; background: var(--lvl); transition: width .4s; }
+.bk-dial { width: min(300px, 92%); height: auto; aspect-ratio: 1; cursor: grab; touch-action: none; user-select: none; }
+.card[data-size="s"] .bk-dial { width: min(200px, 80%); }
+.card[data-size="l"] .bk-dial { width: min(340px, 94%); }
+.bk-dial.bk-grabbing { cursor: grabbing; }
+.bk-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.bk-btn {
+  min-height: 34px; padding: 4px 12px; border: 0; border-radius: 8px; background: var(--green-700); color: var(--beige-50); font-size: 14px;
+}
+.bk-btn:hover { background: var(--green-600); }
+.bk-btn.bk-primary { background: var(--fresh); color: #062012; font-weight: 700; }
+.bk-btn.bk-accent { background: var(--orange); color: #fff; }
+.bk-btn[aria-expanded="true"] { background: var(--orange); }
+.bk-daily { display: flex; align-items: center; gap: 6px; background: var(--green-800); padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+.bk-daily input { width: 48px; padding: 4px; border: 0; border-radius: 6px; background: var(--green-700); color: var(--beige-50); text-align: center; font: inherit; }
+.bk-settings { width: min(320px, 96%); background: var(--green-800); padding: 10px; border-radius: 8px; font-size: 13px; display: grid; gap: 8px; }
+.bk-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bk-row > span:first-child { color: #a9bcae; }
+.bk-seg { display: inline-flex; gap: 4px; }
+.bk-seg button { padding: 4px 8px; border: 0; border-radius: 6px; background: var(--green-700); color: var(--beige-50); font-size: 12px; min-height: 28px; }
+.bk-seg button[aria-pressed="true"] { background: var(--orange); }
+.bk-hint { margin: 0; font-size: 11px; color: #7f9585; }
+
+/* ── ودجة الملاحظات */
+.nt-text { display: block; width: 100%; border: 0; padding: 12px; background: transparent; color: var(--ink); font: inherit; resize: vertical; line-height: 1.7; }
+.nt-text:focus { outline: none; background: #fff; }
