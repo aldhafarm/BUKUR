@@ -1,0 +1,6 @@
+html, body { margin: 0; height: 100%; background: #f4ede1; font-family: system-ui, "Noto Sans Arabic", Tahoma, sans-serif; }
+iframe { border: 0; width: 100%; height: 100%; display: block; }
+#offline { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; gap: 4px; color: #1d2a22; }
+#offline .small { color: #6b7a70; font-size: 13px; margin: 0; }
+#offline button { margin-top: 8px; padding: 8px 16px; border: 0; border-radius: 8px; background: #e8742c; color: #fff; font: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
