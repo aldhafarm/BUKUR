@@ -5,7 +5,7 @@
 import {
   PHASE_LABEL, PRESETS, RING, advance, angleToMs, autoUnit, catchUp, configFor, customWith, dayStats,
   formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, pause, phaseMs, remaining, reset,
-  remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit,
+  PERCENT_LABELS, nextUnit, remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit, zoneColor,
 } from './timer.js';
 
 const DEFAULTS = {
@@ -13,6 +13,7 @@ const DEFAULTS = {
   custom: { focusSec: 1500, breakSec: 300 },
   unit: null,         // 'minutes' | 'hours' | null = حسب المدة
   chain: false,       // السلسلة التلقائية
+  muted: false,       // 🔕 بلا نغمة تنبيه
   goal: 8,            // «بومودورو: ___/8» من مستند الأدوات
   timer: null,
   log: {},
@@ -35,8 +36,8 @@ const TEMPLATE = `
     <div class="ft-face">
       <svg viewBox="-14 -14 228 228" class="ft-disk" data-ref="disk" role="slider" tabindex="0"
            aria-label="اسحب على الحلقة لتحديد المدة">
-        <circle cx="100" cy="100" r="92" class="ft-plate"/>
-        <path data-ref="sector" class="ft-sector"/>
+        <circle cx="100" cy="100" r="112" class="ft-plate"/>
+        <g data-ref="segs" class="ft-segs"></g>
         <g data-ref="ticks"></g>
         <g data-ref="labels" class="ft-labels"></g>
         <circle data-ref="knob" r="6" class="ft-knob"/>
@@ -54,6 +55,7 @@ const TEMPLATE = `
     <div class="ft-tools">
       <button type="button" class="ft-chip" data-act="unit" title="ضغطة: دقائق ⇄ ساعات"></button>
       <button type="button" class="ft-chip" data-act="chain" title="الراحة ثم الجلسة التالية تبدآن تلقائياً، مع تنبيه">🔁 سلسلة تلقائية</button>
+      <button type="button" class="ft-chip" data-act="mute" title="تشغيل/إيقاف نغمة التنبيه"></button>
     </div>
     <p class="ft-notice" data-ref="notice" role="status" hidden></p>
     <div class="ft-actions">
@@ -76,28 +78,33 @@ const pt = (r, frac) => {
   return [100 + r * Math.sin(a), 100 - r * Math.cos(a)];
 };
 
-// قطاع من القمة مع عقارب الساعة بنسبة frac
-function sectorPath(frac) {
-  if (frac <= 0) return '';
-  if (frac >= 0.9999) return 'M100 8 A92 92 0 1 1 99.99 8 Z';
-  const [x, y] = pt(92, frac);
-  return `M100 100 L100 8 A92 92 0 ${frac > 0.5 ? 1 : 0} 1 ${x.toFixed(2)} ${y.toFixed(2)} Z`;
-}
-
 function ticksMarkup() {
+  // حلقة نقاط خارج الأشرطة كالمؤقت المرجعي — نقطة أكبر كل ١٠٪
   let out = '';
-  for (let i = 0; i < 60; i++) {
-    const long = i % 5 === 0;
-    const [x1, y1] = pt(long ? 82 : 87, i / 60);
-    const [x2, y2] = pt(92, i / 60);
-    out += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" class="${long ? 'ft-tick-l' : 'ft-tick'}"/>`;
+  for (let i = 0; i < 100; i++) {
+    const [x, y] = pt(97, i / 100);
+    out += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${i % 10 === 0 ? 1.3 : 0.6}" class="ft-dot"/>`;
   }
   return out;
 }
 
-const labelsMarkup = (unit) => RING[unit].labels.map((n, i) => {
-  const [x, y] = pt(104, i / 12);
-  return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="central">${n}</text>`;
+// ١٠٠ شريط كالمؤقت المرجعي — لونه بحسب موضعه (أحمر ← برتقالي ← أصفر ← فيروزي)
+const SEGS = 100;
+function segmentsMarkup() {
+  let out = '';
+  for (let i = 0; i < SEGS; i++) {
+    const a0 = i / SEGS + 0.0016;
+    const a1 = (i + 1) / SEGS - 0.0016;
+    const [x1, y1] = pt(92, a0); const [x2, y2] = pt(92, a1);
+    const [x3, y3] = pt(66, a1); const [x4, y4] = pt(66, a0);
+    out += `<path d="M${x1.toFixed(2)} ${y1.toFixed(2)}A92 92 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}L${x3.toFixed(2)} ${y3.toFixed(2)}A66 66 0 0 0 ${x4.toFixed(2)} ${y4.toFixed(2)}Z" data-zone="${zoneColor((i + 0.5) / SEGS)}"/>`;
+  }
+  return out;
+}
+
+const labelsMarkup = (unit) => (unit === 'percent' ? PERCENT_LABELS : RING[unit].labels).map((n, i, arr) => {
+  const [x, y] = pt(104, i / arr.length);
+  return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="central">${unit === 'percent' ? `${n}%` : n}</text>`;
 }).join('');
 
 // نغمة بلا ملفات. المتصفح يسمح بالصوت بعد لمسة، و«ابدأ» لمسة.
@@ -133,6 +140,9 @@ export default {
     const ref = (n) => el.querySelector(`[data-ref="${n}"]`);
     const store = ctx.store;
     ref('ticks').innerHTML = ticksMarkup();
+    ref('segs').innerHTML = segmentsMarkup();
+    const segEls = [...ref('segs').children];
+    let litCount = -1, litPhase = '';
     const disk = ref('disk');
 
     const cfg = () => { const s = store.get(); return configFor(s.mode, s.custom); };
@@ -160,7 +170,7 @@ export default {
         ? (s.chain ? 'انتهت جلسة التركيز — بدأت الراحة تلقائياً ☕' : 'انتهت جلسة التركيز — وقت الراحة ☕')
         : (s.chain ? 'انتهت الراحة — عُد للتركيز، بدأت الجلسة التالية 🍅' : 'انتهت الراحة — جاهز لجلسة تركيز 🍅');
       store.set({ timer: state, log, notice });
-      if (audible) chime(state.phase);
+      if (audible && !s.muted) chime(state.phase);
       return true;
     }
 
@@ -216,7 +226,7 @@ export default {
     }
     disk.addEventListener('pointerdown', (e) => {
       const { deg, dist } = angleAt(e);
-      if (dist < 0.55 || !editable(timer())) return; // المركز للعجلات؛ والجلسة الجارية لا تُعدَّل بالسحب
+      if (dist < 0.55 || !editable(timer()) || unitFor(timer()) === 'percent') return; // المركز للعجلات؛ والجارية لا تُعدَّل؛ والنسبة تُضبط بالعجلات
       e.preventDefault();
       dragging = true;
       autoHours = false;
@@ -230,7 +240,7 @@ export default {
     disk.addEventListener('pointerup', stop);
     disk.addEventListener('pointercancel', stop);
     disk.addEventListener('keydown', (e) => {
-      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) || !editable(timer())) return;
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) || !editable(timer()) || unitFor(timer()) === 'percent') return;
       e.preventDefault();
       const t = timer();
       const step = RING[unitFor(t)].snapMs * (['ArrowUp', 'ArrowRight'].includes(e.key) ? 1 : -1);
@@ -244,18 +254,24 @@ export default {
       const c = cfg();
       const unit = unitFor(t);
       const left = remaining(t, now);
+      const frac = ringFraction(left, unit, phaseMs(t.phase, c));
       const root = el.querySelector('.ft');
       root.dataset.phase = t.phase;
       root.dataset.status = t.status;
       root.style.setProperty('--ph', remainingColor(t.phase, left / phaseMs(t.phase, c)));
       ref('time').textContent = formatClock(left);
-      ref('phase').textContent = PHASE_LABEL[t.phase];
-      const frac = ringFraction(left, unit);
-      ref('sector').setAttribute('d', sectorPath(frac));
+      ref('phase').textContent = unit === 'percent' ? `${PHASE_LABEL[t.phase]} · \u2066${Math.round(frac * 100)}%\u2069` : PHASE_LABEL[t.phase];
+      const lit = Math.ceil(frac * SEGS - 1e-9);
+      if (lit !== litCount || litPhase !== t.phase) {
+        segEls.forEach((seg, i) => {
+          seg.setAttribute('fill', i < lit ? (t.phase === 'focus' ? seg.dataset.zone : '#3b82c4') : 'var(--ft-off)');
+        });
+        litCount = lit; litPhase = t.phase;
+      }
       const [kx, ky] = pt(92, Math.min(frac, 0.9999));
       ref('knob').setAttribute('cx', kx.toFixed(2));
       ref('knob').setAttribute('cy', ky.toFixed(2));
-      ref('knob').style.display = editable(t) ? '' : 'none';
+      ref('knob').style.display = editable(t) && unit !== 'percent' ? '' : 'none';
       if (ref('labels').dataset.unit !== unit) { ref('labels').innerHTML = labelsMarkup(unit); ref('labels').dataset.unit = unit; }
       disk.setAttribute('aria-valuetext', formatClock(left));
       // العجلات عند التوقف (وليس في الحجم الصغير)، والعدّاد أثناء الجلسة
@@ -266,7 +282,9 @@ export default {
       const per = c.every || 4;
       ref('dots').textContent = c.every ? '🍅'.repeat(t.done % per) + '○'.repeat(per - (t.done % per)) : '';
       el.querySelector('[data-act="toggle"]').textContent = t.status === 'running' ? 'إيقاف مؤقت ⏸' : t.status === 'paused' ? 'استئناف ▶' : 'ابدأ ▶';
-      el.querySelector('[data-act="unit"]').textContent = unit === 'hours' ? 'الحلقة: ساعات ⇄' : 'الحلقة: دقائق ⇄';
+      el.querySelector('[data-act="unit"]').textContent = { minutes: 'الحلقة: دقائق ⇄', hours: 'الحلقة: ساعات ⇄', percent: 'الحلقة: نسبة ٪ ⇄' }[unit];
+      el.querySelector('[data-act="mute"]').textContent = s.muted ? '🔕 صامت' : '🔔 تنبيه';
+      el.querySelector('[data-act="mute"]').setAttribute('aria-pressed', String(Boolean(s.muted)));
       el.querySelector('[data-act="chain"]').setAttribute('aria-pressed', String(Boolean(s.chain)));
       for (const b of el.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === s.mode));
       const today = dayStats(s.log, new Date(now));
@@ -298,7 +316,8 @@ export default {
       }
       if (act === 'skip') store.set({ timer: advance(t, cfg()), notice: null }); // التخطي لا يُسجَّل جلسةً
       if (act === 'reset') store.set({ timer: reset(t, cfg()), notice: null });
-      if (act === 'unit') store.set({ unit: unitFor(t) === 'hours' ? 'minutes' : 'hours' });
+      if (act === 'unit') store.set({ unit: nextUnit(unitFor(t)) });
+      if (act === 'mute') store.set({ muted: !store.get().muted });
       if (act === 'chain') store.set({ chain: !store.get().chain });
     });
     ref('goal').addEventListener('change', (e) => store.set({ goal: Math.min(24, Math.max(1, parseInt(e.target.value, 10) || 8)) }));

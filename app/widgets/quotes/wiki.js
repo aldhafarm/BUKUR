@@ -29,12 +29,38 @@ export function parseEntity(json) {
     arTitle: ent.sitelinks?.arwiki?.title ?? null,
     image: name ? { thumb: `${FILEPATH}${encodeURIComponent(name)}?width=160`, page: `${FILEPAGE}${encodeURIComponent(name)}`, file } : null,
     wikidataUrl: `https://www.wikidata.org/wiki/${ent.id}`,
+    workIds: (ent.claims?.P800 ?? []).map((c) => c.mainsnak?.datavalue?.value?.id).filter(Boolean).slice(0, 12),
   };
+}
+
+const imageOf = (file) => {
+  if (!file) return null;
+  const name = file.replace(/ /g, '_');
+  return { thumb: `${FILEPATH}${encodeURIComponent(name)}?width=220`, page: `${FILEPAGE}${encodeURIComponent(name)}`, file };
+};
+
+/** «أعماله البارزة» (P800) — لكل كتاب عنوانه وصورته (P18) إن وُجدت. دالة نقية للتحليل. */
+export function parseWorks(json, ids) {
+  const ents = json?.entities ?? {};
+  return ids.map((id) => ents[id]).filter((e) => e && !('missing' in e)).map((e) => ({
+    qid: e.id,
+    title: e.labels?.ar?.value ?? e.labels?.en?.value ?? e.id,
+    image: imageOf(e.claims?.P18?.[0]?.mainsnak?.datavalue?.value),
+    url: `https://www.wikidata.org/wiki/${e.id}`,
+  }));
+}
+
+export function worksUrl(ids) {
+  const q = new URLSearchParams({ action: 'wbgetentities', ids: ids.join('|'), props: 'labels|claims', languages: 'ar|en', format: 'json', origin: '*' });
+  return `${WD}?${q}`;
 }
 
 export async function fetchWiki(enwikiTitle, fetchImpl = fetch) {
   const ent = parseEntity(await (await fetchImpl(entityUrl(enwikiTitle))).json());
   if (!ent) return null;
+  if (ent.workIds.length) {
+    try { ent.works = parseWorks(await (await fetchImpl(worksUrl(ent.workIds))).json(), ent.workIds); } catch { ent.works = []; }
+  } else ent.works = [];
   if (ent.arTitle) {
     try {
       const s = await (await fetchImpl(AR_SUMMARY + encodeURIComponent(ent.arTitle.replace(/ /g, '_')))).json();
