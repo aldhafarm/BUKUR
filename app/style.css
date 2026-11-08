@@ -122,15 +122,14 @@ button { font: inherit; cursor: pointer; }
 .ft-modes { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
 .ft-modes button { padding: 4px 8px; border: 1px solid var(--beige-300); border-radius: 6px; background: #fff; font-size: 12px; min-height: 28px; color: var(--ink); }
 .ft-modes button[aria-pressed="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }
-.ft-custom { display: flex; gap: 10px; font-size: 13px; }
-.ft-custom input, .ft-goal input { width: 52px; padding: 3px; border: 1px solid var(--beige-300); border-radius: 6px; text-align: center; font: inherit; }
+.ft-goal input { width: 52px; padding: 3px; border: 1px solid var(--beige-300); border-radius: 6px; text-align: center; font: inherit; }
 .ft-face { position: relative; width: min(240px, 86%); aspect-ratio: 1; }
 .card[data-size="s"] .ft-face { width: min(170px, 70%); }
 .ft-disk { width: 100%; height: 100%; display: block; }
 .ft-plate { fill: #fff; stroke: var(--beige-300); stroke-width: 2; }
 .ft-tick { stroke: #c9bba3; stroke-width: 1; }
 .ft-tick-l { stroke: #8f8068; stroke-width: 2; }
-.ft-sector { fill: var(--ph); opacity: .92; transition: d .25s linear; }
+.ft-sector { fill: var(--ph); opacity: .92; } /* بلا transition على d: يتشوّه عند تغيّر علم القوس الكبير */
 .ft-hub { fill: var(--beige-50); stroke: var(--beige-300); stroke-width: 1.5; }
 .ft-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; }
 .ft-phase { font-size: 12px; color: var(--muted); }
@@ -154,3 +153,21 @@ button { font: inherit; cursor: pointer; }
 .em-open { color: var(--green-700); text-decoration: none; white-space: nowrap; }
 .em-open:hover { text-decoration: underline; }
 .em-frame { display: block; width: 100%; border: 0; background: #18181b; }
+
+/* ── المؤقت التفاعلي: حلقة تُسحب، عجلات داخل الحلقة، أزرار الوحدة والسلسلة */
+.ft-disk { touch-action: none; cursor: grab; }
+.ft-disk.ft-dragging { cursor: grabbing; }
+.ft[data-status="running"] .ft-disk { cursor: default; }
+.ft-labels text { font-size: 10px; fill: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+.ft-knob { fill: #fff; stroke: var(--ph); stroke-width: 3; filter: drop-shadow(0 1px 2px rgba(0,0,0,.25)); }
+.ft-picker { display: flex; align-items: center; gap: 2px; pointer-events: auto; }
+.ft-picker > span { font-weight: 700; color: var(--muted); }
+.ft-wheel { height: 78px; width: 34px; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; text-align: center;
+  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent); -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent); }
+.ft-wheel::-webkit-scrollbar { display: none; }
+.ft-wheel:focus-visible { outline: 2px solid var(--ph); border-radius: 6px; }
+.ft-wheel-item { height: 26px; line-height: 26px; scroll-snap-align: center; font: 700 18px ui-monospace, Menlo, monospace; color: var(--ink); }
+.ft-wheel-pad { height: 26px; }
+.ft-tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.ft-chip { padding: 4px 10px; min-height: 30px; border: 1px solid var(--beige-300); border-radius: 99px; background: #fff; font-size: 12px; color: var(--ink); }
+.ft-chip[aria-pressed="true"] { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); }

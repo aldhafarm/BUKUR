@@ -11,14 +11,19 @@ export const PRESETS = {
 export const PHASE_LABEL = { focus: 'تركيز', short: 'راحة قصيرة', long: 'راحة طويلة' };
 
 const MIN = 60_000;
-const clampMinutes = (n) => Math.min(180, Math.max(1, Math.round(Number(n) || 0)));
+export const MIN_SEC = 10;          // أقصر مدة مخصصة: ١٠ ثوانٍ
+export const MAX_SEC = 12 * 3600;   // أطولها: ١٢ ساعة (حلقة الساعات)
+const clampSec = (n) => Math.min(MAX_SEC, Math.max(MIN_SEC, Math.round(Number(n) || 0)));
 
-/** إعدادات النموذج الفعلية: نموذج جاهز، أو «مخصص» بمدتين يكتبهما المستخدم. */
+/**
+ * إعدادات النموذج الفعلية: نموذج جاهز، أو «مخصص» بمدتين بالثواني (focusSec / breakSec).
+ * المدد في الإعدادات بالدقائق (قد تكون كسرية للمخصص). يقبل الصيغة القديمة {focus, short} بالدقائق.
+ */
 export function configFor(mode, custom = {}) {
   if (PRESETS[mode]) return PRESETS[mode];
-  const focus = clampMinutes(custom.focus ?? 25);
-  const brk = clampMinutes(custom.short ?? 5);
-  return { label: 'مخصص', focus, short: brk, long: brk, every: 0 };
+  const focusSec = clampSec(custom.focusSec ?? (custom.focus ?? 25) * 60);
+  const breakSec = clampSec(custom.breakSec ?? (custom.short ?? 5) * 60);
+  return { label: 'مخصص', focus: focusSec / 60, short: breakSec / 60, long: breakSec / 60, every: 0 };
 }
 
 export const phaseMs = (phase, cfg) => cfg[phase] * MIN;
@@ -105,4 +110,55 @@ export function formatMinutes(min) {
   const m = min % 60;
   if (h === 0) return `${m}د`;
   return m === 0 ? `${h}س` : `${h}س ${m}د`;
+}
+
+// ── الحلقة التفاعلية: تُسحب لتحديد المدة. «دقائق» = الحلقة ٦٠ دقيقة، «ساعات» = الحلقة ١٢ ساعة.
+
+export const RING = {
+  minutes: { spanMs: 60 * MIN, snapMs: MIN, labels: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55] },
+  hours: { spanMs: 12 * 60 * MIN, snapMs: 5 * MIN, labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+};
+
+/** زاوية (٠ في القمة، مع عقارب الساعة) ← مدة مقرّبة لوحدة الحلقة، لا تقل عن خطوة واحدة. */
+export function angleToMs(angleDeg, unit) {
+  const r = RING[unit];
+  const a = ((angleDeg % 360) + 360) % 360;
+  const ms = Math.round(((a / 360) * r.spanMs) / r.snapMs) * r.snapMs;
+  return ms === 0 && a > 300 ? r.spanMs : Math.max(r.snapMs, ms); // الالتفاف عند القمة = حلقة كاملة
+}
+
+/** نسبة المدة من الحلقة (0..1) لرسم القطاع — ما يزيد على الحلقة يُرسم حلقة كاملة. */
+export const ringFraction = (ms, unit) => Math.min(1, Math.max(0, ms / RING[unit].spanMs));
+
+/** الوحدة المناسبة للمدة: أكثر من ساعة ← ساعات. */
+export const autoUnit = (ms) => (ms > 60 * MIN ? 'hours' : 'minutes');
+
+export const splitHMS = (ms) => {
+  const t = Math.round(ms / 1000);
+  return { h: Math.floor(t / 3600), m: Math.floor((t % 3600) / 60), s: t % 60 };
+};
+export const fromHMS = ({ h = 0, m = 0, s = 0 }) => ((h * 3600) + (m * 60) + s) * 1000;
+
+/** مدة جديدة للمرحلة الحالية ← إعدادات «مخصص» تحفظ مدة المرحلة الأخرى كما هي. */
+export function customWith(cfg, phase, ms) {
+  const sec = clampSec(ms / 1000);
+  return phase === 'focus'
+    ? { focusSec: sec, breakSec: Math.round(cfg.short * 60) }
+    : { focusSec: Math.round(cfg.focus * 60), breakSec: sec };
+}
+
+/**
+ * «السلسلة»: يعالج كل مرحلة انتهت حتى «now». بلا سلسلة: تنتهي المرحلة وتنتظر «ابدأ».
+ * مع السلسلة: تبدأ التالية من لحظة انتهاء السابقة (لا من لحظة الفتح)، فيبقى العدّ صحيحاً
+ * وإن كانت الصفحة مغلقة. يعيد الحالة الجديدة وقائمة المراحل المنتهية لتسجيلها.
+ */
+export function catchUp(s, cfg, now, chain) {
+  const ended = [];
+  let st = s;
+  for (let i = 0; i < 200 && isFinished(st, now); i++) {
+    ended.push({ phase: st.phase, endsAt: st.endsAt });
+    const next = advance(st, cfg);
+    st = chain ? { ...next, status: 'running', endsAt: st.endsAt + next.remainingMs } : next;
+  }
+  return { state: st, ended };
 }
