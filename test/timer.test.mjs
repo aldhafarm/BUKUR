@@ -234,3 +234,13 @@ test('تنبيه المراحل: عند كل انتقال لون (كل ربع) �
   assert.equal(quarterCrossed(0.3, 0.8), null);     // إعادة الضبط للأعلى: لا تنبيه
   assert.deepEqual([0, 14.9, 15, 44, 61].map((m) => upStep(m * MIN)), [0, 0, 1, 2, 4]);
 });
+
+import { logMinutes } from '../app/widgets/focus-timer/timer.js';
+
+test('مهام التصاعدي تُجمع في دقائق التركيز ولا تُحسب جلسة بومودورو', () => {
+  const day = new Date(2026, 10, 8, 10, 0);
+  let log = logFocus({}, day, 25);          // جلسة بومودورو
+  log = logMinutes(log, day, 2);             // مهمة دقيقتين
+  log = logMinutes(log, day, 42.1);          // مهمة ٤٢ دقيقة
+  assert.deepEqual(dayStats(log, day), { sessions: 1, minutes: 69.1 });
+});

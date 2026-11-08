@@ -1,12 +1,14 @@
-// ودجة مؤقت التركيز (بومودورو) — منفصلة الآن، وتُربط بالبكور في مرحلة ثانية.
-// • القرص: قطاع يتناقص (برتقالي للتركيز، أخضر للراحة) — يُسحب بالفأرة أو اللمس لتحديد المدة.
-// • زر الوحدة: الحلقة = ٦٠ دقيقة أو ١٢ ساعة. • داخل الحلقة: عجلات ساعات/دقائق/ثوانٍ كمؤقت أبل.
-// • «سلسلة»: الراحة ثم التركيز تتواليان تلقائياً، مع تنبيه عند كل انتقال.
-import { icon, setIconBtn, tip } from '../../icons.js';
+// ودجة مؤقت التركيز — السلوك فقط؛ المنطق في timer.js، والرسم في dial.js، والقالب في view.js، والأصوات في sound.js.
+// • تنازلي (بومودورو، الوضع الأساسي): حلقة تُسحب بوقفات، وسلسلة تلقائية، وتنبيه عند كل لون.
+// • تصاعدي (أداة قياس جانبية): يحسب الوقت المستغرق لمهمة، ويُحفظ في سجل المهام.
+import { icon, setIconBtn } from '../../icons.js';
+import { SEGS, labelsMarkup, pt, segmentsMarkup, ticksMarkup } from './dial.js';
+import { chime, softCue, tick, unlockAudio } from './sound.js';
+import { ROW, TEMPLATE } from './view.js';
 import {
-  PHASE_LABEL, PRESETS, RING, advance, autoUnit, catchUp, configFor, customWith, dayStats,
-  formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, pause, phaseMs, remaining, reset,
-  PERCENT_LABELS, nextUnit, remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit, zoneColor,
+  PHASE_LABEL, advance, autoUnit, catchUp, configFor, customWith, dayStats,
+  formatClock, formatMinutes, fromHMS, initial, isFinished, logFocus, logMinutes, pause, phaseMs, remaining, reset,
+  nextUnit, remainingColor, ringFraction, splitHMS, start, weekStats, wrapUnit, zoneColor,
   dragMs, stepDetent, PALETTE, quarterCrossed, upStep, formatElapsed, logTask, swElapsed, swInitial, swToggle,
 } from './timer.js';
 
@@ -26,165 +28,6 @@ const DEFAULTS = {
   notice: null,
 };
 
-const MODES = [...Object.entries(PRESETS).map(([id, p]) => [id, `${p.focus}/${p.short}`, p.label]), ['custom', '', 'مخصص']];
-const ROW = 34; // ارتفاع صف العجلة بالبكسل — صف واحد ظاهر، كالعدّاد أثناء التشغيل
-const range = (n) => Array.from({ length: n }, (_, i) => i);
-const wheel = (key, n, label) => `
-  <div class="ft-wheel" data-wheel="${key}" tabindex="0" aria-label="${label}">
-    <div class="ft-wheel-pad"></div>${range(n).map((i) => `<div class="ft-wheel-item">${String(i).padStart(2, '0')}</div>`).join('')}<div class="ft-wheel-pad"></div>
-  </div>`;
-
-const TEMPLATE = `
-  <div class="ft">
-    <div class="ft-modes" role="group" aria-label="النموذج">
-      <button type="button" class="ft-kind" data-act="kind"></button>
-      <input class="ft-task" data-ref="task" data-up maxlength="40" placeholder="المهمة…" aria-label="اسم المهمة">
-      ${MODES.map(([id, short, name]) => `<button type="button" data-mode="${id}" data-down data-size="m l" ${tip(name)}>${short || icon('tune')}</button>`).join('')}
-    </div>
-    <div class="ft-face">
-      <svg viewBox="-14 -14 228 228" class="ft-disk" data-ref="disk" role="slider" tabindex="0"
-           aria-label="اسحب على الحلقة لتحديد المدة">
-        <circle cx="100" cy="100" r="112" class="ft-plate"/>
-        <g data-ref="segs" class="ft-segs"></g>
-        <g data-ref="ticks"></g>
-        <g data-ref="labels" class="ft-labels"></g>
-        <circle data-ref="knob" r="6" class="ft-knob"/>
-        <circle cx="100" cy="100" r="58" class="ft-hub"/>
-      </svg>
-      <div class="ft-center">
-        <span class="ft-phase" data-ref="phase"></span>
-        <b class="ft-time" data-ref="time" dir="ltr"></b>
-        <div class="ft-picker" data-ref="picker" dir="ltr">
-          ${wheel('h', 13, 'ساعات')}<span>:</span>${wheel('m', 60, 'دقائق')}<span>:</span>${wheel('s', 60, 'ثوانٍ')}
-        </div>
-        <span class="ft-dots" data-ref="dots" aria-label="جلسات الدورة"></span>
-      </div>
-    </div>
-    <div class="ft-tools">
-      <button type="button" class="ft-chip" data-act="unit" data-down></button>
-      <button type="button" class="ft-chip" data-down data-act="chain" ${tip('سلسلة تلقائية: الراحة ثم الجلسة التالية مع تنبيه')}>${icon('sync')}</button>
-      <button type="button" class="ft-chip" data-act="mute"></button>
-    </div>
-    <p class="ft-notice" data-ref="notice" role="status" hidden></p>
-    <p class="ft-toast" data-ref="toast" role="status" aria-live="polite" hidden></p>
-    <div class="ft-actions">
-      <button type="button" class="ft-btn ft-primary" data-act="toggle"></button>
-      <button type="button" class="ft-btn" data-act="skip" data-down ${tip('تخطَّ إلى المرحلة التالية')}>${icon('skip_next')}</button>
-      <button type="button" class="ft-btn" data-act="reset" data-down ${tip('أعد المرحلة لبدايتها')}>${icon('restart_alt')}</button>
-      <button type="button" class="ft-btn" data-act="sw-done" data-up ${tip('أنهِ واحفظ الوقت المستغرق')}>${icon('check')}</button>
-      <button type="button" class="ft-btn" data-act="sw-reset" data-up ${tip('صفّر دون حفظ')}>${icon('restart_alt')}</button>
-    </div>
-    <div class="ft-stats" data-size="m l">
-      <div ${tip('جلسات اليوم / الهدف')}>${icon('today')}<b data-ref="today"></b></div>
-      <div ${tip('ساعات التركيز اليوم')}>${icon('timer')}<b data-ref="hours"></b></div>
-      <div data-size="l" ${tip('آخر ٧ أيام')}>${icon('calendar_month')}<b data-ref="week"></b></div>
-    </div>
-    <ul class="ft-tasks" data-ref="tasks" data-up data-size="m l"></ul>
-    <div class="ft-goal" data-size="l">
-      <label>هدف اليوم <input type="number" min="1" max="24" inputmode="numeric" data-ref="goal" dir="ltr"> جلسات</label>
-    </div>
-  </div>`;
-
-const pt = (r, frac) => {
-  const a = frac * 2 * Math.PI;
-  return [100 + r * Math.sin(a), 100 - r * Math.cos(a)];
-};
-
-function ticksMarkup() {
-  // حلقة نقاط خارج الأشرطة كالمؤقت المرجعي — نقطة أكبر كل ١٠٪
-  let out = '';
-  for (let i = 0; i < 100; i++) {
-    const [x, y] = pt(97, i / 100);
-    out += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${i % 10 === 0 ? 1.3 : 0.6}" class="ft-dot"/>`;
-  }
-  return out;
-}
-
-// ١٠٠ شريط كالمؤقت المرجعي — لونه بحسب موضعه (أحمر ← برتقالي ← أصفر ← فيروزي)
-const SEGS = 100;
-function segmentsMarkup() {
-  let out = '';
-  for (let i = 0; i < SEGS; i++) {
-    const a0 = i / SEGS + 0.0016;
-    const a1 = (i + 1) / SEGS - 0.0016;
-    const [x1, y1] = pt(92, a0); const [x2, y2] = pt(92, a1);
-    const [x3, y3] = pt(66, a1); const [x4, y4] = pt(66, a0);
-    out += `<path d="M${x1.toFixed(2)} ${y1.toFixed(2)}A92 92 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}L${x3.toFixed(2)} ${y3.toFixed(2)}A66 66 0 0 0 ${x4.toFixed(2)} ${y4.toFixed(2)}Z" data-zone="${zoneColor((i + 0.5) / SEGS)}"/>`;
-  }
-  return out;
-}
-
-const labelsMarkup = (unit) => (unit === 'percent' ? PERCENT_LABELS : RING[unit].labels).map((n, i, arr) => {
-  const [x, y] = pt(104, i / arr.length);
-  // الصفر في القمة يُكتب ∞ كما في ساعة البكور (طلب المالك) — في الدقائق والساعات؛ وفي النسبة تبقى ١٠٠٪
-  if (i === 0 && unit !== 'percent') return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="central" class="ft-inf">∞</text>`;
-  return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="central">${unit === 'percent' ? `${n}%` : n}</text>`;
-}).join('');
-
-// نغمة بلا ملفات. المتصفح يسمح بالصوت بعد لمسة، و«ابدأ» لمسة.
-let audio = null;
-
-/** «تكّة» قصيرة عند كل وقفة أثناء الضبط (طلب المالك: صوت متقطع كالتكويك) — ضجيج قصير جداً مُرشَّح. */
-let lastTick = 0;
-function tick() {
-  const now = performance.now();
-  if (now - lastTick < 28) return; // لا أكثر من ~٣٥ تكّة/ث عند السحب السريع
-  lastTick = now;
-  try {
-    audio ??= new AudioContext();
-    audio.resume?.();
-    const t = audio.currentTime;
-    const len = Math.floor(audio.sampleRate * 0.012);
-    const buf = audio.createBuffer(1, len, audio.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 4;
-    const src = audio.createBufferSource();
-    src.buffer = buf;
-    const bp = audio.createBiquadFilter();
-    bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = 1.2;
-    const gain = audio.createGain();
-    gain.gain.setValueAtTime(0.35, t);
-    src.connect(bp).connect(gain).connect(audio.destination);
-    src.start(t);
-  } catch { /* بلا صوت */ }
-  try { navigator.vibrate?.(4); } catch { /* بلا اهتزاز */ }
-}
-function chime(kind) {
-  try {
-    audio ??= new AudioContext();
-    const t = audio.currentTime;
-    const notes = kind === 'focus' ? [660, 880, 990] : [880, 660, 520]; // صاعدة: عُد للتركيز · هابطة: استرح
-    notes.forEach((freq, i) => {
-      const osc = audio.createOscillator();
-      const gain = audio.createGain();
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, t + i * 0.28);
-      gain.gain.exponentialRampToValueAtTime(0.25, t + i * 0.28 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.28 + 0.25);
-      osc.connect(gain).connect(audio.destination);
-      osc.start(t + i * 0.28);
-      osc.stop(t + i * 0.28 + 0.26);
-    });
-  } catch { /* لا صوت متاح — تكفي الرسالة */ }
-}
-
-/** نغمة خفيفة واحدة لتنبيه المراحل — أهدأ من نغمة الانتهاء. */
-function softCue() {
-  try {
-    audio ??= new AudioContext();
-    const t = audio.currentTime;
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = 740;
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
-    osc.connect(gain).connect(audio.destination);
-    osc.start(t);
-    osc.stop(t + 0.36);
-  } catch { /* بلا صوت */ }
-}
 
 export default {
   id: 'focus-timer',
@@ -481,7 +324,7 @@ export default {
           store.set({
             sw: swInitial(),
             tasks: logTask(s.tasks, name, ms, new Date(now)),
-            log: ms >= 60_000 ? logFocus(s.log, new Date(now), Math.round(ms / 60_000)) : s.log,
+            log: logMinutes(s.log, new Date(now), ms / 60_000), // دقائق تركيز فقط — لا تُعدّ جلسة بومودورو
             notice: `حُفظ: «${name}» استغرقت ${formatElapsed(ms)}`,
           });
         }
@@ -490,7 +333,7 @@ export default {
       }
       const t = timer();
       if (act === 'toggle') {
-        try { audio ??= new AudioContext(); audio.resume?.(); } catch { /* بلا صوت */ }
+        unlockAudio();
         store.set({ timer: t.status === 'running' ? pause(t, now) : start(t, now), notice: null });
       }
       if (act === 'skip') store.set({ timer: advance(t, cfg()), notice: null }); // التخطي لا يُسجَّل جلسةً
