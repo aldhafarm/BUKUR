@@ -470,7 +470,7 @@ button { font: inherit; cursor: pointer; }
 .pl-year { min-width: 560px; gap: 0; border-top: 1px solid var(--beige-300); }
 .pl-yrow { border-bottom: 1px solid var(--beige-300); gap: 0; }
 .pl-yrow > b { font-size: 11px; font-weight: 700; color: var(--ink); padding: 4px 4px 0; }
-.pl-ydays { grid-template-columns: repeat(31, minmax(16px, 1fr)); row-gap: 1px; padding-bottom: 3px; }
+.pl-ydays { grid-template-columns: repeat(var(--cols, 31), minmax(16px, 1fr)); row-gap: 1px; padding-bottom: 3px; }
 .pl-ydays > i { height: auto; min-height: 22px; display: flex; align-items: baseline; gap: 2px; padding: 2px 2px 0; background: #fff; border-inline-start: 1px solid var(--beige-100);
   border-top: 3px solid color-mix(in srgb, var(--s) 70%, #fff); font-style: normal; }
 .pl-ydays > i.pl-wkend { background: color-mix(in srgb, var(--s) 10%, #f4ede1); }
@@ -517,3 +517,23 @@ button { font: inherit; cursor: pointer; }
 .pl-later-btn { background: var(--beige-100) !important; color: var(--green-800) !important; }
 [draggable="true"] { cursor: grab; }
 .pl-drop { outline: 2px dashed var(--orange) !important; outline-offset: -2px; background: #fff3e6 !important; }
+
+/* ── المخطط: تخطيطات السنة */
+.pl-ywhead .pl-ydays > i { background: none; border-top: 0; min-height: 0; font-size: 9px; color: var(--muted); justify-content: center; font-style: normal; font-weight: 700; }
+.pl-yweeks { min-width: 0; }
+.pl-yweeks .pl-ydays { grid-template-columns: repeat(7, minmax(30px, 1fr)); }
+.pl-yweeks .pl-yrow > b small { font-weight: 400; color: var(--muted); font-size: 9px; }
+.pl-yweeks .pl-yrow.pl-mstart { border-top: 2px solid var(--green-700); }
+.pl-ymonths { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.pl-mini { border: 1px solid var(--beige-300); border-radius: 10px; background: #fff; padding: 6px; }
+.pl-mini h5 { margin: 0 0 4px; font-size: 13px; color: var(--green-800); }
+.pl-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+.pl-mgrid em { font-style: normal; font-size: 9px; color: var(--muted); text-align: center; }
+.pl-mgrid > i { min-height: 26px; }
+.pl-mgrid button { min-height: 26px; padding: 1px 0 0; border: 0; border-top: 2px solid color-mix(in srgb, var(--s) 70%, #fff); background: #fff; font: inherit; cursor: pointer; display: grid; justify-items: center; gap: 1px; }
+.pl-mgrid button.pl-wkend { background: color-mix(in srgb, var(--s) 10%, #f4ede1); }
+.pl-mgrid button b { font-size: 10px; font-weight: 600; }
+.pl-mgrid button.pl-now b { display: inline-grid; place-items: center; min-width: 16px; height: 16px; border-radius: 50%; background: #e0393e; color: #fff; }
+.pl-mgrid button span { display: flex; gap: 1px; min-height: 4px; }
+.pl-mgrid button u { width: 4px; height: 4px; border-radius: 50%; }
+.pl-mgrid button:hover { background: #fff3e6; }

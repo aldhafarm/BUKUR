@@ -4,7 +4,7 @@
 // المرحلة الأولى: مهام بمدة وتصنيف ونسبة إنجاز، وفرز بالتصنيف (كـ AnuCal)، و«لاحقاً» للمهام بلا موعد تُسحب إلى يوم؛ والخطط والأهداف (عشرية ← سنوية ← يومية) لاحقاً فوقها.
 import { icon, tip } from '../../icons.js';
 import {
-  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule,
+  CATEGORIES, colorOf, countByCategory, visibleTasks, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, YEAR_LAYOUT_LABEL, nextYearLayout, monthOffset, WEEKDAY_COLS, yearWeeks, monthCells,
   periodAt, rangeFor, rangeProgress, shift, tasksIn, yearRows,
 } from './plan.js';
 
@@ -25,7 +25,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6] }, // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, yearLayout: 'date' }, // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -33,23 +33,64 @@ export default {
     const today = () => key(new Date());
     const anchor = () => store.get().anchor ?? today();
 
+    // خانة يوم في السنة: رقمه وحرفه، وظل العطلة، وخط لون الموسم، ودائرة حمراء لليوم
+    function dayCell(s, d, t0, label) {
+      const k = key(d);
+      const p = periodAt(s.system, k);
+      const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : '';
+      return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}" data-day="${k}" ${tip(`${label}${p ? ` · ${p.name}` : ''}`)}><b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s></i>`;
+    }
+
     function yearView(s, r) {
       const y = parse(r.start).getFullYear();
       const t0 = today();
-      return `<div class="pl-year">${yearRows(s.tasks, y).map((row) => {
-        const cells = Array.from({ length: 31 }, (_, i) => {
-          if (i >= row.days) return '<i class="pl-off"></i>';
-          const d = new Date(y, row.m, i + 1);
-          const k = key(d);
-          const p = periodAt(s.system, k);
-          const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''; // عطلة نهاية الأسبوع بحسب إعداد المستخدم
-          return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}" data-day="${k}" ${tip(`${i + 1} ${row.name}${p ? ` · ${p.name}` : ''}`)}><b>${i + 1}</b><s>${DOW1[d.getDay()]}</s></i>`;
+      const L = s.yearLayout;
+      if (L === 'months') return yearMonthsView(s, y, t0);
+      if (L === 'weeks') return yearWeeksView(s, y, t0);
+      // بالتاريخ (١–٣١) أو محاذاة بيوم الأسبوع (٣٧ عموداً، يُزاح أول كل شهر إلى عمود يومه)
+      const aligned = L === 'weekday';
+      const cols = aligned ? WEEKDAY_COLS : 31;
+      const rows = yearRows(s.tasks, y).map((row) => {
+        const off = aligned ? monthOffset(y, row.m, s.weekStart) : 0;
+        const cells = Array.from({ length: cols }, (_, i) => {
+          const day = i - off + 1;
+          if (day < 1 || day > row.days) return '<i class="pl-off"></i>';
+          return dayCell(s, new Date(y, row.m, day), t0, `${day} ${row.name}`);
         }).join('');
-        const lanes = row.bars.map((b, i) => bar(b.t, b, `grid-row:${i + 2}`)).join('');
-        return `<div class="pl-yrow"><b>${row.name.slice(0, 3)}</b><div class="pl-ydays">${cells}${lanes}</div></div>`;
-      }).join('')}
-        <div class="pl-yrow pl-yhead"><b></b><div class="pl-ydays">${Array.from({ length: 31 }, (_, i) => `<i>${(i + 1) % 5 === 0 || i === 0 ? i + 1 : ''}</i>`).join('')}</div></div>
-      </div>`;
+        const lanes = row.bars.map((b, i) => bar(b.t, { ...b, col: b.col + off }, `grid-row:${i + 2}`)).join('');
+        return `<div class="pl-yrow"><b>${row.name.slice(0, 3)}</b><div class="pl-ydays" style="--cols:${cols}">${cells}${lanes}</div></div>`;
+      }).join('');
+      const head = aligned ? `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:${cols}">${Array.from({ length: cols }, (_, i) => `<i>${DOW1[(i + s.weekStart) % 7]}</i>`).join('')}</div></div>` : '';
+      return `<div class="pl-year">${head}${rows}</div>`;
+    }
+
+    // مقسّم أسابيع: صف لكل أسبوع × ٧ أيام، وعلامة الشهر عند أوله
+    function yearWeeksView(s, y, t0) {
+      const head = `<div class="pl-yrow pl-ywhead"><b></b><div class="pl-ydays" style="--cols:7">${Array.from({ length: 7 }, (_, i) => `<i>${DOW[(i + s.weekStart) % 7]}</i>`).join('')}</div></div>`;
+      return `<div class="pl-year pl-yweeks">${head}${yearWeeks(y, s.weekStart).map((w) => {
+        const cells = Array.from({ length: 7 }, (_, i) => {
+          const k = addDays(w.start, i);
+          const d = parse(k);
+          return d.getFullYear() === y ? dayCell(s, d, t0, `${d.getDate()} ${MONTHS[d.getMonth()]}`) : '<i class="pl-off"></i>';
+        }).join('');
+        const lanes = tasksIn(s.tasks, w).map((t, i) => bar(t, barFor(t, w), `grid-row:${i + 2}`)).join('');
+        return `<div class="pl-yrow${w.monthStart != null ? ' pl-mstart' : ''}"><b ${tip(`الأسبوع ${w.n}`)}>${w.monthStart != null ? MONTHS[w.monthStart].slice(0, 3) : `<small>${w.n}</small>`}</b><div class="pl-ydays" style="--cols:7">${cells}${lanes}</div></div>`;
+      }).join('')}</div>`;
+    }
+
+    // مقسّم أشهراً: ١٢ تقويماً صغيراً؛ تحت كل يوم نقاط بألوان تصنيفات مهامه، والضغط يفتح ذلك اليوم
+    function yearMonthsView(s, y, t0) {
+      return `<div class="pl-ymonths">${MONTHS.map((name, m) => {
+        const cells = monthCells(y, m, s.weekStart).map((k) => {
+          if (!k) return '<i class="pl-off"></i>';
+          const d = parse(k);
+          const list = tasksIn(s.tasks, { start: k, end: k });
+          const dots = list.slice(0, 3).map((t) => `<u style="background:${colorOf(t)}"></u>`).join('');
+          const p = periodAt(s.system, k);
+          return `<button type="button" data-goto="${k}" data-day="${k}" style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''}" ${tip(`${d.getDate()} ${name}${list.length ? ` · ${list.map((t) => t.name).join('، ')}` : ''}`)}><b>${d.getDate()}</b><span>${dots}</span></button>`;
+        }).join('');
+        return `<section class="pl-mini"><h5>${name}</h5><div class="pl-mgrid">${Array.from({ length: 7 }, (_, i) => `<em>${DOW1[(i + s.weekStart) % 7]}</em>`).join('')}${cells}</div></section>`;
+      }).join('')}</div>`;
     }
 
     // أزرار الفرز بالتصنيف: كل زر يُظهر أو يخفي مهام تصنيفه، وعليه عددها في النطاق المعروض
@@ -135,6 +176,7 @@ export default {
         <label>عطلة نهاية الأسبوع
           <select data-weekend-preset>${Object.entries(WEEKEND_PRESETS).map(([id, v]) => `<option value="${id}" ${id === preset ? 'selected' : ''}>${v.label}</option>`).join('')}
             <option value="custom" ${preset === 'custom' ? 'selected' : ''} disabled>مخصص</option></select></label>
+        <label>بداية الأسبوع <select data-week-start>${DOW.map((n, i) => `<option value="${i}" ${i === s.weekStart ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <div class="pl-wdays" role="group" aria-label="أيام العطلة">${DOW.map((n, i) => `<button type="button" data-wday="${i}" aria-pressed="${s.weekend.includes(i)}">${n}</button>`).join('')}</div>
       </div>`;
     }
@@ -160,6 +202,8 @@ export default {
       const all = store.get();
       const s = { ...all, tasks: visibleTasks(all.tasks, all.hidden ?? []), hidden: all.hidden ?? [] }; // الفرز يسري على كل العروض والنسبة
       s.weekend = Array.isArray(all.weekend) ? all.weekend : [5, 6];
+      s.weekStart = Number.isInteger(all.weekStart) ? all.weekStart : 0;
+      s.yearLayout = all.yearLayout ?? 'date';
       const narrow = NARROW.matches;
       s.scope = scopeFor(all.scope, narrow); // السنة والشهر الكامل والموسم الكامل للتطبيق الكامل فقط
       const two = s.scope === 'months2' || s.scope === 'periods2' ? twoRanges(s.scope, anchor(), s.system) : null;
@@ -171,6 +215,7 @@ export default {
       el.innerHTML = `<div class="pl">
         <div class="pl-top">
           <button type="button" class="pl-btn pl-scope" data-act="scope" ${tip(narrow ? 'بدّل العرض: يوم ← أسبوع ← شهران ← فترتان (السنة والشهر الكامل في التبويب الكامل)' : 'بدّل العرض: سنة ← موسم ← شهر ← أسبوع ← يوم')}>${icon(SCOPE_ICON[s.scope])}<span>${SCOPE_LABEL[s.scope]}</span></button>
+          ${s.scope === 'year' ? `<button type="button" class="pl-btn" data-act="ylayout" ${tip('ترتيب السنة — اضغط للتبديل: بالتاريخ ← محاذاة باليوم ← أشهر ← أسابيع')}>${icon({ date: 'format_list_numbered', weekday: 'view_week', months: 'calendar_view_month', weeks: 'view_agenda' }[s.yearLayout])}<span>${YEAR_LAYOUT_LABEL[s.yearLayout]}</span></button>` : ''}
           <button type="button" class="pl-btn" data-act="system" ${tip('نظام المواسم — اضغط للتبديل')}>${icon('eco')}<span>${SYSTEMS[s.system].label}</span></button>
           <span class="pl-nav">
             <button type="button" class="pl-btn" data-act="prev" ${tip('السابق')}>${icon('chevron_right')}</button>
@@ -207,6 +252,8 @@ export default {
       }
       const taskBtn = e.target.closest('[data-task]');
       if (taskBtn) { editing = taskBtn.dataset.task; render(); return; }
+      const go = e.target.closest('[data-goto]'); // يوم في التقويم الشهري الصغير ← عرض ذلك اليوم
+      if (go) { store.set({ anchor: go.dataset.goto, scope: 'day' }); return; }
       const wd = e.target.closest('[data-wday]');
       if (wd) {
         const w = store.get().weekend ?? [5, 6];
@@ -219,6 +266,7 @@ export default {
       const s = store.get();
       if (act === 'scope') store.set({ scope: nextScope(scopeFor(s.scope, NARROW.matches), NARROW.matches) });
       if (act === 'settings') { showSettings = !showSettings; render(); }
+      if (act === 'ylayout') store.set({ yearLayout: nextYearLayout(s.yearLayout ?? 'date') });
       if (act === 'system') store.set({ system: nextSystem(s.system) });
       if (act === 'prev' || act === 'next') store.set({ anchor: shift(scopeFor(s.scope, NARROW.matches), anchor(), act === 'next' ? 1 : -1, s.system) });
       if (act === 'today') store.set({ anchor: null });
@@ -229,6 +277,7 @@ export default {
     });
     el.addEventListener('change', (e) => {
       if (e.target.matches('[data-weekend-preset]') && WEEKEND_PRESETS[e.target.value]) store.set({ weekend: [...WEEKEND_PRESETS[e.target.value].days] });
+      if (e.target.matches('[data-week-start]')) store.set({ weekStart: Number(e.target.value) });
     });
     el.addEventListener('input', (e) => {
       if (e.target.name === 'progress') e.target.nextElementSibling.textContent = `${e.target.value}٪`;
