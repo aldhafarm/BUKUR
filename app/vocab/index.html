@@ -2,6 +2,7 @@
 <meta charset="utf-8">
 <title>EES 525 Exam 2 Flashcards</title>
 <script src="decks/index.js"></script>
+<script src="decks/plans.js"></script>
 <script>
 /* البكور: قوائم تدريب متعددة. القائمة من ?deck= أو آخر اختيار، والأصلية ees525 افتراضاً.
    لكل قائمة تقدّمها المستقل: مفاتيح بيانات التدريب ees525-* تُحفظ باسم vocab:<القائمة>:* لغير الأصلية
@@ -1302,7 +1303,22 @@ const DEF_AR=(window.__DECK&&window.__DECK.ar)||{"Bottleneck": "فقد التن�
   list.forEach(function(d){var o=document.createElement("option");o.value=d.id;o.textContent=d.name+" ("+d.n+")";if(d.id===window.__DECK_ID)o.selected=true;sel.appendChild(o);});
   sel.addEventListener("change",function(){try{localStorage.setItem("vocab-deck",sel.value);}catch(e){} location.search="?deck="+encodeURIComponent(sel.value);});
   var st=document.createElement("style");
-  st.textContent=".decksel{display:flex;flex-direction:column;gap:6px;margin-top:6px}.decksel select{font:inherit;font-size:.9rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}";
+  /* خطط التعلّم (أوراق «خطة…» في ملف IELTS): جداول للقراءة تحت اختيار القائمة */
+  var plans=window.__PLANS||[];
+  if(plans.length){
+    var det=document.createElement("details"); det.className="plans";
+    var sm=document.createElement("summary"); sm.textContent="📋 خطط التعلّم ("+plans.length+")"; det.appendChild(sm);
+    plans.forEach(function(pl){
+      var h=document.createElement("h3"); h.textContent=pl.title; det.appendChild(h);
+      var box=document.createElement("div"); box.className="pltab";
+      var t=document.createElement("table"), tr=document.createElement("tr");
+      pl.head.forEach(function(c){var th=document.createElement("th");th.textContent=c;tr.appendChild(th);}); t.appendChild(tr);
+      pl.rows.forEach(function(r){var tr2=document.createElement("tr");r.forEach(function(c){var td=document.createElement("td");td.textContent=c;tr2.appendChild(td);});t.appendChild(tr2);});
+      box.appendChild(t); det.appendChild(box);
+    });
+    head.appendChild(det);
+  }
+  st.textContent=".plans summary{cursor:pointer;font-size:.85rem;color:var(--accent)}.plans h3{font-family:var(--f-ar);font-size:1rem;margin:12px 0 6px;direction:rtl}.pltab{overflow-x:auto;direction:rtl}.pltab table{border-collapse:collapse;font-family:var(--f-ar);font-size:.85rem;min-width:640px}.pltab th,.pltab td{border:1px solid var(--line);padding:6px 8px;text-align:start;vertical-align:top}.pltab th{background:var(--back)}"+".decksel{display:flex;flex-direction:column;gap:6px;margin-top:6px}.decksel select{font:inherit;font-size:.9rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}";
   document.head.appendChild(st);
   if(!window.__DECK) return;
   var D=window.__DECK;
