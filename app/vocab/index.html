@@ -1,0 +1,1271 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta charset="utf-8">
+<title>EES 525 Exam 2 Flashcards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Noto+Naskh+Arabic:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+[hidden]{display:none!important}
+/* Layout: one centered index card on a prairie-paper ground; controls stacked beneath; works one-handed on a phone */
+:root{
+  --bg:#f1f2ec; --card:#fbfbf7; --ink:#1f2a22; --muted:#5f6b60; --line:#d6dbcf;
+  --accent:#4f6f3a; --accent-ink:#ffffff; --back:#e8eedf; --star:#a5741c;
+  --f-term:"Literata", Georgia, "Times New Roman", serif;
+  --f-ar:"Noto Naskh Arabic", "Geeza Pro", "Arabic Typesetting", Tahoma, serif;
+  --f-ui:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151a16; --card:#1e2520; --ink:#e7ece3; --muted:#9aa697; --line:#334036;
+  --accent:#8fb36f; --accent-ink:#132010; --back:#243024; --star:#e0b05a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a16; --card:#1e2520; --ink:#e7ece3; --muted:#9aa697; --line:#334036;
+  --accent:#8fb36f; --accent-ink:#132010; --back:#243024; --star:#e0b05a; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+.wrap{min-width:0;display:flex;flex-direction:column;gap:18px}
+.practice{min-width:0;display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;
+  position:sticky;top:calc(env(safe-area-inset-top, 0px) + 12px);max-height:calc(100vh - 40px);overflow:auto}
+.practice h2{font-family:var(--f-term);font-weight:650;font-size:1.15rem;margin:0}
+.phead{display:flex;flex-direction:column;gap:4px}
+.ptools{display:flex;gap:8px;flex-wrap:wrap}
+.tbtn{font:inherit;font-size:.78rem;padding:8px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.tbtn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.tbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.prompt2{margin:0;font-size:1.3rem;text-align:start;background:var(--back);border-radius:8px;padding:6px 12px}
+#typeBox{font-family:var(--f-term);font-size:1.05rem;line-height:1.7;min-height:180px;resize:vertical;width:100%;box-sizing:border-box;
+  padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+#typeBox:focus{outline:2px solid var(--accent);outline-offset:1px}
+.skipopt{display:flex;align-items:center;gap:8px;font-size:.8rem;cursor:pointer}
+.skipopt input{width:16px;height:16px;accent-color:var(--accent)}
+.tawrap{position:relative;background:var(--bg);border-radius:10px}
+.tawrap #typeBox{background:transparent;position:relative;z-index:1}
+#taGhost{position:absolute;top:1px;left:1px;overflow:hidden;pointer-events:none;box-sizing:border-box;padding:10px 12px;
+  font-family:var(--f-term);font-size:1.05rem;line-height:1.7;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;color:transparent}
+#taGhost .gh{color:color-mix(in srgb,var(--ink) 35%,transparent)}
+.psum{margin:0;font-size:.8rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks li{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);font-size:.85rem;min-width:0}
+.checks .mk{grid-row:span 2;font-weight:500}
+.checks .w{font-family:var(--f-term);overflow-wrap:anywhere}
+.checks .ar2{font-family:var(--f-ar);direction:rtl;text-align:start;color:var(--muted)}
+.checks .fix{color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
+.checks .diff{font-family:var(--f-term);font-size:.9rem;color:var(--ink)}
+.checks li.ok{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))} .checks li.ok .mk{color:var(--accent)}
+.checks li.near .mk{color:var(--star)} .checks li.bad .mk{color:#b4493b}
+.xsub{color:#b4493b;text-decoration:underline} .xadd{color:var(--star);text-decoration:underline;font-weight:650}
+.xdel{color:#b4493b;opacity:.75}
+.missing summary{cursor:pointer;font-size:.78rem;color:var(--muted)}
+.missing ul{margin:8px 0 0;padding:0 18px 0 0;font-family:var(--f-ar);direction:rtl;columns:2;column-gap:20px;font-size:.95rem}
+.modes{align-self:flex-start}
+.pmode{display:flex;flex-direction:column;gap:8px}
+.tiny{margin:0;font-size:.72rem;color:var(--muted)}
+.sugwrap{position:relative}
+#sugIn,#trIn{font-family:var(--f-ui);font-size:1.2rem;letter-spacing:.02em;width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;
+  border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+#sugIn:focus,#trIn:focus{outline:2px solid var(--accent);outline-offset:1px}
+#sugList,#taSug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;list-style:none;margin:0;padding:4px;max-height:260px;overflow:auto;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 28px -14px rgba(0,0,0,.4)}
+#sugList li,#taSug li{padding:9px 12px;border-radius:7px;font-family:var(--f-term);font-size:1.15rem;line-height:1.35;cursor:pointer}
+#sugList li b,#taSug li b{color:var(--accent)}
+#sugList li.on,#sugList li:hover,#taSug li.on,#taSug li:hover{background:var(--back)}
+.trace{position:relative}
+.trace .ghost{position:absolute;inset:0;padding:10px 12px;border:1px solid transparent;font-family:var(--f-ui);font-size:1.2rem;letter-spacing:.02em;
+  white-space:pre;overflow:hidden;pointer-events:none;line-height:normal;display:flex;align-items:center}
+.trace.tracing #trIn{background:transparent;position:relative}
+.trace.tracing{background:var(--bg);border-radius:10px}
+.ghost .gr{color:color-mix(in srgb,var(--ink) 28%,transparent)}
+.ghost .gt{color:transparent}
+.ghost .gx{color:transparent;text-decoration:underline 3px #b4493b;text-underline-offset:5px}
+#trIn.err{border-color:#b4493b}
+#trIn.done{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--bg))}
+.guide{font-family:var(--f-ui);font-size:1.35rem;letter-spacing:.04em;line-height:1.6;overflow-wrap:anywhere;padding:6px 2px}
+.guide .gd{color:var(--accent)}
+.guide .gm{color:var(--muted);opacity:.7}
+.guide .gnext{background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:0 2px;animation:blink 1s steps(2) infinite}
+.guide .gbad{background:#b4493b;color:#fff;border-radius:4px;padding:0 2px}
+@keyframes blink{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.guide .gnext{animation:none}}
+.progress{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.prhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.progress h3{margin:0;font-family:var(--f-term);font-size:1rem;font-weight:650}
+.weak{margin:0;padding-left:20px;font-size:.8rem;display:flex;flex-direction:column;gap:3px}
+.weak b{font-family:var(--f-term)} .weak span{color:var(--muted)}
+.auto{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.aphead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.auto h3{margin:0;font-family:var(--f-term);font-size:1rem;font-weight:650}
+.apgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.apf{display:flex;flex-direction:column;gap:5px;min-width:0}
+.apf select{font:inherit;font-size:.82rem;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.apchk{grid-column:1/-1;flex-direction:row;align-items:center;gap:8px;font-size:.8rem}
+.aptimer{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.aptimer i{display:block;height:100%;width:0;background:var(--star)}
+.cnt{display:inline-block;margin-left:8px;font-family:var(--f-ui);font-size:.72rem;padding:1px 7px;border-radius:999px;background:var(--back);color:var(--accent);vertical-align:middle}
+.gmeta{grid-column:2;font-size:.72rem;color:var(--muted)}
+@media (max-width:520px){.apgrid{grid-template-columns:1fr 1fr}}
+.settings{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.sthead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.settings h2{margin:0;font-family:var(--f-term);font-size:1.05rem;font-weight:650}
+.strow{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:start}
+.stlabel{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding-top:9px}
+.stctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;min-width:0}
+.stctl select{font:inherit;font-size:.82rem;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:100%}
+.inl{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--accent)}
+.stbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.settings.collapsed .strow{display:none}
+.strow.dim .stctl{opacity:.5}
+.strow.dim .stlabel::after{content:" (Free mode)";text-transform:none;letter-spacing:0}
+@media (max-width:520px){.strow{grid-template-columns:1fr}.stlabel{padding-top:0}}
+.def{font-family:var(--f-term);font-size:1rem;line-height:1.55;max-width:48ch;margin:0 auto;display:flex;flex-direction:column;gap:8px;-webkit-user-select:text;user-select:text;cursor:text}
+.def p{margin:0}
+.def .dar{font-family:var(--f-ar);direction:rtl;font-size:1.05rem;line-height:1.8}
+.card.long .face{justify-content:safe center;overflow:auto}
+.card.long{aspect-ratio:auto;min-height:340px}
+.card.long .face{position:absolute}
+#en2.bigterm{font-size:clamp(1.3rem,4.6vw,1.9rem)!important;font-weight:650!important;color:var(--ink)!important}
+.defterm{margin:0;font-family:var(--f-term);font-size:1.35rem;font-weight:650;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.defterm .ar{font-size:1.1rem;font-weight:500;color:var(--muted)}
+#defIn{font-family:var(--f-term);font-size:1.02rem;line-height:1.6;min-height:130px;resize:vertical;width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+#defIn:focus{outline:2px solid var(--accent);outline-offset:1px}
+#defResult{display:flex;flex-direction:column;gap:8px}
+.dscore{margin:0;font-size:.85rem;color:var(--muted)} .dscore b{font-family:var(--f-term);font-size:1.3rem;color:var(--accent)}
+.dchips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-term);font-size:.85rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line)}
+.chip.ok{background:color-mix(in srgb,var(--accent) 16%,var(--bg));border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.chip.miss{background:color-mix(in srgb,var(--star) 16%,var(--bg));border-color:color-mix(in srgb,var(--star) 55%,var(--line))}
+.dofficial{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.dofficial p{margin:0;font-family:var(--f-term);line-height:1.55}
+.dofficial p.ar{font-family:var(--f-ar);direction:rtl;font-size:1.02rem;line-height:1.8}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.syline{margin:0;font-family:var(--f-ui);font-size:1rem;letter-spacing:.03em;color:var(--accent)}
+.sylsep{color:var(--star);padding:0 1px;font-weight:500}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+.shake{animation:shake .32s ease;box-shadow:0 0 0 2px color-mix(in srgb,#b4493b 55%,transparent);border-radius:10px}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+.flags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.flag{font:inherit;font-size:.8rem;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.flag[aria-pressed="true"]{background:var(--star);border-color:var(--star);color:#fff}
+.flag:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.flstat{font-size:.75rem;color:var(--accent)}
+.sub4{margin:6px 0 0;font-family:var(--f-term);font-size:.92rem;font-weight:650}
+.flist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.flist li{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border:1px solid var(--line);border-radius:999px;font-size:.82rem}
+.flist .fterm{font-family:var(--f-term)}
+.flist .fx{font:inherit;border:0;background:transparent;color:var(--muted);cursor:pointer;padding:0 6px;font-size:1rem;line-height:1}
+.flist li.tiny{border:0;padding:0}
+@media (max-width:860px){.layout{grid-template-columns:1fr}.practice{position:static;max-height:none;order:2}}
+header{display:flex;flex-direction:column;gap:4px}
+h1{font-family:var(--f-term);font-weight:650;font-size:1.45rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:.78rem;letter-spacing:.04em;margin:0}
+.controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:.8rem;background:transparent;color:var(--ink);border:0;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible,.nav button:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.group{display:flex;flex-direction:column;gap:6px}
+.stage{perspective:1400px}
+.card{position:relative;width:100%;aspect-ratio:5/3;max-width:100%;cursor:pointer;border:0;padding:0;background:none;color:inherit;font:inherit;
+  transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid var(--line);border-radius:14px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;padding:22px;text-align:center;gap:10px;
+  box-shadow:0 1px 0 var(--line),0 10px 28px -18px rgba(0,0,0,.35)}
+.front{background:var(--card);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,color-mix(in srgb,var(--line) 70%,transparent) 31px 32px);
+  background-position:0 54px}
+.front::before{content:"";position:absolute;top:44px;left:0;right:0;height:1px;background:color-mix(in srgb,var(--star) 55%,transparent)}
+.back{background:var(--back);transform:rotateY(180deg)}
+.term{font-family:var(--f-term);font-weight:650;font-size:clamp(1.4rem,5.2vw,2.15rem);line-height:1.2;text-wrap:balance;min-width:0;overflow-wrap:anywhere}
+.ar{font-family:var(--f-ar);font-weight:700;font-size:clamp(1.5rem,5.6vw,2.3rem);line-height:1.5;direction:rtl;text-wrap:balance}
+.tag{position:absolute;top:14px;left:18px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.star{position:absolute;top:13px;right:18px;font-size:.68rem;letter-spacing:.06em;color:var(--star);text-transform:uppercase}
+.hint{position:absolute;bottom:12px;font-size:.68rem;color:var(--muted);letter-spacing:.05em}
+.nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.nav button{font:inherit;font-size:.85rem;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.nav button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.count{font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--muted);text-align:center;min-width:6ch}
+.bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.keys{color:var(--muted);font-size:.7rem;text-align:center;margin:0}
+.term,.ar{-webkit-user-select:text;user-select:text;cursor:text}
+.say{font:inherit;font-size:.78rem;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;position:relative;z-index:2}
+.say:hover{border-color:var(--accent)}
+.say:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.says{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.note{color:var(--muted);font-size:.72rem;text-align:center;margin:0}
+@media (max-width:440px){.card{aspect-ratio:4/3.4}}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+
+<div class="layout">
+<aside class="practice" aria-labelledby="pTitle">
+  <div class="phead">
+    <h2 id="pTitle">Typing practice</h2>
+    <p class="sub" id="modeHelp"></p>
+  </div>
+
+  <!-- Free: one term per line, every line spell-checked -->
+  <div class="pmode" id="box-free">
+    <div class="ptools">
+      <button id="clearType" type="button" class="tbtn ghost">Clear text</button>
+    </div>
+    <label class="label" for="typeBox">Your typing</label>
+    <div class="sugwrap">
+    <div class="tawrap"><div id="taGhost" aria-hidden="true"></div>
+    <textarea id="typeBox" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="taSug" spellcheck="true" lang="en" autocomplete="off" autocapitalize="off" placeholder="Bottleneck&#10;Founder effects&#10;Phytoextraction"></textarea></div>
+    <ul id="taSug" role="listbox" hidden></ul>
+    </div>
+    <p class="syline" id="sylHint" hidden></p>
+    <p class="tiny" id="taSugHelp">With suggestions on: ↑ ↓ choose · Tab or Enter fills the line · Esc closes</p>
+    <p class="tiny" id="ghHelp"></p>
+    <div class="group" hidden><span class="label">Enter key</span>
+      <div class="seg" role="group" aria-label="What Enter does">
+        <button id="en-off" type="button">New line only</button>
+        <button id="en-ok" type="button">Next card if correct</button>
+        <button id="en-always" type="button">Always next card</button>
+      </div></div>
+  </div>
+
+  <!-- Suggest: dropdown narrows with every letter -->
+  <div class="pmode" id="box-suggest" hidden>
+    <label class="label" for="sugIn">Start typing a term</label>
+    <div class="sugwrap">
+      <input id="sugIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugList">
+      <ul id="sugList" role="listbox" hidden></ul>
+    </div>
+    <p class="tiny">↑ ↓ choose · Tab fills the word · Enter checks and saves it</p>
+  </div>
+
+  <!-- Trace and Next letter: type the term on the current card -->
+  <div class="pmode" id="box-def" hidden>
+    <p class="defterm" id="dTerm"></p>
+    <label class="label" for="defIn">Write the definition in English</label>
+    <textarea id="defIn" spellcheck="true" lang="en" autocomplete="off" placeholder="Write it in your own words or Dr. Perkins's wording"></textarea>
+    <div class="ptools">
+      <button id="defCheck" type="button" class="tbtn">Check</button>
+      <button id="defShow" type="button" class="tbtn ghost">Show the definition</button>
+    </div>
+    <p class="tiny">Enter checks · Shift+Enter starts a new line · Enter again moves on, following the Next card setting</p>
+    <div id="defResult" aria-live="polite"></div>
+  </div>
+
+  <div class="pmode" id="box-target" hidden>
+    <p class="prompt2 ar" id="tgtAr"></p>
+    <p class="syline" id="sylLine" hidden></p>
+    <div class="trace" id="traceBox">
+      <div class="ghost" id="ghost" aria-hidden="true"></div>
+      <input id="trIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the term">
+    </div>
+    <div class="guide" id="guide" aria-hidden="true"></div>
+    <p class="tiny" id="tgtInfo"></p>
+    <div class="ptools">
+      <button id="tgtSkip" type="button" class="tbtn ghost">Skip to next card</button>
+    </div>
+  </div>
+
+  <p class="psum" id="checkSum"></p>
+  <ul class="checks" id="checkList" aria-live="polite"></ul>
+  <details class="missing">
+    <summary>Not typed correctly yet (<span id="missCount">0</span>) · shown in Arabic</summary>
+    <ul id="missList"></ul>
+  </details>
+
+  <section class="progress" aria-labelledby="prTitle">
+    <div class="prhead"><h3 id="prTitle">Saved progress</h3><button id="resetProg" type="button" class="tbtn ghost">Reset progress</button></div>
+    <p class="tiny" id="prStats"></p>
+    <ol class="weak" id="weakList"></ol>
+    <h4 class="sub4">Slowest words <span class="tiny">(seconds per letter, average)</span></h4>
+    <ol class="weak" id="slowList"></ol>
+    <h4 class="sub4">Practice more <span class="tiny" id="pracInfo"></span></h4>
+    <ul class="flist" id="pracList"></ul>
+    <h4 class="sub4">Didn't know the meaning</h4>
+    <ul class="flist" id="meanList"></ul>
+    <p class="tiny">Saved automatically in this browser. It stays after you close the page, but the copy inside Claude and the local file keep separate records.</p>
+  </section>
+</aside>
+<div class="wrap">
+  <header>
+    <h1>EES 525 · Exam 2 Terms</h1>
+    <p class="sub">English first · tap the card for Arabic</p>
+  </header>
+
+  <section class="settings" aria-labelledby="stTitle">
+    <div class="sthead"><h2 id="stTitle">Study settings</h2>
+      <div class="stbtns"><button id="apPlay" type="button" class="tbtn" hidden>▶ Start timer</button>
+      <button id="stToggle" type="button" class="tbtn ghost" aria-expanded="true">Hide settings</button></div></div>
+
+    <div class="strow">
+      <span class="stlabel">Cards</span>
+      <div class="stctl">
+        <div class="seg" role="group" aria-label="Order">
+          <button id="ord-seq" type="button" aria-pressed="true">Sequential</button>
+          <button id="ord-rnd" type="button" aria-pressed="false">Random</button>
+        </div>
+        <div class="seg" role="group" aria-label="Deck">
+          <button id="deck-all" type="button" aria-pressed="true">All terms</button>
+          <button id="deck-off" type="button" aria-pressed="false">Review sheet (24)</button>
+          <button id="deck-prac" type="button" aria-pressed="false">Practice more (<span id="nPrac">0</span>)</button>
+          <button id="deck-mean" type="button" aria-pressed="false">Didn't know (<span id="nMean">0</span>)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="strow">
+      <span class="stlabel">Card shows</span>
+      <div class="stctl">
+        <div class="seg" role="group" aria-label="Front of the card">
+          <button id="cv-term" type="button">Term first</button>
+          <button id="cv-def" type="button">Definition first</button>
+        </div>
+        <div class="seg" role="group" aria-label="Definition language">
+          <button id="dl-off" type="button">No definition</button>
+          <button id="dl-en" type="button">English</button>
+          <button id="dl-ar" type="button">Arabic</button>
+          <button id="dl-both" type="button">Both</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="sylShow"> Show syllables (in·breed·ing)</label>
+      </div>
+    </div>
+
+    <div class="strow">
+      <label class="stlabel" for="advMode">Next card</label>
+      <div class="stctl">
+        <select id="advMode">
+          <option value="manual">Only with the buttons or ← →</option>
+          <option value="enter-ok">Enter, when the word is correct</option>
+          <option value="enter">Enter, always</option>
+          <option value="timer">Timer only</option>
+          <option value="timer-enter">Timer, or Enter when correct</option>
+        </select>
+        <label class="inl" id="secsWrap">Time to type
+          <select id="apSecs"><option value="3">3 s</option><option value="5">5 s</option><option value="8">8 s</option><option value="10">10 s</option><option value="15">15 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option></select></label>
+      </div>
+    </div>
+
+    <div class="strow">
+      <label class="stlabel" for="apLang">Sound</label>
+      <div class="stctl">
+        <select id="apLang">
+          <option value="off">Off</option>
+          <option value="en">English</option>
+          <option value="enar">English, then Arabic</option>
+          <option value="ar">Arabic only</option>
+        </select>
+        <label class="inl" id="repWrap">Repeat
+          <select id="apRep"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="5">5×</option><option value="10">10×</option></select></label>
+        <label class="chk"><input type="checkbox" id="flipAr"> Read Arabic when I flip</label>
+        <label class="chk"><input type="checkbox" id="sylSay"> Read syllable by syllable first</label>
+      </div>
+    </div>
+
+    <div class="strow">
+      <span class="stlabel">Typing mode</span>
+      <div class="stctl">
+        <div class="seg" role="group" aria-label="Practice mode">
+          <button id="pm-free" type="button">Free</button>
+          <button id="pm-suggest" type="button">Suggest</button>
+          <button id="pm-trace" type="button">Trace</button>
+          <button id="pm-guided" type="button">Next letter</button>
+          <button id="pm-def" type="button">Write definition</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="strow" id="freeRow">
+      <span class="stlabel">Typing box</span>
+      <div class="stctl">
+        <div class="seg" role="group" aria-label="Suggestions in the box">
+          <button id="taSugOff" type="button">Suggestions off</button>
+          <button id="taSugOn" type="button">Suggestions on</button>
+        </div>
+        <div class="seg" role="group" aria-label="Faint text in the box">
+          <button id="gh-off" type="button">Faint text off</button>
+          <button id="gh-sug" type="button">Finish the word</button>
+          <button id="gh-card" type="button">Card word</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="skipDone"> Hide words I've already typed correctly from the suggestions</label>
+      </div>
+    </div>
+
+    <div class="strow">
+      <span class="stlabel">Practice list</span>
+      <div class="stctl">
+        <label class="chk"><input type="checkbox" id="autoAdd"> Add words by themselves when they're slow or have mistakes</label>
+        <label class="chk"><input type="checkbox" id="autoRemove"> Remove a word after 3 quick tries with no mistakes</label>
+      </div>
+    </div>
+
+    <div class="strow">
+      <span class="stlabel">Mistakes</span>
+      <div class="stctl">
+        <label class="chk"><input type="checkbox" id="mkSound"> Soft sound</label>
+        <label class="chk"><input type="checkbox" id="mkShake"> Shake the box</label>
+      </div>
+    </div>
+
+    <div class="strow">
+      <span class="stlabel">Listening</span>
+      <div class="stctl"><label class="chk"><input type="checkbox" id="apHide"> Hide the English word (listen and type)</label></div>
+    </div>
+
+    <div class="aptimer" aria-hidden="true"><i id="apBar"></i></div>
+    <p class="tiny" id="apStatus" aria-live="polite"></p>
+  </section>
+  <div hidden>
+    <button id="auto-off" type="button"></button><button id="auto-on" type="button"></button>
+  </div>
+
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+
+  <div class="stage">
+    <div class="card" id="card" tabindex="0">
+      <div class="face front" id="faceF">
+        <span class="tag" id="tagF"></span><span class="star" id="starF"></span>
+        <div class="term" id="en"></div>
+        <div class="def" id="defF" hidden></div>
+        <button class="say" id="sayEn" type="button" aria-label="Pronounce in English">🔊 English</button>
+        <span class="hint">tap to flip</span>
+      </div>
+      <div class="face back" id="faceB" aria-hidden="true">
+        <span class="tag" id="tagB"></span>
+        <div class="ar" id="ar"></div>
+        <div class="def" id="defB" hidden></div>
+        <div class="term" id="en2" style="font-size:.95rem;font-weight:500;color:var(--muted)"></div>
+        <div class="says">
+          <button class="say" id="sayAr" type="button" aria-label="انطق بالعربية">🔊 عربي</button>
+          <button class="say" id="sayEn2" type="button" aria-label="Pronounce in English">🔊 English</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flags" role="group" aria-label="Mark this word">
+    <button id="flPrac" type="button" class="flag">↻ Practice more</button>
+    <button id="flMean" type="button" class="flag">? Didn't know the meaning</button>
+    <span class="flstat" id="flStat"></span>
+  </div>
+  <div class="nav">
+    <button id="prev" type="button">← Prev</button>
+    <div class="count" id="count">1 / 1</div>
+    <button id="next" type="button" class="primary">Next →</button>
+  </div>
+  <p class="keys">Keyboard (outside the typing box): Space flips · ← → move · R reshuffles · E / A pronounce · P practice more · M didn’t know</p>
+  <p class="note" id="voiceNote"></p>
+
+</div>
+</div>
+
+<script>
+const O="Review sheet", L1="Lecture · Soil & erosion", L2="Lecture · Populations", P="Papers";
+const CARDS=[
+ ["Bottleneck","عنق الزجاجة",L2,1],
+ ["Bud bank","بنك البراعم",L2,1],
+ ["Catalyst species","الأنواع المحفِّزة",L2,1],
+ ["Conservation introductions","الإدخالات الصونية",L2,1],
+ ["Deflation","التذرية (الكسح الريحي)",L1,1],
+ ["Demographic stochasticity","العشوائية الديموغرافية",L2,1],
+ ["Environmental stochasticity","العشوائية البيئية",L2,1],
+ ["Founder effects","تأثير المؤسِّس",L2,1],
+ ["Genetic drift","الانجراف الوراثي",L2,1],
+ ["Inbreeding depression","انحطاط التزاوج الداخلي",L2,1],
+ ["Inflation","الانتفاخ (التراكم الريحي)",L1,1],
+ ["Local adaptation (home-site advantage)","التكيّف المحلي (ميزة الموطن)",L2,1],
+ ["Nurse plants","النباتات الحاضنة",L2,1],
+ ["Outbreeding depression","انحطاط التزاوج الخارجي",L2,1],
+ ["Phytoremediation","المعالجة النباتية",L1,1],
+ ["Polluted soils","التربة الملوّثة",L1,1],
+ ["Population","العشيرة",L2,1],
+ ["Population ecology","بيئة العشائر",L2,1],
+ ["Population genetics","وراثة العشائر",L2,1],
+ ["Reinforcement","التعزيز",L2,1],
+ ["Reintroduction","إعادة الإدخال",L2,1],
+ ["Safe sites","المواقع الآمنة",L2,1],
+ ["Soil seed bank","بنك البذور في التربة",L2,1],
+ ["Translocation","النقل",L2,1],
+ ["Aeolian processes","العمليات الريحية",L1,0],
+ ["Desert pavement","الرصيف الصحراوي",L1,0],
+ ["Coppice dunes","الكثبان الشجيرية",L1,0],
+ ["Dune stabilization","تثبيت الكثبان",L1,0],
+ ["Dune endemics","مستوطنات الكثبان",L1,0],
+ ["Chemical tackifiers","المواد اللاصقة الكيميائية",L1,0],
+ ["Mechanical pitting","الحُفَر الميكانيكية",L1,0],
+ ["Surface runoff","الجريان السطحي",L1,0],
+ ["Infiltration capacity","سعة الترشيح",L1,0],
+ ["Sheet erosion","التعرية الصفائحية",L1,0],
+ ["Rill erosion","تعرية الجداول (القنوات الصغيرة)",L1,0],
+ ["Gully erosion","التعرية الأخدودية",L1,0],
+ ["Terraces","المدرّجات",L1,0],
+ ["Water bars","حواجز الماء",L1,0],
+ ["Erosion control blankets","بطانيات مكافحة التعرية",L1,0],
+ ["Hydromulch","الغطاء المائي (الملش المائي)",L1,0],
+ ["Ex-situ treatment","المعالجة خارج الموقع",L1,0],
+ ["In-situ treatment","المعالجة في الموقع",L1,0],
+ ["Cap","التغطية",L1,0],
+ ["Phytostabilization","التثبيت النباتي",L1,0],
+ ["Phytodegradation","التحلّل النباتي",L1,0],
+ ["Phytovolatilization","التطاير النباتي",L1,0],
+ ["Phytoextraction","الاستخلاص النباتي",L1,0],
+ ["Bioremediation","المعالجة الحيوية (الميكروبية)",L1,0],
+ ["Soil compaction","انضغاط التربة",L1,0],
+ ["Ripping / subsoiling","الحراثة العميقة",L1,0],
+ ["Physical crust","القشرة الفيزيائية",L1,0],
+ ["Biological crust","القشرة الحيوية",L1,0],
+ ["Soil conditioners","محسّنات التربة",L1,0],
+ ["Biosolids","الحمأة المعالجة",L1,0],
+ ["Organic matter (OM)","المادة العضوية",L1,0],
+ ["Natural recolonization","إعادة الاستيطان الطبيعي",L2,0],
+ ["Assisted recolonization","إعادة الاستيطان المساعَد",L2,0],
+ ["Natural dispersers","الناشرات الطبيعية",L2,0],
+ ["Conspecific attraction","الانجذاب لأفراد النوع",L2,0],
+ ["Nightclub effect","تأثير الملهى الليلي",L2,0],
+ ["Inadvertent selection","الانتخاب غير المقصود",L2,0],
+ ["Artificial selection","الانتخاب الاصطناعي",L2,0],
+ ["Hard release","الإطلاق الصلب",L2,0],
+ ["Soft release","الإطلاق الناعم",L2,0],
+ ["Ecosystem engineer","مهندس النظام البيئي",P,0],
+ ["Autogenic engineer","المهندس الذاتي",P,0],
+ ["Allogenic engineer","المهندس الغيري",P,0],
+ ["Habitat-forming species","الأنواع المكوِّنة للموطن",P,0],
+ ["Infauna","الحيوانات داخل الرواسب",P,0],
+ ["Epifauna","الحيوانات على سطح الرواسب",P,0],
+ ["Cage artefact","أثر القفص",P,0],
+ ["Enemy release","التحرّر من الأعداء",P,0],
+ ["Site fidelity","الوفاء للموقع",P,0]
+];
+const $=id=>document.getElementById(id);
+let st={order:"seq",deck:"all",auto:false};
+try{const s=JSON.parse(localStorage.getItem("ees525-fc")||"null"); if(s&&s.order&&s.deck) st=Object.assign(st,s);}catch(e){}
+const TTS=("speechSynthesis" in window)&&("SpeechSynthesisUtterance" in window);
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){voices=[];} voiceNote();}
+function pickVoice(lang){
+  const p=lang.slice(0,2).toLowerCase();
+  return voices.find(v=>v.lang&&v.lang.toLowerCase()===lang.toLowerCase())||voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith(p))||null;
+}
+function voiceNote(){
+  const n=$("voiceNote"); if(!n) return;
+  if(!TTS){n.textContent="Pronunciation isn't available in this browser or app view. Try opening the page in Chrome, Safari or Edge.";return;}
+  if(voices.length&&!pickVoice("ar-SA")) n.textContent="No Arabic voice found on this device; Arabic may be read in another voice. Add an Arabic voice in your system's speech settings.";
+  else n.textContent="";
+}
+function speak(text,lang){
+  if(!TTS){voiceNote();return;}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=lang; const v=pickVoice(lang); if(v) u.voice=v;
+    u.rate=lang.startsWith("ar")?0.85:0.9;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+if(TTS){loadVoices(); try{speechSynthesis.addEventListener("voiceschanged",loadVoices);}catch(e){}}
+else voiceNote();
+let list=[], i=0;
+function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a;}
+function build(){
+  list=CARDS.filter(c=>window.__inDeck?window.__inDeck(c):(st.deck==="all"||c[3]===1));
+  if(!list.length){ list=CARDS.slice(); if(window.__deckEmpty) window.__deckEmpty(); }
+  if(st.order==="rnd") list=shuffle(list.slice());
+  i=0; render();
+  $("ord-seq").setAttribute("aria-pressed",st.order==="seq"); $("ord-rnd").setAttribute("aria-pressed",st.order==="rnd");
+  $("deck-all").setAttribute("aria-pressed",st.deck==="all"); $("deck-off").setAttribute("aria-pressed",st.deck==="off"); if(window.__deckBtns) window.__deckBtns();
+  $("auto-off").setAttribute("aria-pressed",!st.auto); $("auto-on").setAttribute("aria-pressed",!!st.auto);
+  try{localStorage.setItem("ees525-fc",JSON.stringify(st));}catch(e){}
+}
+function render(){
+  const c=list[i]; $("card").classList.remove("flipped");
+  $("faceF").setAttribute("aria-hidden","false"); $("faceB").setAttribute("aria-hidden","true");
+  $("en").textContent=c[0]; $("en2").textContent=c[0]; $("ar").textContent=c[1];
+  $("tagF").textContent=c[2]; $("tagB").textContent=c[2];
+  $("starF").textContent=c[3]?"★ "+O:"";
+  $("count").textContent=(i+1)+" / "+list.length;
+  $("bar").style.width=((i+1)/list.length*100)+"%";
+  $("prev").disabled=false;
+}
+let userActed=false;
+function flip(){
+  const c=$("card"); c.classList.toggle("flipped");
+  const fl=c.classList.contains("flipped");
+  $("faceF").setAttribute("aria-hidden",fl); $("faceB").setAttribute("aria-hidden",!fl);
+  if(st.auto&&userActed){ const x=list[i]; c.classList.contains("flipped")?speak(x[1],"ar-SA"):speak(x[0],"en-US"); }
+}
+function go(d){i=(i+d+list.length)%list.length; render(); if(st.auto&&userActed) speak(list[i][0],"en-US");}
+document.addEventListener("pointerdown",()=>{userActed=true;},{once:true});
+document.addEventListener("keydown",()=>{userActed=true;},{once:true});
+$("card").addEventListener("click",()=>{
+  let sel=""; try{sel=String(window.getSelection()||"");}catch(e){}
+  if(sel.trim()) return; /* selecting text for a reader app should not flip the card */
+  flip();
+});
+$("card").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.altKey&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey){e.preventDefault();flip();} });
+$("sayEn").addEventListener("click",e=>{e.stopPropagation();speak(list[i][0],"en-US");});
+$("sayEn2").addEventListener("click",e=>{e.stopPropagation();speak(list[i][0],"en-US");});
+$("sayAr").addEventListener("click",e=>{e.stopPropagation();speak(list[i][1],"ar-SA");});
+$("auto-off").addEventListener("click",()=>{st.auto=false;$("auto-off").setAttribute("aria-pressed",true);$("auto-on").setAttribute("aria-pressed",false);try{localStorage.setItem("ees525-fc",JSON.stringify(st));}catch(e){} if(TTS) speechSynthesis.cancel();});
+$("auto-on").addEventListener("click",()=>{st.auto=true;userActed=true;$("auto-off").setAttribute("aria-pressed",false);$("auto-on").setAttribute("aria-pressed",true);try{localStorage.setItem("ees525-fc",JSON.stringify(st));}catch(e){} const c=$("card"); c.classList.contains("flipped")?speak(list[i][1],"ar-SA"):speak(list[i][0],"en-US");});
+$("next").addEventListener("click",()=>go(1));
+$("prev").addEventListener("click",()=>go(-1));
+$("ord-seq").addEventListener("click",()=>{st.order="seq";build();});
+$("ord-rnd").addEventListener("click",()=>{st.order="rnd";build();});
+$("deck-all").addEventListener("click",()=>{st.deck="all";build();});
+$("deck-off").addEventListener("click",()=>{st.deck="off";build();});
+document.addEventListener("keydown",e=>{
+  if(e.altKey||e.metaKey||e.ctrlKey||e.shiftKey) return; /* leave Option/Cmd/Ctrl/Shift shortcuts to the system and reader apps */
+  if(e.target.closest&&(e.target.closest(".seg")||e.target.closest(".nav")||e.target.closest(".say")||e.target.closest(".practice"))) return; /* typing practice keeps every key */
+  if(e.key===" "){e.preventDefault();flip();}
+  else if(e.key==="ArrowRight"){go(1);} else if(e.key==="ArrowLeft"){go(-1);}
+  else if(e.key==="e"||e.key==="E"){speak(list[i][0],"en-US");}
+  else if(e.key==="a"||e.key==="A"){speak(list[i][1],"ar-SA");}
+  else if(e.key==="r"||e.key==="R"){ if(st.order==="rnd") build(); }
+});
+build();
+</script>
+<script>
+/* Definitions: English from the review sheet and lectures; Arabic is a translation */
+const DEF_EN={"Bottleneck": "Loss of genetic variation due to a decrease in population size", "Bud bank": "Buds (meristematic tissues) present in the soil that can grow into whole plants", "Catalyst species": "Species that facilitate the arrival and establishment of other species", "Conservation introductions": "Populations established outside their natural range, but within appropriate habitat", "Deflation": "Process where the force of the wind sweeps up and carries away loose, fine-grained particles like silt, dust, and sand, lowering the land surface", "Demographic stochasticity": "Erratic changes affecting the fates of individuals; every year there is some random chance that a particular individual will not reproduce or survive (bad luck years)", "Environmental stochasticity": "Erratic changes in the environment that affect the average birth or death rates of a population", "Founder effects": "Loss of genetic variation when few individuals establish a new population", "Genetic drift": "Loss of genetic material from one generation to the next just by chance", "Inbreeding depression": "Increase in frequency of deleterious genetic material in a population; the drop in biological fitness, health, and vigor when closely related individuals mate", "Inflation": "When vegetation acts as a physical obstacle, forcing the wind to slow down and drop soil particles, so soil builds up and raises the surface height underneath the plant", "Local adaptation (home-site advantage)": "Populations can become adapted to their local conditions; better predicted by ecological similarity/dissimilarity, not necessarily spatial distance", "Nurse plants": "Plants that moderate environmental conditions, improving establishment and growth of other plant species", "Outbreeding depression": "Offspring of non-locally adapted individuals have less survival and fitness; a reduction in fitness caused by breeding between genetically dissimilar individuals, which may result from too broad sourcing of propagules", "Phytoremediation": "Plants used to reduce concentration of pollutants to acceptable levels", "Polluted soils": "Soils that contain anomalous chemicals or concentrations of chemicals that pose risks", "Population": "A group of conspecific individuals that is demographically, genetically, or spatially disjunct from other groups of individuals", "Population ecology": "Examines birth, growth, reproduction, and death within populations and seeks to identify the factors that influence the success and distribution of populations", "Population genetics": "Examines how the genetic composition of populations changes over time, and what factors influence the change", "Reinforcement": "The addition of individuals to an existing population of conspecifics", "Reintroduction": "To establish a species in an area that was once part of its historical range but from which it has become extirpated", "Safe sites": "A place that provides a seed (1) the stimuli required to break dormancy, (2) the conditions required for germination to proceed, and (3) the resources required for establishment", "Soil seed bank": "Viable seeds in the soil, coming from on-site reproduction, dispersal into the site, and seeds persisting in the soil, so its species composition differs from the aboveground vegetation", "Translocation": "The mediated movement of wild individuals or populations from one part of their range to another", "Aeolian processes": "Wind-driven erosion and deposition; every landscape is affected by them, and they can maintain or degrade a desired landscape", "Desert pavement": "A surface of coarse particles left behind after wind removes the fine particles", "Coppice dunes": "Mounds of soil that build up beneath plants as vegetation slows the wind", "Dune stabilization": "A human alteration that decreases wind erosion of sand dunes", "Dune endemics": "Species restricted to shifting sand that can be harmed when wind erosion is reduced", "Chemical tackifiers": "Chemicals applied to the soil surface that bind particles to reduce wind erosion", "Mechanical pitting": "Making small depressions in the soil surface to add roughness and slow the wind at ground level", "Surface runoff": "Water flowing over the land when rainfall exceeds the soil's infiltration capacity", "Infiltration capacity": "The maximum rate at which water can enter the soil", "Sheet erosion": "Uniform removal of soil in thin layers", "Rill erosion": "The most common form of water erosion, forming small channels", "Gully erosion": "The advanced stage of water erosion, after small channels deepen and widen", "Terraces": "Stepped earthworks on slopes that reduce runoff velocity at the site level", "Water bars": "Diagonal barriers that divert runoff to reduce its velocity", "Erosion control blankets": "Mats laid over soil to protect it and slow runoff while vegetation establishes", "Hydromulch": "A mulch slurry sprayed onto bare soil to protect it from water erosion", "Ex-situ treatment": "Removing polluted soil and treating it off-site at licensed facilities", "In-situ treatment": "Treating polluted soil on site, for example by capping, phytoremediation, or bioremediation", "Cap": "Covering polluted soil on site to contain the contaminants", "Phytostabilization": "Plants convert contaminants to less toxic forms and retain them in the soil, usually in the roots or rhizosphere", "Phytodegradation": "Organic compounds are broken down and metabolized by plants on site", "Phytovolatilization": "Plants take up pollutants, convert them to gases, and release them to the atmosphere with evapotranspiration", "Phytoextraction": "Plants take up contaminants (metals) into their biomass and are then harvested repeatedly", "Bioremediation": "Using microbes to reduce pollutant concentrations to safe, acceptable levels; may require inoculation, fertilizing, or aeration", "Soil compaction": "How much soil particles are pressed together", "Ripping / subsoiling": "Deep tillage used when soil is too compact for conventional cultivation to fix", "Physical crust": "A surface crust formed by physical disintegration and chemical dispersion of soil aggregates", "Biological crust": "A soil surface crust made of lichens, mosses, and cyanobacteria", "Soil conditioners": "Polymers applied to the soil surface to address physical crusts", "Biosolids": "A soil amendment that adds organic matter, nutrients, and lime", "Organic matter (OM)": "Soil material that improves physical, chemical, and biotic properties; too little is fixed with residues, manure, or compost, too much by burning or incorporation", "Natural recolonization": "Target species return to a site on their own after conditions are restored", "Assisted recolonization": "Humans establish individuals at a site through reintroduction, reinforcement, translocation, or conservation introductions", "Natural dispersers": "Animals or birds that move seeds to new sites", "Conspecific attraction": "Individuals settle where members of their own species are already present", "Nightclub effect": "Good habitat remains unoccupied simply because no conspecifics are there", "Inadvertent selection": "Unintended selection on traits during seed collection, production, and restoration", "Artificial selection": "Selection imposed by human practices, a problem with farmed sources of individuals", "Hard release": "Releasing animals with no further support", "Soft release": "A gradual return to the wild in which the animal receives support, shelter, or food", "Ecosystem engineer": "An organism that modifies the physical environment, changing resource availability for other species", "Autogenic engineer": "An engineer that changes the environment through its own physical structure, such as cordgrass or trees", "Allogenic engineer": "An engineer that changes the environment by transforming other materials, such as burrowing crabs or beavers", "Habitat-forming species": "Species that create the physical foundations of dependent species assemblages", "Infauna": "Invertebrates that live within the sediment", "Epifauna": "Invertebrates that live on the sediment surface", "Cage artefact": "Unintended effects of an enclosure itself, such as shading and reduced water flow, that can confound treatment effects", "Enemy release": "Invaders escape the predators and competitors that limited them in their native range", "Site fidelity": "The tendency of released animals to stay near the release site"};
+const SYL={"Bottleneck": [3, 6], "Bud bank": [], "Catalyst species": [3, 4, 12], "Conservation introductions": [3, 6, 8, 15, 18, 21], "Deflation": [2, 5], "Demographic stochasticity": [3, 4, 9, 15, 19, 22, 23], "Environmental stochasticity": [2, 4, 7, 10, 17, 21, 24, 25], "Founder effects": [5, 10], "Genetic drift": [2, 5], "Inbreeding depression": [2, 7, 13, 17], "Inflation": [2, 5], "Local adaptation (home-site advantage)": [2, 8, 10, 12, 30, 33], "Nurse plants": [], "Outbreeding depression": [3, 8, 14, 18], "Phytoremediation": [3, 5, 7, 9, 11, 12], "Polluted soils": [3, 6], "Population": [3, 4, 6], "Population ecology": [3, 4, 6, 12, 15, 16], "Population genetics": [3, 4, 6, 13, 16], "Reinforcement": [2, 4, 9], "Reintroduction": [2, 4, 7, 10], "Safe sites": [], "Soil seed bank": [], "Translocation": [5, 7, 9], "Aeolian processes": [2, 3, 5, 11, 15], "Desert pavement": [3, 11], "Coppice dunes": [3], "Dune stabilization": [8, 10, 12, 14], "Dune endemics": [7, 10], "Chemical tackifiers": [4, 5, 13, 14, 16], "Mechanical pitting": [2, 6, 7, 14], "Surface runoff": [3, 11], "Infiltration capacity": [2, 5, 8, 15, 18, 19], "Sheet erosion": [7, 9], "Rill erosion": [6, 8], "Gully erosion": [3, 7, 9], "Terraces": [3, 6], "Water bars": [2], "Erosion control blankets": [1, 3, 11, 20], "Hydromulch": [2, 5], "Ex-situ treatment": [5, 13], "In-situ treatment": [5, 13], "Cap": [], "Phytostabilization": [3, 5, 8, 10, 12, 14], "Phytodegradation": [3, 5, 8, 10, 12], "Phytovolatilization": [3, 5, 8, 9, 12, 13, 15], "Phytoextraction": [3, 5, 7, 11], "Bioremediation": [2, 3, 5, 7, 9, 10], "Soil compaction": [8, 11], "Ripping / subsoiling": [3, 13, 17], "Physical crust": [4, 5], "Biological crust": [2, 3, 6, 7], "Soil conditioners": [8, 10, 14], "Biosolids": [2, 3, 6], "Organic matter (OM)": [2, 5, 11], "Natural recolonization": [3, 4, 10, 13, 14, 16, 18], "Assisted recolonization": [2, 6, 11, 14, 15, 17, 19], "Natural dispersers": [3, 4, 11, 15], "Conspecific attraction": [3, 6, 9, 14, 18], "Nightclub effect": [5, 12], "Inadvertent selection": [2, 4, 7, 14, 17], "Artificial selection": [2, 4, 6, 13, 16], "Hard release": [7], "Soft release": [7], "Ecosystem engineer": [1, 3, 6, 12, 14], "Autogenic engineer": [2, 4, 7, 12, 14], "Allogenic engineer": [2, 4, 7, 12, 14], "Habitat-forming species": [3, 4, 12, 19], "Infauna": [2, 5], "Epifauna": [2, 3, 6], "Cage artefact": [7, 9], "Enemy release": [2, 3, 8], "Site fidelity": [7, 10, 11]};
+/* syllables: SYL[term] lists the letter positions where a new syllable starts */
+const FX=(function(){let f={sylShow:false,sylSay:false,mkSound:true,mkShake:true};try{Object.assign(f,JSON.parse(localStorage.getItem("ees525-fx")||"{}"));}catch(e){}return f;})();
+function sylText(t){const b=new Set(SYL[t]||[]);let o="";for(let k=0;k<t.length;k++){if(b.has(k))o+="·";o+=t[k];}return o;}
+function sylParts(t){return sylText(t).split(/[·\s/()]+/).filter(Boolean);}
+const DEF_AR={"Bottleneck": "فقد التنوع الوراثي بسبب انخفاض حجم العشيرة.", "Bud bank": "براعم (أنسجة مرستيمية) موجودة في التربة يمكن أن تنمو إلى نباتات كاملة.", "Catalyst species": "أنواع تسهّل وصول أنواع أخرى وتأسّسها.", "Conservation introductions": "عشائر تُؤسَّس خارج نطاقها الطبيعي، لكن داخل موطن مناسب.", "Deflation": "عملية تجرف فيها قوة الرياح الحبيبات الدقيقة السائبة (الطمي والغبار والرمل) فينخفض سطح الأرض.", "Demographic stochasticity": "تغيرات عشوائية تؤثر في مصير الأفراد؛ ففي كل سنة احتمال عشوائي ألا يتكاثر فرد ما أو ألا يبقى (سنوات حظ سيئ).", "Environmental stochasticity": "تغيرات عشوائية في البيئة تؤثر في متوسط معدلات الولادة أو الموت في العشيرة.", "Founder effects": "فقد التنوع الوراثي عندما يؤسّس عدد قليل من الأفراد عشيرة جديدة.", "Genetic drift": "فقد مادة وراثية من جيل إلى الذي يليه بمحض الصدفة.", "Inbreeding depression": "زيادة تكرار المادة الوراثية الضارة في العشيرة؛ أي انخفاض اللياقة والصحة والقوة عند تزاوج الأفراد الأقارب.", "Inflation": "يعمل النبات عائقاً فيزيائياً يُبطئ الرياح فتُسقط حبيبات التربة، فتتراكم التربة ويرتفع السطح تحت النبات.", "Local adaptation (home-site advantage)": "قد تتكيّف العشائر مع ظروفها المحلية، ويُتنبّأ بذلك بالتشابه أو الاختلاف البيئي، لا بالمسافة المكانية بالضرورة.", "Nurse plants": "نباتات تلطّف الظروف البيئية فتحسّن تأسّس أنواع نباتية أخرى ونموها.", "Outbreeding depression": "نسل الأفراد غير المتكيّفين محلياً أقل بقاءً ولياقة؛ أي انخفاض اللياقة بسبب التزاوج بين أفراد مختلفين وراثياً، وقد ينتج عن جمع المادة التكاثرية من نطاق واسع جداً.", "Phytoremediation": "استخدام النباتات لخفض تركيز الملوّثات إلى مستويات مقبولة.", "Polluted soils": "تربة تحتوي مواد كيميائية شاذة، أو تراكيز منها، تشكّل خطراً.", "Population": "مجموعة أفراد من النوع نفسه منفصلة ديموغرافياً أو وراثياً أو مكانياً عن مجموعات الأفراد الأخرى.", "Population ecology": "تدرس الولادة والنمو والتكاثر والموت داخل العشائر، وتبحث عن العوامل المؤثرة في نجاح العشائر وتوزيعها.", "Population genetics": "تدرس كيف يتغيّر التركيب الوراثي للعشائر عبر الزمن، وما العوامل المؤثرة في هذا التغيّر.", "Reinforcement": "إضافة أفراد إلى عشيرة قائمة من النوع نفسه.", "Reintroduction": "تأسيس نوع في منطقة كانت جزءاً من نطاقه التاريخي ثم انقرض منها محلياً.", "Safe sites": "مكان يوفّر للبذرة (1) المحفّزات اللازمة لكسر السكون، (2) الظروف اللازمة للإنبات، (3) الموارد اللازمة للتأسّس.", "Soil seed bank": "البذور الحيّة في التربة، وتأتي من التكاثر في الموقع، والبذور المنتشرة إليه، والبذور الباقية في التربة؛ لذا يختلف تركيبها عن الغطاء النباتي الظاهر.", "Translocation": "النقل بتدخّل بشري لأفراد أو عشائر بريّة من جزء من نطاقها إلى جزء آخر.", "Aeolian processes": "عمليات التعرية والترسيب بفعل الرياح؛ تؤثر في كل الطبيعة، وقد تحافظ على الطبيعة المرغوبة أو تدهورها.", "Desert pavement": "سطح من الحبيبات الخشنة يبقى بعد أن تزيل الرياح الحبيبات الدقيقة.", "Coppice dunes": "أكوام من التربة تتراكم تحت النباتات حين يُبطئ الغطاء النباتي الرياح.", "Dune stabilization": "تدخّل بشري يقلّل التعرية الريحية للكثبان الرملية.", "Dune endemics": "أنواع مقتصرة على الرمال المتحركة، قد تتضرر عند تقليل التعرية الريحية.", "Chemical tackifiers": "مواد كيميائية تُرش على سطح التربة لتربط الحبيبات وتقلّل التعرية الريحية.", "Mechanical pitting": "عمل حُفَر صغيرة في سطح التربة لزيادة خشونته وإبطاء الرياح عند السطح.", "Surface runoff": "جريان الماء فوق سطح الأرض عندما يتجاوز المطر سعة ترشيح التربة.", "Infiltration capacity": "أقصى معدل يمكن أن يدخل به الماء إلى التربة.", "Sheet erosion": "إزالة منتظمة للتربة في طبقات رقيقة.", "Rill erosion": "أكثر أشكال التعرية المائية شيوعاً، وتكوّن قنوات صغيرة.", "Gully erosion": "المرحلة المتقدمة من التعرية المائية، بعد أن تتعمّق القنوات الصغيرة وتتّسع.", "Terraces": "مدرّجات على المنحدرات تقلّل سرعة الجريان على مستوى الموقع.", "Water bars": "حواجز مائلة تحوّل مسار الجريان لتقليل سرعته.", "Erosion control blankets": "حُصُر توضع على التربة لحمايتها وإبطاء الجريان حتى يتأسّس النبات.", "Hydromulch": "خليط من الملش يُرش على التربة المكشوفة لحمايتها من التعرية المائية.", "Ex-situ treatment": "إزالة التربة الملوّثة ومعالجتها خارج الموقع في منشآت مرخّصة.", "In-situ treatment": "معالجة التربة الملوّثة في موقعها، مثل التغطية أو المعالجة النباتية أو الحيوية.", "Cap": "تغطية التربة الملوّثة في الموقع لاحتواء الملوّثات.", "Phytostabilization": "تحوّل النباتات الملوّثات إلى صور أقل سمّية وتحبسها في التربة، غالباً في الجذور أو الريزوسفير.", "Phytodegradation": "تكسير المركبات العضوية واستقلابها بواسطة النباتات في الموقع.", "Phytovolatilization": "تمتص النباتات الملوّثات وتحوّلها إلى غازات وتطلقها إلى الجو مع النتح.", "Phytoextraction": "تمتص النباتات الملوّثات (المعادن) في كتلتها الحيوية، ثم تُحصد مراراً.", "Bioremediation": "استخدام الميكروبات لخفض تركيز الملوّثات إلى مستويات آمنة ومقبولة؛ وقد يحتاج تلقيحاً أو تسميداً أو تهوية.", "Soil compaction": "مقدار تلاصق حبيبات التربة وانضغاطها.", "Ripping / subsoiling": "حراثة عميقة تُستخدم حين تكون التربة شديدة الانضغاط ولا تكفي الحراثة العادية.", "Physical crust": "قشرة سطحية تنتج عن التفكك الفيزيائي والتشتت الكيميائي لتجمّعات التربة.", "Biological crust": "قشرة على سطح التربة مكوّنة من الأشنات والحزازيات والبكتيريا الزرقاء.", "Soil conditioners": "بوليمرات تُرش على سطح التربة لعلاج القشرة الفيزيائية.", "Biosolids": "محسّن للتربة يضيف المادة العضوية والعناصر الغذائية والجير.", "Organic matter (OM)": "مادة في التربة تحسّن خواصها الفيزيائية والكيميائية والحيوية؛ يُعالج نقصها بالبقايا النباتية أو السماد أو الكمبوست، وزيادتها بالحرق أو الدمج في التربة.", "Natural recolonization": "عودة الأنواع المستهدفة إلى الموقع من تلقاء نفسها بعد استعادة الظروف.", "Assisted recolonization": "تأسيس البشر لأفراد في الموقع عبر إعادة الإدخال أو التعزيز أو النقل أو الإدخالات الصونية.", "Natural dispersers": "حيوانات أو طيور تنقل البذور إلى مواقع جديدة.", "Conspecific attraction": "استقرار الأفراد حيث يوجد أفراد من نوعهم مسبقاً.", "Nightclub effect": "موطن جيد يبقى غير مأهول لمجرد عدم وجود أفراد من النوع نفسه فيه.", "Inadvertent selection": "انتخاب غير مقصود لصفات معيّنة أثناء جمع البذور وإنتاجها والترميم.", "Artificial selection": "انتخاب تفرضه الممارسات البشرية، وهو مشكلة في المصادر المستزرعة للأفراد.", "Hard release": "إطلاق الحيوانات دون أي دعم بعد ذلك.", "Soft release": "عودة تدريجية إلى البرية يتلقى فيها الحيوان دعماً أو مأوى أو غذاء.", "Ecosystem engineer": "كائن يعدّل البيئة الفيزيائية فيغيّر توافر الموارد لأنواع أخرى.", "Autogenic engineer": "مهندس يغيّر البيئة ببنيته الجسدية نفسها، مثل الحشيشة الحبلية أو الأشجار.", "Allogenic engineer": "مهندس يغيّر البيئة بتحويل مواد أخرى، مثل السرطانات الحفّارة أو القنادس.", "Habitat-forming species": "أنواع تبني الأساس الفيزيائي الذي تعتمد عليه تجمّعات أنواع أخرى.", "Infauna": "لافقاريات تعيش داخل الرواسب.", "Epifauna": "لافقاريات تعيش على سطح الرواسب.", "Cage artefact": "تأثيرات غير مقصودة للقفص نفسه، مثل الظل وتقليل جريان الماء، قد تختلط بتأثير المعاملة.", "Enemy release": "تحرّر الغازي من المفترسين والمنافسين الذين كانوا يحدّونه في نطاقه الأصلي.", "Site fidelity": "ميل الحيوانات المُطلَقة إلى البقاء قرب موقع الإطلاق."};
+</script>
+<script>
+/* Typing practice: four modes, all saved in this browser (localStorage) */
+(function(){
+  const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+            set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+  const ta=$("typeBox"), out=$("checkList"), sum=$("checkSum"), miss=$("missList");
+  let hist=LS.get("ees525-hist",[]); if(!Array.isArray(hist)) hist=[];
+  let mode=LS.get("ees525-pmode","free");
+  ta.value=LS.get("ees525-typetxt",null) ?? (function(){try{return localStorage.getItem("ees525-type")||"";}catch(e){return "";}})();
+
+  const norm=s=>s.toLowerCase().replace(/[‐-―]/g,"-").replace(/[^a-z0-9]+/g," ").trim();
+  function variants(t){
+    const v=new Set([t]);
+    const noPar=t.replace(/\s*\([^)]*\)\s*/g," ").trim(); v.add(noPar);
+    (t.match(/\(([^)]*)\)/g)||[]).forEach(m=>v.add(m.slice(1,-1)));
+    noPar.split("/").forEach(p=>v.add(p.trim()));
+    if(/ treatment$/.test(noPar)) v.add(noPar.replace(/ treatment$/,""));
+    return [...v].filter(Boolean);
+  }
+  const deck=()=>{const d=CARDS.filter(c=>window.__inDeck?window.__inDeck(c):(st.deck==="all"||c[3]===1)); return d.length?d:CARDS;};
+  let skipDone=LS.get("ees525-skipdone",false);
+  let enterMode=LS.get("ees525-enter","always"); const enterNext=()=>enterMode;
+  function setEnter(m){enterMode=m;LS.set("ees525-enter",m);["off","ok","always"].forEach(k=>{const b=$("en-"+k); if(b) b.setAttribute("aria-pressed",k===m);});}
+  /* terms already typed correctly: other lines of the Free box, plus correct entries this session */
+  function doneSet(){
+    const d=new Set(); if(!skipDone) return d;
+    const v=ta.value, c=ta.selectionStart, a=v.lastIndexOf("\n",c-1)+1; let b=v.indexOf("\n",c); if(b<0) b=v.length;
+    (v.slice(0,a)+"\n"+v.slice(b)).split(/\n|,|;/).map(x=>x.trim()).filter(Boolean).forEach(l=>{const r=match(l); if(r.hit) d.add(r.hit[0]);});
+    (typeof session!=="undefined"?session:[]).forEach(x=>{if(x.ok&&x.res&&x.res.hit) d.add(x.res.hit[0]);});
+    return d;
+  }
+  const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function lev(a,b){const m=a.length,n=b.length,d=[];for(let x=0;x<=m;x++)d[x]=[x];for(let y=0;y<=n;y++)d[0][y]=y;
+    for(let x=1;x<=m;x++)for(let y=1;y<=n;y++)d[x][y]=Math.min(d[x-1][y]+1,d[x][y-1]+1,d[x-1][y-1]+(a[x-1]===b[y-1]?0:1));return d;}
+  function diffHTML(typed,target){
+    const a=typed.toLowerCase(),b=target.toLowerCase(),d=lev(a,b);let x=a.length,y=b.length,parts=[];
+    while(x>0||y>0){
+      if(x>0&&y>0&&a[x-1]===b[y-1]&&d[x][y]===d[x-1][y-1]){parts.unshift(["ok",target[y-1]]);x--;y--;}
+      else if(x>0&&y>0&&d[x][y]===d[x-1][y-1]+1){parts.unshift(["sub",target[y-1]]);x--;y--;}
+      else if(y>0&&d[x][y]===d[x][y-1]+1){parts.unshift(["add",target[y-1]]);y--;}
+      else{parts.unshift(["del",typed[x-1]]);x--;}
+    }
+    return parts.map(([k,c])=>k==="ok"?esc(c):k==="del"?'<s class="xdel">'+esc(c)+'</s>':'<b class="x'+k+'">'+(c===" "?"&nbsp;":esc(c))+'</b>').join("");
+  }
+  function match(line){
+    const n=norm(line);
+    for(const c of CARDS) if(variants(c[0]).some(v=>norm(v)===n)) return {hit:c};
+    let best=null,bd=1e9,bv="";
+    for(const c of CARDS) for(const v of variants(c[0])){const nv=norm(v),dist=lev(n,nv)[n.length][nv.length]; if(dist<bd){bd=dist;best=c;bv=v;}}
+    const close=best&&bd<=Math.max(2,Math.round(norm(bv).length*.35));
+    return close?{near:best,spell:bv}:{};
+  }
+
+  /* ---------- saved progress ---------- */
+  function record(term,typed,ok,errors,ms){
+    hist.push({t:term,y:typed,ok:ok,e:errors||0,m:mode,d:Date.now(),ms:ms||0});
+    if(term&&window.__afterAttempt) window.__afterAttempt(term,ok,errors||0,ms||0,mode); if(hist.length>3000) hist=hist.slice(-3000);
+    LS.set("ees525-hist",hist); renderProgress();
+  }
+  function everCorrect(){const s=new Set();hist.forEach(h=>{if(h.ok&&h.t)s.add(h.t);});return s;}
+  function renderProgress(){
+    const n=hist.length, ok=hist.filter(h=>h.ok).length;
+    const today=new Date().toDateString(), td=hist.filter(h=>new Date(h.d).toDateString()===today);
+    $("prStats").textContent=n?(n+" attempts saved · "+Math.round(ok/n*100)+"% correct · today "+td.length+" attempts"):"No attempts saved yet. Results from Suggest, Trace and Next letter are saved here.";
+    const by={};hist.forEach(h=>{if(!h.t)return;const r=by[h.t]||(by[h.t]={n:0,bad:0});r.n++;if(!h.ok||h.e>0)r.bad++;});
+    const weak=Object.entries(by).filter(([,r])=>r.bad>0).sort((a,b)=>b[1].bad-a[1].bad||b[1].n-a[1].n).slice(0,6);
+    const ol=$("weakList");ol.innerHTML="";
+    weak.forEach(([t,r])=>{const li=document.createElement("li");li.innerHTML="<b></b> <span></span>";li.querySelector("b").textContent=t;li.querySelector("span").textContent="· "+r.bad+" of "+r.n+" with mistakes";ol.appendChild(li);});
+    ol.hidden=!weak.length;
+    renderMissing();
+  }
+  let armed=false;
+  $("resetProg").addEventListener("click",()=>{
+    if(!armed){armed=true;$("resetProg").textContent="Click again to erase";setTimeout(()=>{armed=false;$("resetProg").textContent="Reset progress";},3000);return;}
+    hist=[];LS.set("ees525-hist",hist);armed=false;$("resetProg").textContent="Reset progress";renderProgress();
+  });
+
+  /* ---------- result list (shared) ---------- */
+  function totalFor(term){let n=0;hist.forEach(h=>{if(h.t===term)n++;});return n;}
+  function lineItem(line,res,extra,grp){
+    const li=document.createElement("li");
+    if(res.hit){li.className="ok";li.innerHTML='<span class="mk">✓</span><span class="w"></span><span class="ar2"></span>';li.querySelector(".ar2").textContent=res.hit[1]+(extra||"");}
+    else if(res.near){li.className="near";li.innerHTML='<span class="mk">≈</span><span class="w"></span><span class="fix">Correct spelling: <span class="diff">'+diffHTML(line,res.spell)+'</span></span>';}
+    else{li.className="bad";li.innerHTML='<span class="mk">✗</span><span class="w"></span><span class="fix">Not a term in this list</span>';}
+    li.querySelector(".w").textContent=line;
+    if(grp&&(grp.n>1||grp.total)){
+      const c=document.createElement("span");c.className="cnt";c.textContent="×"+grp.n;li.querySelector(".w").appendChild(c);
+      const m=document.createElement("span");m.className="gmeta";
+      m.textContent=(grp.hasOk!==false?(grp.ok+" of "+grp.n+" correct"+(grp.where||" this session")):(grp.n+" times"+(grp.where||"")))+(grp.total?" · "+grp.total+" saved in total":"");
+      li.appendChild(m);
+    }
+    return li;
+  }
+  function renderMissing(){
+    const terms=deck(), got=new Set(everCorrect());
+    if(mode==="free") ta.value.split(/\n|,|;/).map(s=>s.trim()).filter(Boolean).forEach(l=>{const r=match(l);if(r.hit)got.add(r.hit[0]);});
+    const have=terms.filter(c=>got.has(c[0])).length;
+    sum.textContent=have+" of "+terms.length+" terms typed correctly"+(st.deck==="off"?" (review sheet)":"");
+    const missing=terms.filter(c=>!got.has(c[0]));
+    miss.innerHTML="";missing.forEach(c=>{const li=document.createElement("li");li.textContent=c[1];miss.appendChild(li);});
+    $("missCount").textContent=missing.length;
+  }
+  let session=[];
+  function keyOf(line,res){return res.hit?res.hit[0]:(res.near?"~"+res.near[0]+"|"+line.toLowerCase():"x|"+line.toLowerCase());}
+  function renderSession(){
+    /* repeated words are stacked into one row with a count */
+    out.innerHTML=""; const g=new Map();
+    session.forEach(s=>{const k=keyOf(s.line,s.res);const r=g.get(k)||{n:0,ok:0};r.n++;if(s.ok)r.ok++;r.last=s;g.delete(k);g.set(k,r);});
+    [...g.values()].reverse().slice(0,20).forEach(r=>{
+      const t=r.last.res.hit?r.last.res.hit[0]:"";
+      out.appendChild(lineItem(r.last.line,r.last.res,r.last.extra,{n:r.n,ok:r.ok,total:t?totalFor(t):0}));
+    });
+  }
+
+  /* ---------- Free ---------- */
+  function checkFree(){
+    LS.set("ees525-typetxt",ta.value);
+    out.innerHTML="";
+    const g=new Map();
+    ta.value.split(/\n|,|;/).map(s=>s.trim()).filter(Boolean).forEach(l=>{const res=match(l),k=keyOf(l,res);const r=g.get(k)||{n:0,ok:0,line:l,res};r.n++;if(res.hit)r.ok++;g.set(k,r);});
+    g.forEach(r=>out.appendChild(lineItem(r.line,r.res,"",r.n>1?{n:r.n,ok:r.ok,hasOk:false,where:" in your text"}:null)));
+    renderMissing();
+  }
+  let tmr=null; ta.addEventListener("input",()=>{clearTimeout(tmr);tmr=setTimeout(checkFree,250);});
+  $("clearType").addEventListener("click",()=>{ta.value="";checkFree();ta.focus();});
+
+
+  /* ---------- suggestions inside the Free box (current line) ---------- */
+  const taL=$("taSug"); let taOn=LS.get("ees525-tasug",true), taIdx=-1, taItems=[];
+  function lineBounds(){const v=ta.value,c=ta.selectionStart;const a=v.lastIndexOf("\n",c-1)+1;let b=v.indexOf("\n",c);if(b<0)b=v.length;return [a,b,c];}
+  function taSugRender(){
+    taL.innerHTML="";
+    if(!taOn||mode!=="free"||document.activeElement!==ta){taL.hidden=true;ta.setAttribute("aria-expanded","false");return;}
+    const [a,,c]=lineBounds(); const q=ta.value.slice(a,c).replace(/^\s+/,"").toLowerCase();
+    const dn=doneSet();
+    taItems=q?[...new Set(deck().map(x=>x[0]).filter(t=>!dn.has(t)).filter(t=>t.toLowerCase().startsWith(q)||variants(t).some(v=>v.toLowerCase().startsWith(q))))].sort((x,y)=>x.localeCompare(y)):[];
+    if(taIdx>=taItems.length) taIdx=taItems.length-1;
+    taItems.forEach((t,k)=>{const li=document.createElement("li");li.setAttribute("role","option");li.id="tas-"+k;
+      li.innerHTML=t.toLowerCase().startsWith(q)?'<b>'+esc(t.slice(0,q.length))+'</b>'+esc(t.slice(q.length)):esc(t);
+      if(k===taIdx){li.className="on";li.setAttribute("aria-selected","true");}
+      li.addEventListener("mousedown",e=>{e.preventDefault();taFill(t);});taL.appendChild(li);});
+    const show=taItems.length>0&&!(taItems.length===1&&taItems[0].toLowerCase()===q);
+    taL.hidden=!show; ta.setAttribute("aria-expanded",show);
+    if(taIdx>=0&&show){ta.setAttribute("aria-activedescendant","tas-"+taIdx);const el=$("tas-"+taIdx);el&&el.scrollIntoView({block:"nearest"});} else ta.removeAttribute("aria-activedescendant");
+  }
+  function caretIntoView(){
+    /* keep the line with the cursor visible, also after the page changes the text itself */
+    const cs=getComputedStyle(ta), lh=parseFloat(cs.lineHeight)||28, pt=parseFloat(cs.paddingTop)||10;
+    const lineIdx=ta.value.slice(0,ta.selectionStart).split("\n").length-1;
+    const top=pt+lineIdx*lh, bottom=top+lh;
+    if(top<ta.scrollTop) ta.scrollTop=Math.max(0,top-pt);
+    else if(bottom>ta.scrollTop+ta.clientHeight) ta.scrollTop=bottom-ta.clientHeight+pt+2;
+  }
+  function taFill(t){
+    const [a,b]=lineBounds(); ta.value=ta.value.slice(0,a)+t+ta.value.slice(b);
+    const pos=a+t.length; ta.setSelectionRange(pos,pos); taIdx=-1; ta.focus(); caretIntoView(); taSugRender(); checkFree();
+  }
+  ta.addEventListener("keydown",e=>{
+    if(e.altKey||e.metaKey||e.ctrlKey) return;
+    if(taL.hidden) return;
+    if(e.key==="ArrowDown"){e.preventDefault();taIdx=(taIdx+1)%taItems.length;taSugRender();}
+    else if(e.key==="ArrowUp"){e.preventDefault();taIdx=(taIdx-1+taItems.length)%taItems.length;taSugRender();}
+    else if(e.key==="Tab"&&!e.shiftKey){e.preventDefault();taFill(taItems[Math.max(taIdx,0)]);}
+    else if(e.key==="Enter"&&!e.shiftKey&&taIdx>=0){e.preventDefault();taFill(taItems[taIdx]);}
+    else if(e.key==="Escape"){e.preventDefault();taL.hidden=true;ta.setAttribute("aria-expanded","false");}
+  });
+  ta.addEventListener("input",()=>{taIdx=-1;taSugRender();});
+  let lineStart=0, lineWasEmpty=true;
+  ta.addEventListener("input",()=>{const [a,b]=lineBounds(); const empty=!ta.value.slice(a,b).trim(); if(lineWasEmpty&&!empty) lineStart=Date.now(); lineWasEmpty=empty;});
+  const lineMs=()=>lineStart?Date.now()-lineStart:0;
+  ta.addEventListener("click",()=>{taIdx=-1;taSugRender();});
+  ta.addEventListener("blur",()=>setTimeout(()=>{taL.hidden=true;ta.setAttribute("aria-expanded","false");},120));
+  function setTaOn(v){taOn=v;LS.set("ees525-tasug",v);$("taSugOn").setAttribute("aria-pressed",v);$("taSugOff").setAttribute("aria-pressed",!v);$("taSugHelp").hidden=!v;if(!v){taL.hidden=true;}}
+  $("taSugOn").addEventListener("click",()=>{setTaOn(true);ta.focus();});
+  $("taSugOff").addEventListener("click",()=>{setTaOn(false);ta.focus();});
+  setTaOn(taOn);
+  $("skipDone").checked=skipDone;
+  $("skipDone").addEventListener("change",()=>{skipDone=$("skipDone").checked;LS.set("ees525-skipdone",skipDone);ta.focus();taSugRender();});
+
+  /* ---------- faint text on the line you are typing ---------- */
+  const gEl=$("taGhost"); let ghMode=LS.get("ees525-ghost","sug");
+  const GH_HELP={off:"",sug:"The rest of the first suggestion appears faintly after your letters. Tab or → at the end of the line accepts it.",
+    card:"The term on the card appears faintly on the line. Type over it; press Enter when the line matches to save it and move to the next card."};
+  function ghostText(){
+    if(ghMode==="off"||mode!=="free"||document.activeElement!==ta) return null;
+    const [a,b,c]=lineBounds(); if(c!==b) return null;          /* only when the cursor is at the end of the line */
+    const typed=ta.value.slice(a,b); const tl=typed.replace(/^\s+/,"").toLowerCase();
+    let term="";
+    if(ghMode==="card"){ term=list[i][0]; }
+    else { if(!tl) return null;
+      let pick=taOn&&!taL.hidden?taItems[Math.max(taIdx,0)]:null;
+      if(!pick){const dn=doneSet(); pick=deck().map(x=>x[0]).filter(t=>!dn.has(t)&&t.toLowerCase().startsWith(tl)).sort((x,y)=>x.localeCompare(y))[0];}
+      term=pick&&pick.toLowerCase().startsWith(tl)?pick:""; }
+    if(!term) return null;
+    if(!term.toLowerCase().startsWith(tl)) return null;
+    const rest=term.slice(tl.length); return rest?{end:b,rest,term}:null;
+  }
+  function drawGhost(){
+    gEl.style.width=ta.clientWidth+"px"; gEl.style.height=ta.clientHeight+"px";
+    const g=ghostText();
+    if(!g){gEl.innerHTML="";return;}
+    gEl.innerHTML=esc(ta.value.slice(0,g.end))+'<span class="gh">'+esc(g.rest)+'</span>'+esc(ta.value.slice(g.end))+"\n";
+    gEl.scrollTop=ta.scrollTop;
+  }
+  function acceptGhost(){const g=ghostText(); if(!g) return false; taFill(g.term); return true;}
+  ta.addEventListener("keydown",e=>{
+    if(e.altKey||e.metaKey||e.ctrlKey) return;
+    if((e.key==="Tab"&&!e.shiftKey&&taL.hidden)||(e.key==="ArrowRight"&&!e.shiftKey)){
+      if(ghostText()){e.preventDefault();acceptGhost();}
+    }
+    if(e.key==="Enter"&&!e.shiftKey&&(taL.hidden||taIdx<0)&&enterNext()!=="off"){
+      /* Enter moves to the next card: always, or only when the line matches the card */
+      const [a,b]=lineBounds(); const line=ta.value.slice(a,b).trim(); const term=list[i][0];
+      const ok=!!line&&line.toLowerCase()===term.toLowerCase();
+      if(ok||enterNext()==="always"){
+        e.preventDefault();
+        if(line){
+          const ms=lineMs(); lineStart=0; lineWasEmpty=true;
+          if(ghMode==="card"||ok) record(term,line,ok,ok?0:1,ms);
+          else { const r=match(line); if(r.hit) record(r.hit[0],line,true,0,ms); else if(r.near) record(r.near[0],line,false,1,ms); }
+        }
+        const pos=b; ta.setSelectionRange(pos,pos); if(line) ta.setRangeText("\n",pos,pos,"end");
+        checkFree(); caretIntoView(); go(1); setTimeout(()=>{caretIntoView();drawGhost();},0);
+      }
+    }
+  });
+  ["input","click","keyup","scroll","focus","blur","select"].forEach(ev=>ta.addEventListener(ev,()=>setTimeout(drawGhost,0)));
+  ta.addEventListener("input",()=>{ if(ta.selectionStart===ta.value.length) caretIntoView(); });
+  try{new ResizeObserver(drawGhost).observe(ta);}catch(e){}
+  function setGh(m){ghMode=m;LS.set("ees525-ghost",m);["off","sug","card"].forEach(k=>$("gh-"+k).setAttribute("aria-pressed",k===m));$("ghHelp").textContent=GH_HELP[m];drawGhost();}
+  ["off","sug","card"].forEach(k=>$("gh-"+k).addEventListener("click",()=>{setGh(k);ta.focus();}));
+  const _r2=render; render=function(){_r2(); drawGhost();};
+  setGh(GH_HELP[ghMode]!==undefined?ghMode:"sug");
+
+  /* ---------- Suggest ---------- */
+  const sIn=$("sugIn"), sList=$("sugList"); let sIdx=-1, sItems=[];
+  function sugRender(){
+    const q=sIn.value.trim().toLowerCase();
+    const dn=doneSet();
+    sItems=q?deck().map(c=>c[0]).filter(t=>!dn.has(t)).filter(t=>t.toLowerCase().startsWith(q)||variants(t).some(v=>v.toLowerCase().startsWith(q))):[];
+    sItems=[...new Set(sItems)].sort((a,b)=>a.localeCompare(b));
+    sList.innerHTML=""; if(sIdx>=sItems.length) sIdx=sItems.length-1;
+    sItems.forEach((t,k)=>{
+      const li=document.createElement("li");li.setAttribute("role","option");li.id="sug-"+k;
+      const pos=t.toLowerCase().indexOf(q);
+      li.innerHTML=pos===0?'<b>'+esc(t.slice(0,q.length))+'</b>'+esc(t.slice(q.length)):esc(t);
+      if(k===sIdx){li.className="on";li.setAttribute("aria-selected","true");}
+      li.addEventListener("mousedown",e=>{e.preventDefault();sIn.value=t;sIdx=-1;sugRender();sIn.focus();});
+      sList.appendChild(li);
+    });
+    const show=sItems.length>0&&!(sItems.length===1&&sItems[0].toLowerCase()===q);
+    sList.hidden=!show; sIn.setAttribute("aria-expanded",show);
+    if(sIdx>=0) sIn.setAttribute("aria-activedescendant","sug-"+sIdx); else sIn.removeAttribute("aria-activedescendant");
+    $("tgtInfo").textContent="";
+  }
+  let sStart=0; sIn.addEventListener("input",()=>{ if(sIn.value.length===1||!sStart) sStart=sIn.value?Date.now():0; });
+  sIn.addEventListener("input",()=>{sIdx=-1;sugRender();});
+  sIn.addEventListener("keydown",e=>{
+    if(e.altKey||e.metaKey||e.ctrlKey) return;
+    if(e.key==="ArrowDown"&&sItems.length){e.preventDefault();sIdx=(sIdx+1)%sItems.length;sugRender();}
+    else if(e.key==="ArrowUp"&&sItems.length){e.preventDefault();sIdx=(sIdx-1+sItems.length)%sItems.length;sugRender();}
+    else if(e.key==="Tab"&&!e.shiftKey&&sItems.length&&!sList.hidden){e.preventDefault();sIn.value=sItems[Math.max(sIdx,0)];sIdx=-1;sugRender();}
+    else if(e.key==="Escape"){sList.hidden=true;}
+    else if(e.key==="Enter"&&!e.shiftKey){
+      e.preventDefault();
+      if(sIdx>=0&&!sList.hidden&&sItems[sIdx].toLowerCase()!==sIn.value.trim().toLowerCase()){sIn.value=sItems[sIdx];sIdx=-1;sugRender();return;}
+      const line=sIn.value.trim(); if(!line) return;
+      const res=match(line); session.push({line,res,ok:!!res.hit}); if(!res.hit&&window.__mistake) window.__mistake(sIn);
+      record(res.hit?res.hit[0]:(res.near?res.near[0]:""),line,!!res.hit,res.hit?0:1,sStart?Date.now()-sStart:0); sStart=0; renderSession();
+      sIn.value="";sIdx=-1;sugRender();
+    }
+  });
+  sIn.addEventListener("blur",()=>setTimeout(()=>{sList.hidden=true;},120));
+
+  /* ---------- Trace and Next letter (target = card on screen) ---------- */
+  const tIn=$("trIn"); let target="", errs=0, t0=0, prevLen=0;
+  function curTerm(){return list[i];}
+  function setTarget(){
+    const c=curTerm(); target=c[0]; errs=0; t0=0; prevLen=0; tIn.value="";
+    $("tgtAr").textContent=c[1];
+    drawTarget();
+  }
+  function drawTarget(){
+    const v=tIn.value, tl=target.toLowerCase(), vl=v.toLowerCase();
+    let firstBad=-1; for(let k=0;k<v.length;k++){ if(vl[k]!==tl[k]){firstBad=k;break;} }
+    const traceOn=mode==="trace";
+    $("traceBox").classList.toggle("tracing",traceOn);
+    /* ghost: typed part invisible (red underline where wrong), the rest faint */
+    let g="";
+    for(let k=0;k<Math.max(target.length,v.length);k++){
+      const ch=k<target.length?target[k]:" ";
+      if(k<v.length) g+='<span class="'+(vl[k]===tl[k]?"gt":"gx")+'">'+(ch===" "?"&nbsp;":esc(ch))+'</span>';
+      else g+='<span class="gr">'+(ch===" "?"&nbsp;":esc(ch))+'</span>';
+    }
+    $("ghost").innerHTML=traceOn?g:"";
+    /* next letter: done letters, the next one highlighted, the rest muted */
+    let h="";
+    const okLen=firstBad<0?Math.min(v.length,target.length):firstBad;
+    for(let k=0;k<target.length;k++){
+      const ch=target[k]===" "?"␣":esc(target[k]);
+      if(FX.sylShow&&k>0&&(SYL[target]||[]).includes(k)) h+='<span class="sylsep" aria-hidden="true">·</span>';
+      if(k<okLen) h+='<span class="gd">'+ch+'</span>';
+      else if(k===okLen) h+='<span class="'+(firstBad>=0?"gbad":"gnext")+'">'+ch+'</span>';
+      else h+='<span class="gm">'+ch+'</span>';
+    }
+    $("guide").innerHTML=mode==="guided"?h:"";
+    $("guide").hidden=mode!=="guided";
+    $("sylLine").hidden=!(FX.sylShow&&mode==="trace"); $("sylLine").textContent=sylText(target);
+    tIn.classList.toggle("err",firstBad>=0);
+    const nxt=okLen<target.length?target[okLen]:"";
+    $("tgtInfo").textContent=firstBad>=0?("Mistake at letter "+(firstBad+1)+". Delete it and type “"+(target[firstBad]===" "?"space":target[firstBad])+"”."):
+      (v.length&&v.length<target.length&&mode==="guided"?("Next: "+(nxt===" "?"space":"“"+nxt+"”")):(errs?("Mistakes so far: "+errs):""));
+  }
+  tIn.addEventListener("input",()=>{
+    if(!t0) t0=Date.now();
+    const v=tIn.value;
+    if(v.length>prevLen){ const k=v.length-1; if(k>=target.length||v[k].toLowerCase()!==target[k].toLowerCase()){ errs++; window.__mistake&&window.__mistake(tIn); } }
+    prevLen=v.length; drawTarget();
+    if(v.toLowerCase()===target.toLowerCase()){
+      const secs=Math.round((Date.now()-t0)/100)/10;
+      const res={hit:CARDS.find(c=>c[0]===target)};
+      session.push({line:v,res,ok:errs===0,extra:" · last try: "+(errs?errs+" mistake"+(errs>1?"s":""):"no mistakes")+" · "+secs+" s"});
+      record(target,v,errs===0,errs,Date.now()-t0); renderSession();
+      if(window.__autoplayTyped) window.__autoplayTyped();
+      tIn.classList.add("done"); tIn.disabled=true;
+      setTimeout(()=>{tIn.classList.remove("done");tIn.disabled=false; if(!window.__advanceOnCorrect||window.__advanceOnCorrect()) go(1); else {tIn.value="";prevLen=0;errs=0;t0=0;drawTarget();} tIn.focus();},650);
+    }
+  });
+  $("tgtSkip").addEventListener("click",()=>{go(1);tIn.focus();});
+  tIn.addEventListener("keydown",e=>{
+    if(e.key!=="Enter"||e.shiftKey||e.altKey||e.metaKey||e.ctrlKey||enterMode!=="always") return;
+    e.preventDefault(); if(tIn.value.trim()) record(target,tIn.value,false,Math.max(1,errs)); go(1); tIn.focus();
+  });
+  ["off","ok","always"].forEach(k=>$("en-"+k).addEventListener("click",()=>{setEnter(k);ta.focus();}));
+  setEnter(["off","ok","always"].includes(enterMode)?enterMode:"always");
+  window.__setEnter=setEnter; window.__ghMode=()=>ghMode; window.__mode=()=>mode;
+  const _render=render; render=function(){_render(); if(mode==="trace"||mode==="guided") setTarget(); if(mode==="def") setDefTarget();};
+
+  /* ---------- Write definition ---------- */
+  const dIn=$("defIn"); let dChecked=false, dLast=0;
+  const STOP=new Set("the a an and or of to in on for from by with that which is are be as at it its this these those into their they them than then can may such not but also has have had other others when where who what one some any all each more most less very just only over under between within without about after before during through so do does used use uses using being been there here".split(" "));
+  const stem=w=>w.toLowerCase().replace(/[^a-z0-9]/g,"").replace(/ies$/,"y").replace(/(ing|ed|es|s)$/,"").replace(/e$/,"");
+  function keyWords(def){const seen=new Set(),out=[];def.split(/[^A-Za-z0-9-]+/).forEach(w=>{const lw=w.toLowerCase();if(lw.length<4||STOP.has(lw))return;const k=stem(lw);if(!k||seen.has(k))return;seen.add(k);out.push(w);});return out;}
+  function setDefTarget(){const c=list[i];$("dTerm").innerHTML=esc(c[0])+' <span class="ar">'+esc(c[1])+'</span>';dIn.value="";dChecked=false;$("defResult").innerHTML="";}
+  function officialHTML(c){return '<div class="dofficial"><span class="label">Definition</span><p>'+esc(DEF_EN[c[0]]||"")+'</p><p class="ar">'+esc(DEF_AR[c[0]]||"")+'</p></div>';}
+  function checkDef(){
+    const c=list[i], def=DEF_EN[c[0]]||""; const kws=keyWords(def);
+    const typed=new Set(dIn.value.split(/[^A-Za-z0-9-]+/).map(stem).filter(Boolean));
+    const found=kws.filter(k=>typed.has(stem(k))), missing=kws.filter(k=>!typed.has(stem(k)));
+    const pct=kws.length?Math.round(found.length/kws.length*100):0; dLast=pct;
+    $("defResult").innerHTML='<p class="dscore"><b>'+pct+'%</b> of the key words · '+found.length+' of '+kws.length+'</p>'+
+      '<div class="dchips">'+found.map(w=>'<span class="chip ok">'+esc(w)+'</span>').join("")+missing.map(w=>'<span class="chip miss">'+esc(w)+'</span>').join("")+'</div>'+
+      '<p class="tiny">Green: key words you used. Amber: key words you left out. This counts words only; it does not judge meaning.</p>'+officialHTML(c);
+    record(c[0],dIn.value.trim(),pct>=70,missing.length); dChecked=true; if(pct<70&&window.__mistake) window.__mistake(dIn);
+  }
+  $("defCheck").addEventListener("click",()=>{checkDef();dIn.focus();});
+  $("defShow").addEventListener("click",()=>{$("defResult").innerHTML=officialHTML(list[i]);dIn.focus();});
+  dIn.addEventListener("input",()=>{dChecked=false;});
+  dIn.addEventListener("keydown",e=>{
+    if(e.key!=="Enter"||e.shiftKey||e.altKey||e.metaKey||e.ctrlKey) return;
+    e.preventDefault();
+    if(!dChecked){checkDef();return;}
+    const em=enterNext(); if(em==="always"||(em==="ok"&&dLast>=70)){go(1);dIn.focus();}
+  });
+
+  /* ---------- modes ---------- */
+  const HELP={free:"Type the English terms, one per line. Each line is checked for spelling against the list.",
+    suggest:"Type the first letters; the list narrows as you go. Press Enter to check the word you typed.",
+    trace:"The term on the card appears faintly. Type over it; wrong letters are underlined in red.",
+    guided:"Type the term on the card. The next letter to type is highlighted, like a typing tutor.",
+    def:"Write the definition of the term on the card. Check shows which key words you used and which you missed."};
+  function setMode(m){
+    mode=m; LS.set("ees525-pmode",m);
+    ["free","suggest","trace","guided","def"].forEach(k=>$("pm-"+k).setAttribute("aria-pressed",k===m));
+    $("box-free").hidden=m!=="free"; const fr=$("freeRow"); if(fr) fr.classList.toggle("dim",m!=="free"); $("box-suggest").hidden=m!=="suggest"; $("box-target").hidden=!(m==="trace"||m==="guided"); $("box-def").hidden=m!=="def";
+    $("modeHelp").textContent=HELP[m];
+    session=[];
+    if(m==="free") checkFree(); else {renderSession(); renderMissing();}
+    if(m==="suggest"){sIn.value="";sugRender();}
+    if(m==="trace"||m==="guided") setTarget();
+    if(m==="def") setDefTarget();
+  }
+  ["free","suggest","trace","guided","def"].forEach(k=>$("pm-"+k).addEventListener("click",()=>{setMode(k); const f={free:ta,suggest:sIn,trace:tIn,guided:tIn,def:$("defIn")}[k]; f&&f.focus();}));
+  ["deck-all","deck-off"].forEach(id=>$(id).addEventListener("click",()=>setTimeout(()=>{ if(mode==="free") checkFree(); else renderMissing(); if(mode==="suggest") sugRender(); },0)));
+  if(!HELP[mode]) mode="free";
+  setMode(mode); renderProgress();
+})();
+</script>
+<script>
+/* One engine for moving between cards and for sound, driven by the Study settings panel */
+(function(){
+  const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+  const old=LS.get("ees525-auto",{});
+  const U=Object.assign({advance:"enter-ok",secs:old.secs||"10",voice:old.lang||"en",reps:(old.rep&&old.rep!=="0")?old.rep:"1",hide:!!old.hide,flipAr:false},LS.get("ees525-unified",{}));
+  st.auto=false; /* the older auto-pronounce switch is replaced by the Sound setting */
+  const ids={advMode:"advance",apSecs:"secs",apLang:"voice",apRep:"reps"};
+  Object.entries(ids).forEach(([id,k])=>{$(id).value=U[k]; if($(id).value!==String(U[k])) $(id).selectedIndex=0;});
+  $("apHide").checked=U.hide; $("flipAr").checked=U.flipAr;
+  const timerMode=()=>U.advance==="timer"||U.advance==="timer-enter";
+  let paused=true, run=0, tick=null;
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  function sayOnce(text,lang){
+    return new Promise(res=>{
+      if(!TTS){res();return;}
+      let done=false;const fin=()=>{if(!done){done=true;res();}};
+      try{const u=new SpeechSynthesisUtterance(text);u.lang=lang;const v=pickVoice(lang);if(v)u.voice=v;
+        u.rate=lang.startsWith("ar")?0.85:0.9;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u);}catch(e){fin();}
+      setTimeout(fin,1500+text.length*140);
+    });
+  }
+  function applyHide(){const h=U.hide; $("en").style.visibility=h?"hidden":""; $("sayEn").style.visibility=h?"hidden":"";}
+  function stopTimer(){clearInterval(tick);tick=null;$("apBar").style.width="0";}
+  function describe(){
+    const a={manual:"Move with the Next button or →.","enter-ok":"Press Enter in the typing box when the word is correct.",enter:"Press Enter in the typing box to move on.",
+      timer:"Cards move on when the timer ends.","timer-enter":"Cards move on when the timer ends, or earlier when you press Enter on a correct word."}[U.advance];
+    const s=U.voice==="off"?"Sound off.":"Each card is read "+U.reps+"×"+(U.voice==="enar"?" in English, then Arabic.":U.voice==="ar"?" in Arabic.":" in English.");
+    return a+" "+s;
+  }
+  function status(t){$("apStatus").textContent=t||describe();}
+  async function cycle(){
+    const my=++run; stopTimer(); applyHide();
+    try{ if(TTS) speechSynthesis.cancel(); }catch(e){}
+    const c=list[i]; if(!c) return;
+    if(U.voice!=="off"&&userActed){
+      const n=+U.reps;
+      for(let k=0;k<n;k++){
+        if(my!==run) return;
+        if(n>1) status("Card "+(i+1)+" of "+list.length+" · listening "+(k+1)+" of "+n);
+        const fv=window.__cardView&&window.__cardView.front==="def";
+        const enTxt=fv?(DEF_EN[c[0]]||c[0]):c[0], arTxt=fv?(DEF_AR[c[0]]||c[1]):c[1];
+        if(U.voice!=="ar"){
+          if(!fv&&FX.sylSay&&sylParts(c[0]).length>1){ for(const part of sylParts(c[0])){ if(my!==run) return; await sayOnce(part,"en-US"); await wait(220);} await wait(200); }
+          if(my!==run) return; await sayOnce(enTxt,"en-US");
+        }
+        if(my!==run) return;
+        if(U.voice==="enar"||U.voice==="ar"){ if(U.voice==="enar") await wait(250); await sayOnce(arTxt,"ar-SA"); }
+        await wait(450);
+      }
+    }
+    if(my!==run) return;
+    if(timerMode()&&!paused){
+      const t0=Date.now(), total=(+U.secs)*1000;
+      tick=setInterval(()=>{
+        if(my!==run){clearInterval(tick);return;}
+        const left=Math.max(0,total-(Date.now()-t0));
+        $("apBar").style.width=(100-left/total*100)+"%";
+        status("Card "+(i+1)+" of "+list.length+" · type it · "+Math.ceil(left/1000)+" s left");
+        if(left<=0){clearInterval(tick);tick=null;go(1);}
+      },100);
+    } else status(timerMode()&&paused?"Timer paused. Press ▶ Start timer.":"");
+  }
+  function applyAll(){
+    LS.set("ees525-unified",U);
+    const tm=timerMode();
+    $("secsWrap").hidden=!tm; $("apPlay").hidden=!tm; $("repWrap").hidden=U.voice==="off";
+    if(!tm) paused=true;
+    $("apPlay").textContent=paused?"▶ Start timer":"❚❚ Pause timer";
+    const em={manual:"off","enter-ok":"ok",enter:"always",timer:"off","timer-enter":"ok"}[U.advance];
+    if(window.__setEnter) window.__setEnter(em);
+    cycle();
+  }
+  $("advMode").addEventListener("change",()=>{U.advance=$("advMode").value;applyAll();});
+  $("apSecs").addEventListener("change",()=>{U.secs=$("apSecs").value;applyAll();});
+  $("apLang").addEventListener("change",()=>{U.voice=$("apLang").value;userActed=true;applyAll();});
+  $("apRep").addEventListener("change",()=>{U.reps=$("apRep").value;userActed=true;applyAll();});
+  $("apHide").addEventListener("change",()=>{U.hide=$("apHide").checked;LS.set("ees525-unified",U);applyHide();});
+  $("flipAr").addEventListener("change",()=>{U.flipAr=$("flipAr").checked;LS.set("ees525-unified",U);});
+  $("apPlay").addEventListener("click",()=>{paused=!paused;userActed=true;applyAll();});
+  const _flip=flip; flip=function(){_flip(); if(U.flipAr&&$("card").classList.contains("flipped")){try{speechSynthesis.cancel();}catch(e){} sayOnce(list[i][1],"ar-SA");}};
+  const _r=render; render=function(){_r(); cycle();};
+  window.__autoplayTyped=()=>{ run++; stopTimer(); status("Typed it. Next card…"); };
+  window.__advanceOnCorrect=()=>U.advance!=="manual";
+  applyAll();
+})();
+</script>
+<script>
+(function(){ /* collapse the settings panel; remembered in this browser */
+  const sec=document.querySelector(".settings"), b=$("stToggle");
+  let c=false; try{c=localStorage.getItem("ees525-stcollapsed")==="1";}catch(e){}
+  function set(v){c=v;sec.classList.toggle("collapsed",c);b.textContent=c?"Show settings":"Hide settings";b.setAttribute("aria-expanded",!c);try{localStorage.setItem("ees525-stcollapsed",c?"1":"0");}catch(e){}}
+  b.addEventListener("click",()=>set(!c)); set(c);
+})();
+</script>
+<script>
+/* What the card shows: term or definition first, and the definition language */
+(function(){
+  let CV={front:"term",def:"off"}; try{Object.assign(CV,JSON.parse(localStorage.getItem("ees525-view")||"{}"));}catch(e){}
+  window.__cardView=CV;
+  const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  function defs(term,which){
+    const en=DEF_EN[term]||"", ar=DEF_AR[term]||"";
+    if(which==="en") return '<p>'+esc(en)+'</p>';
+    if(which==="ar") return '<p class="dar">'+esc(ar)+'</p>';
+    if(which==="both") return '<p>'+esc(en)+'</p><p class="dar">'+esc(ar)+'</p>';
+    return "";
+  }
+  function paint(){
+    const c=list[i]; if(!c) return;
+    const dFront=CV.front==="def";
+    $("en").hidden=dFront; $("sayEn").hidden=dFront;
+    $("defF").hidden=!dFront; $("defF").innerHTML=dFront?defs(c[0],CV.def==="off"?"en":CV.def):"";
+    const backDef=!dFront&&CV.def!=="off";
+    $("defB").hidden=!backDef; $("defB").innerHTML=backDef?defs(c[0],CV.def):"";
+    $("en2").classList.toggle("bigterm",dFront);
+    if(FX.sylShow){ $("en").textContent=sylText(c[0]); $("en2").textContent=sylText(c[0]); }
+    $("card").classList.toggle("long",dFront||backDef);
+  }
+  function setBtns(){
+    $("cv-term").setAttribute("aria-pressed",CV.front==="term"); $("cv-def").setAttribute("aria-pressed",CV.front==="def");
+    ["off","en","ar","both"].forEach(k=>$("dl-"+k).setAttribute("aria-pressed",CV.def===k));
+    $("dl-off").disabled=CV.front==="def";
+    try{localStorage.setItem("ees525-view",JSON.stringify(CV));}catch(e){}
+  }
+  $("cv-term").addEventListener("click",()=>{CV.front="term";setBtns();render();});
+  $("cv-def").addEventListener("click",()=>{CV.front="def";if(CV.def==="off")CV.def="en";setBtns();render();});
+  ["off","en","ar","both"].forEach(k=>$("dl-"+k).addEventListener("click",()=>{CV.def=k;setBtns();render();}));
+  const _r=render; render=function(){_r(); paint();};
+  setBtns(); paint();
+})();
+</script>
+<script>
+/* Syllables and mistake feedback (sound, shake) */
+(function(){
+  const save=()=>{try{localStorage.setItem("ees525-fx",JSON.stringify(FX));}catch(e){}};
+  ["sylShow","sylSay","mkSound","mkShake"].forEach(id=>{const el=$(id); el.checked=!!FX[id]; el.addEventListener("change",()=>{FX[id]=el.checked; save(); render(); hint();});});
+  let ac=null;
+  function beep(){
+    try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended") ac.resume();
+      const o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime;
+      o.type="triangle"; o.frequency.setValueAtTime(330,t); o.frequency.exponentialRampToValueAtTime(200,t+.12);
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.08,t+.01); g.gain.exponentialRampToValueAtTime(0.0001,t+.16);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t+.18);
+    }catch(e){}
+  }
+  window.__mistake=function(el){
+    if(FX.mkSound) beep();
+    if(FX.mkShake&&el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); el.addEventListener("animationend",()=>el.classList.remove("shake"),{once:true}); try{navigator.vibrate&&navigator.vibrate(30);}catch(e){} }
+  };
+  /* Free box: a mistake is the moment the line stops matching (card word) or stops matching any term (finish the word) */
+  const ta=$("typeBox"); let wasOk=true;
+  function lineNow(){const v=ta.value,c=ta.selectionStart,a=v.lastIndexOf("\n",c-1)+1;return v.slice(a,c).replace(/^\s+/,"").toLowerCase();}
+  ta.addEventListener("input",e=>{
+    if(!window.__mode||window.__mode()!=="free") return;
+    const gm=window.__ghMode?window.__ghMode():"off", q=lineNow(); let ok=true;
+    if(!q) ok=true;
+    else if(gm==="card") ok=list[i][0].toLowerCase().startsWith(q);
+    else if(gm==="sug") ok=CARDS.some(c=>c[0].toLowerCase().startsWith(q));
+    if(!ok&&wasOk&&e.inputType&&e.inputType.startsWith("insert")) window.__mistake(ta.closest(".tawrap")||ta);
+    wasOk=ok;
+  });
+  function hint(){
+    const h=$("sylHint"); const show=FX.sylShow&&window.__mode&&window.__mode()==="free"&&window.__ghMode&&window.__ghMode()==="card";
+    h.hidden=!show; if(show) h.textContent="Syllables: "+sylText(list[i][0]);
+  }
+  ["gh-off","gh-sug","gh-card","pm-free","pm-suggest","pm-trace","pm-guided","pm-def"].forEach(id=>{const b=$(id); b&&b.addEventListener("click",()=>setTimeout(hint,0));});
+  const _r=render; render=function(){_r(); hint();};
+  hint();
+})();
+</script>
+<script>
+/* Practice lists: speed per word, "Practice more" and "Didn't know the meaning" lists */
+(function(){
+  const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+  const esc=x=>String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  let F=LS.get("ees525-flags",{prac:{},mean:{}}); F.prac=F.prac||{}; F.mean=F.mean||{};
+  let SP=LS.get("ees525-speed",{});      /* term -> {n, spl (sum of seconds per letter), best} */
+  const O=Object.assign({autoAdd:true,autoRemove:true},LS.get("ees525-flagopt",{}));
+  const saveF=()=>LS.set("ees525-flags",F), saveSP=()=>LS.set("ees525-speed",SP);
+  const letters=t=>t.replace(/[^A-Za-z]/g,"").length||1;
+  window.__inDeck=c=>st.deck==="all"?true:st.deck==="off"?c[3]===1:st.deck==="prac"?!!F.prac[c[0]]:st.deck==="mean"?!!F.mean[c[0]]:true;
+  window.__deckBtns=()=>{["prac","mean"].forEach(k=>$("deck-"+k).setAttribute("aria-pressed",st.deck===k));};
+  window.__deckEmpty=()=>toast(st.deck==="prac"?"Your Practice more list is empty. Showing all terms.":"Your Didn't know list is empty. Showing all terms.");
+  let lastTerm="";
+  function median(){const a=Object.values(SP).filter(r=>r.n).map(r=>r.spl/r.n).sort((x,y)=>x-y);return a.length>=5?a[Math.floor(a.length/2)]:null;}
+  function isSlow(term,ms){ if(!ms) return false; const spl=ms/1000/letters(term), m=median(); return m?spl>1.5*m:spl>1.2; }
+  window.__afterAttempt=(term,ok,errors,ms,mode)=>{
+    lastTerm=term;
+    if(ms&&mode!=="def"){ const r=SP[term]||(SP[term]={n:0,spl:0,best:0}); const spl=ms/1000/letters(term);
+      if(spl<20){ r.n++; r.spl+=spl; r.best=r.best?Math.min(r.best,spl):spl; saveSP(); } }
+    const slow=isSlow(term,ms), bad=!ok||errors>0;
+    if(F.prac[term]){
+      if(bad||slow) F.prac[term].clean=0;
+      else { F.prac[term].clean=(F.prac[term].clean||0)+1;
+        if(O.autoRemove&&F.prac[term].clean>=3){ delete F.prac[term]; toast("“"+term+"” left Practice more: 3 quick tries with no mistakes."); } }
+    } else if(O.autoAdd&&(bad||slow)&&mode!=="def"){
+      F.prac[term]={added:Date.now(),clean:0,auto:true}; toast("“"+term+"” added to Practice more ("+(bad?"mistakes":"slow")+").");
+    }
+    saveF(); paint();
+  };
+  function toggle(list,term,on){ if(!term) return; const L=F[list]; const was=!!L[term]; const now=on===undefined?!was:on;
+    if(now) L[term]=L[term]||{added:Date.now(),clean:0}; else delete L[term]; saveF(); paint();
+    toast((now?"Added “":"Removed “")+term+(now?"” to ":"” from ")+(list==="prac"?"Practice more.":"Didn't know the meaning.")); }
+  let tt=null; function toast(m){const el=$("flStat"); el.textContent=m; clearTimeout(tt); tt=setTimeout(()=>{el.textContent="";},3500);}
+  function paint(){
+    const c=list[i]; if(!c) return;
+    $("flPrac").setAttribute("aria-pressed",!!F.prac[c[0]]); $("flMean").setAttribute("aria-pressed",!!F.mean[c[0]]);
+    $("nPrac").textContent=Object.keys(F.prac).length; $("nMean").textContent=Object.keys(F.mean).length;
+    const slow=Object.entries(SP).filter(([,r])=>r.n).map(([t,r])=>[t,r.spl/r.n,r.n]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    $("slowList").innerHTML=slow.length?slow.map(([t,v,n])=>'<li><b>'+esc(t)+'</b> <span>· '+v.toFixed(2)+' s per letter · '+n+' tr'+(n>1?'ies':'y')+'</span></li>').join(""):'<li class="tiny">Type a few words to see your timing.</li>';
+    const row=(list,t)=>'<li><span class="fterm">'+esc(t)+'</span>'+(list==="prac"&&F.prac[t].clean?'<span class="tiny"> '+F.prac[t].clean+'/3 clean</span>':'')+'<button type="button" class="fx" data-l="'+list+'" data-t="'+esc(t)+'" aria-label="Remove '+esc(t)+'">×</button></li>';
+    $("pracList").innerHTML=Object.keys(F.prac).sort().map(t=>row("prac",t)).join("")||'<li class="tiny">Empty</li>';
+    $("meanList").innerHTML=Object.keys(F.mean).sort().map(t=>row("mean",t)).join("")||'<li class="tiny">Empty</li>';
+    $("pracInfo").textContent=O.autoRemove?"(a word leaves after 3 quick, clean tries)":"";
+  }
+  document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".fx"); if(!b) return; toggle(b.dataset.l,b.dataset.t,false); if((st.deck==="prac"||st.deck==="mean")) build();});
+  $("flPrac").addEventListener("click",()=>toggle("prac",list[i][0]));
+  $("flMean").addEventListener("click",()=>toggle("mean",list[i][0]));
+  ["prac","mean"].forEach(k=>$("deck-"+k).addEventListener("click",()=>{st.deck=k;build();}));
+  ["autoAdd","autoRemove"].forEach(id=>{const el=$(id); el.checked=!!O[id]; el.addEventListener("change",()=>{O[id]=el.checked;LS.set("ees525-flagopt",O);paint();});});
+  /* keys: outside the typing area P and M; inside one-line typing boxes ↓ adds and ↑ removes */
+  document.addEventListener("keydown",e=>{
+    if(e.altKey||e.metaKey||e.ctrlKey||e.shiftKey) return;
+    const t=e.target;
+    if(t&&(t.id==="trIn"||t.id==="sugIn")){
+      if(t.id==="sugIn"&&!$("sugList").hidden) return;
+      if(e.key==="ArrowDown"){e.preventDefault();toggle("prac",t.id==="trIn"?list[i][0]:(lastTerm||list[i][0]),true);}
+      else if(e.key==="ArrowUp"){e.preventDefault();toggle("prac",t.id==="trIn"?list[i][0]:(lastTerm||list[i][0]),false);}
+      return;
+    }
+    if(t&&t.id==="typeBox"){
+      if(e.key==="ArrowDown"&&$("taSug").hidden&&t.selectionStart===t.value.length){e.preventDefault();toggle("prac",lastTerm||list[i][0],true);}
+      return;
+    }
+    if(t&&t.closest&&(t.closest(".practice")||t.closest("select")||t.closest("input"))) return;
+    if(e.key==="p"||e.key==="P") toggle("prac",list[i][0]);
+    else if(e.key==="m"||e.key==="M") toggle("mean",list[i][0]);
+  });
+  const _r=render; render=function(){_r(); paint();};
+  if(st.deck==="prac"||st.deck==="mean") build(); else { window.__deckBtns(); paint(); }
+})();
+</script>
+
+</body></html>

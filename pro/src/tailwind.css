@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* مؤشر الثواني الناعم في الساعة الاحترافية */
+@keyframes bukur-sec-cw { to { transform: rotate(360deg); } }
+@keyframes bukur-sec-ccw { to { transform: rotate(-360deg); } }
