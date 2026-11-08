@@ -356,3 +356,14 @@ button { font: inherit; cursor: pointer; }
 .nt-due:not(:empty) { font-size: 11px; font-weight: 700; }
 .bk-chip b.bk-status { display: inline-flex; align-items: center; gap: 4px; direction: rtl; }
 .bk-status .ic { font-size: 16px; }
+
+/* ── المؤقت: التنازلي/التصاعدي */
+.ft[data-kind="up"] [data-down], .ft[data-kind="down"] [data-up] { display: none !important; }
+.ft-kind { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 28px; padding: 0 6px; border: 1px solid var(--green-800); border-radius: 6px; background: var(--green-800); color: var(--beige-50); }
+.ft-kind .ic { font-size: 18px; }
+.ft-task { min-width: 0; flex: 1; max-width: 220px; padding: 4px 8px; border: 1px solid var(--beige-300); border-radius: 6px; font: inherit; font-size: 13px; background: #fff; color: var(--ink); }
+.ft-tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; width: min(320px, 100%); }
+.ft-tasks:empty { display: none; }
+.ft-tasks li { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; padding: 3px 8px; border-radius: 6px; background: var(--beige-100); }
+.ft-tasks li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ft-tasks li b { font-family: ui-monospace, Menlo, monospace; }
