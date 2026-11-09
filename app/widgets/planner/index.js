@@ -8,6 +8,8 @@ import {
   projectProgress, projectRange, restore, taskColor,
 } from './projects.js';
 import { reviewPanel } from './review-view.js';
+import { effortView } from './effort-view.js';
+import { cycleEffort } from './effort.js';
 import { monthKey, setReviewField, stageFor } from './reviews.js';
 import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
@@ -364,20 +366,21 @@ export default {
       // دمج التقويم في الشهر والموسم والأسبوع (طلب المالك): شبكة أسابيع × أيام بالمحرّك نفسه، أو جانت
       const calScope = !narrow && ['month', 'season', 'week'].includes(s.scope);
       const asCal = calScope && (all.view ?? 'cal') === 'cal';
+      const asEffort = calScope && all.view === 'effort'; // عرض «الجهد»: مهام × أيام بمربّعات متعددة الضغطات
       // خطة المشروع: جانت على مدى مهامه (أو الشهر الحالي إن لم تُجدول بعد)
       const planMode = openProject && all.planView !== false && !narrow;
       if (planMode) {
         const pr = projectRange(all.tasks, openProject.id) ?? rangeFor('month', today());
         Object.assign(r, { start: pr.start, end: pr.end, label: `خطة: ${openProject.name}` });
       }
-      const body = planMode ? ganttView(s, r) : s.scope === 'year' ? calView(s, r, today()) : asCal ? calView(s, r, today(), { rows: 'week', cols: 'weekday' }) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
+      const body = planMode ? ganttView(s, r) : asEffort ? effortView(s.tasks, r, { today: today(), weekend: s.weekend, balanceDay: s.balanceDay === undefined ? 5 : s.balanceDay, colorOf, DOW1 }) : s.scope === 'year' ? calView(s, r, today()) : asCal ? calView(s, r, today(), { rows: 'week', cols: 'weekday' }) : s.scope === 'day' ? dayView(s, r) : two ? agendaView(s, two)
         : s.scope === 'week' && narrow ? weekDaysView(s, r) : ganttView(s, r);
       const t0 = today();
       el.innerHTML = `<div class="pl">
         <div class="pl-top">
           <button type="button" class="pl-btn pl-scope" data-act="scope" ${tip(narrow ? 'بدّل العرض: يوم ← أسبوع ← شهران ← فترتان (السنة والشهر الكامل في التبويب الكامل)' : 'بدّل العرض: سنة ← موسم ← شهر ← أسبوع ← يوم')}>${icon(SCOPE_ICON[s.scope])}<span>${SCOPE_LABEL[s.scope]}</span></button>
           ${s.scope === 'year' ? builderBar(s) : ''}
-          ${calScope ? `<button type="button" class="pl-btn" data-act="view" ${tip(asCal ? 'تقويم (أسابيع × أيام) — اضغط لجانت' : 'جانت (صف لكل مهمة) — اضغط للتقويم')}>${icon(asCal ? 'calendar_month' : 'view_timeline')}<span>${asCal ? 'تقويم' : 'جانت'}</span></button>` : ''}
+          ${calScope ? `<button type="button" class="pl-btn" data-act="view" ${tip(asCal ? 'تقويم (أسابيع × أيام) — اضغط لجانت' : asEffort ? 'الجهد (مهام × أيام بمربّعات) — اضغط للتقويم' : 'جانت (صف لكل مهمة) — اضغط لعرض الجهد')}>${icon(asCal ? 'calendar_month' : asEffort ? 'donut_large' : 'view_timeline')}<span>${asCal ? 'تقويم' : asEffort ? 'الجهد' : 'جانت'}</span></button>` : ''}
           <button type="button" class="pl-btn" data-act="system" ${tip('نظام المواسم — اضغط للتبديل')}>${icon('eco')}<span>${SYSTEMS[s.system].label}</span></button>
           <span class="pl-nav">
             <button type="button" class="pl-btn" data-act="prev" ${tip('السابق')}>${icon('chevron_right')}</button>
@@ -427,6 +430,7 @@ export default {
         store.set({ goals: (st.goals ?? []).filter((g) => g.id !== id), tasks: st.tasks.map(({ goal, ...t }) => (goal === id ? t : { ...t, ...(goal ? { goal } : {}) })) });
         return;
       }
+      if (pick('data-eff')) { const id = pick('data-eff'), k = e.target.closest('[data-k]').dataset.k; store.set({ tasks: st.tasks.map((t) => (t.id === id ? cycleEffort(t, k) : t)) }); return; }
       if (pick('data-review')) { const k = pick('data-review'); review = { mk: monthKey(k), stage: stageFor(k) }; render(); return; }
       if (pick('data-rvstage')) { review = { ...review, stage: pick('data-rvstage') }; render(); return; }
       if (pick('data-popen')) { store.set({ project: pick('data-popen'), planView: true }); return; }
@@ -479,7 +483,7 @@ export default {
         store.set({ grid: next === 'months' ? { ...GRID_PRESETS.date, months: true } : { ...GRID_PRESETS[next] }, anchor: null });
       }
       if (act === 'g-span') store.set({ grid: nextSpan(curGrid()), anchor: null });
-      if (act === 'view') store.set({ view: (s.view ?? 'cal') === 'cal' ? 'gantt' : 'cal' });
+      if (act === 'view') store.set({ view: { cal: 'gantt', gantt: 'effort', effort: 'cal' }[s.view ?? 'cal'] ?? 'cal' });
       if (act === 'g-rows') store.set({ grid: nextRows(curGrid()) });
       if (act === 'g-cols') store.set({ grid: nextCols(curGrid()) });
       if (act === 'system') store.set({ system: nextSystem(s.system) });
