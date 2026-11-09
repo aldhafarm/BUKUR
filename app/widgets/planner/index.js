@@ -10,6 +10,7 @@ import {
 import { reviewPanel } from './review-view.js';
 import { effortView } from './effort-view.js';
 import { cycleEffort } from './effort.js';
+import { addStep, keepExtras, removeStep, stepsLabel, toggleStep } from './steps.js';
 import { monthKey, setReviewField, stageFor } from './reviews.js';
 import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
@@ -34,7 +35,7 @@ const DOW1 = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']; // حرف اليوم د
 
 /** شريط مهمة: لونها، والجزء المنجز ممتلئ من بدايتها (اليمين). */
 const bar = (t, b, extra = '') => `<button type="button" draggable="true" class="pl-task${b.clipStart ? ' cut-s' : ''}${b.clipEnd ? ' cut-e' : ''}" data-task="${esc(t.id)}"
-  style="grid-column:${b.col + 1} / span ${b.span};--c:${colorOf(t)};--p:${Math.round(b.fill * 100)}%;${extra}" ${tip(`${t.name} · ${t.progress}٪ · ${t.start} ← ${t.end}`)}>
+  style="grid-column:${b.col + 1} / span ${b.span};--c:${colorOf(t)};--p:${Math.round(b.fill * 100)}%;${extra}" ${tip(`${t.name} · ${t.progress}٪${t.steps?.length ? ` · خطوات ${stepsLabel(t)}` : ''} · ${t.start} ← ${t.end}`)}>
   <span>${b.span > 2 || b.wide ? esc(t.name) : ''}</span></button>`;
 
 export default {
@@ -262,7 +263,7 @@ export default {
       const list = tasksIn(s.tasks, r);
       if (!list.length) return '<p class="pl-empty">لا مهام اليوم.</p>';
       return `<ul class="pl-day">${list.map((t) => `<li><button type="button" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%">
-        <b>${esc(t.name)}</b><small>${t.start} ← ${t.end} · بقي ${Math.max(0, diffDays(r.start, t.end))} يوم</small><span class="pl-meter"><i></i></span><em>${t.progress}٪</em></button></li>`).join('')}</ul>`;
+        <b>${esc(t.name)}</b><small>${t.start} ← ${t.end} · بقي ${Math.max(0, diffDays(r.start, t.end))} يوم${t.steps?.length ? ` · ${icon('checklist')} ${stepsLabel(t)}` : ''}</small><span class="pl-meter"><i></i></span><em>${t.progress}٪</em></button></li>`).join('')}</ul>`;
     }
 
     // الأسبوع يوماً يوماً (القائمة الجانبية): لكل يوم سطر بتاريخه، وتحته مهامه الجارية بنسبها
@@ -324,10 +325,20 @@ export default {
       return `<form class="pl-edit" data-edit="${esc(t.id)}">
         <input name="name" value="${esc(t.name)}" maxlength="60" aria-label="اسم المهمة">
         <label>${icon('date_range')}<input type="date" name="start" value="${t.start ?? ''}" aria-label="البداية"><input type="date" name="end" value="${t.end ?? ''}" aria-label="النهاية"></label>
-        <label class="pl-prog">${icon('check')}<input type="range" name="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="نسبة الإنجاز"><output>${t.progress}٪</output></label>
+        ${t.steps?.length
+          ? `<span class="pl-prog" ${tip('النسبة تُحسب من الخطوات المنجزة')}>${icon('check')}<b>${t.progress}٪</b><small>من الخطوات ${stepsLabel(t)}</small></span>`
+          : `<label class="pl-prog">${icon('check')}<input type="range" name="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="نسبة الإنجاز"><output>${t.progress}٪</output></label>`}
         <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(s.projects).concat(projectOf(t, s.projects)?.status === 'archived' ? [projectOf(t, s.projects)] : []).map((p) => `<option value="${esc(p.id)}" ${p.id === t.project ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
         ${goalsOf(all.goals, t.project).length ? `<select name="goal" aria-label="الهدف"><option value="">بلا هدف</option>${goalsOf(all.goals, t.project).map((g) => `<option value="${esc(g.id)}" ${g.id === t.goal ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select>` : ''}
         <div class="pl-colors" role="radiogroup" aria-label="اهتمام المهمة الحرّة">${CATEGORIES.map((c) => `<label ${tip(`${c.label} (للمهمة بلا مشروع)`)}><input type="radio" name="category" value="${c.id}" ${c.id === t.category ? 'checked' : ''}><i style="background:${c.color}"></i></label>`).join('')}</div>
+        <fieldset class="pl-steps">
+          <legend>${icon('checklist')} الخطوات <small>(الواجبات والاختبارات… — النسبة تُحسب منها)</small></legend>
+          <ul>${(t.steps ?? []).map((x) => `<li class="${x.done ? 'done' : ''}">
+            <button type="button" data-step-toggle="${esc(x.id)}" aria-pressed="${x.done}" ${tip(x.done ? 'أُنجزت — اضغط للتراجع' : 'اضغط عند الإنجاز')}>${icon(x.done ? 'check_box' : 'check_box_outline_blank')}</button>
+            <span class="pl-sname">${esc(x.name)}</span>${x.due ? `<small>${x.due}</small>` : ''}
+            <button type="button" data-step-del="${esc(x.id)}" ${tip('احذف الخطوة')}>${icon('close')}</button></li>`).join('')}</ul>
+          <div class="pl-stepadd"><input data-step-name maxlength="80" placeholder="خطوة جديدة: واجب، اختبار…" aria-label="اسم الخطوة"><input type="date" data-step-due aria-label="موعد الخطوة (اختياري)"><button type="button" data-act="step-add" ${tip('أضف الخطوة')}>${icon('add')}</button></div>
+        </fieldset>
         <div class="pl-row">
           <button type="submit" ${tip('حفظ')}>${icon('check')}</button>
           ${t.start ? `<button type="button" data-act="unschedule" ${tip('أعدها إلى «لاحقاً» (بلا موعد)')}>${icon('move_to_inbox')}</button>` : ''}
@@ -429,6 +440,16 @@ export default {
       if (pick('data-gdel') && confirm('حذف الهدف؟ (مهامه تبقى)')) {
         const id = pick('data-gdel');
         store.set({ goals: (st.goals ?? []).filter((g) => g.id !== id), tasks: st.tasks.map(({ goal, ...t }) => (goal === id ? t : { ...t, ...(goal ? { goal } : {}) })) });
+        return;
+      }
+      const setTask = (fn) => store.set({ tasks: st.tasks.map((t) => (t.id === editing ? fn(t) : t)) });
+      if (pick('data-step-toggle')) { setTask((t) => toggleStep(t, pick('data-step-toggle'))); return; }
+      if (pick('data-step-del')) { setTask((t) => removeStep(t, pick('data-step-del'))); return; }
+      if (e.target.closest('[data-act="step-add"]')) {
+        const box = e.target.closest('.pl-stepadd');
+        const name = box.querySelector('[data-step-name]').value;
+        if (name.trim()) setTask((t) => addStep(t, name, `s${uid()}`, box.querySelector('[data-step-due]').value || null));
+        el.querySelector('[data-step-name]')?.focus();
         return;
       }
       if (pick('data-eff')) { const id = pick('data-eff'), k = e.target.closest('[data-k]').dataset.k; store.set({ tasks: st.tasks.map((t) => (t.id === id ? cycleEffort(t, k) : t)) }); return; }
@@ -548,7 +569,7 @@ export default {
           hidden: (s.hidden ?? []).filter((x) => x !== f.category) }); // التصنيف المضاف إليه يظهر
       } else if (e.target.dataset.edit) {
         const id = e.target.dataset.edit;
-        store.set({ tasks: s.tasks.map((t) => (t.id === id ? withProject(makeTask(f, id), f.project, f.goal) : t)) });
+        store.set({ tasks: s.tasks.map((t) => (t.id === id ? keepExtras(t, withProject(makeTask(f, id), f.project, f.goal)) : t)) });
         editing = null;
         render();
       }
