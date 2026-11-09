@@ -1,7 +1,7 @@
 // اختبارات المخطط (جانت): النطاقات وأنظمة المواسم وأشرطة المهام.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SYSTEMS, barFor, makeTask, nextScope, periodAt, periodsBetween, rangeFor, rangeProgress, shift, tasksIn, yearRows } from '../app/widgets/planner/plan.js';
+import { SYSTEMS, barFor, dayCounts, makeTask, nextScope, periodAt, periodsBetween, rangeFor, rangeProgress, shift, tasksIn, yearRows } from '../app/widgets/planner/plan.js';
 
 test('الزر متعدد الضغطات (التطبيق الكامل): سنة ← موسم ← شهر ← أسبوع ← يوم ← سنة', () => {
   const seq = []; let s = 'year';
@@ -233,4 +233,16 @@ test('عشر سنوات صفاً واحداً من ١٠ خلايا (كل خلي�
   assert.equal(buildGrid(span, 'year', 'month').cols, 12);
   assert.equal(presetOf({ span: 'decade', rows: 'decade', cols: 'year' }), 'decadeYears');
   assert.ok(validCombo('decade', 'year') && !validCombo('year', 'decade'));
+});
+
+test('عدّاد الأيام: اليوم من السنة والسنة النجمية والموسم والطالع والمنزلة', () => {
+  const c = dayCounts('2026-11-09', 'star');
+  const by = Object.fromEntries(c.map((x) => [x.label, x]));
+  assert.deepEqual([by['السنة'].n, by['السنة'].of, by['السنة'].left], [313, 365, 52]);
+  assert.deepEqual([by['السنة النجمية'].n, by['السنة النجمية'].of], [65, 365]); // من ٦ سبتمبر ٢٠٢٦
+  assert.equal(by['الموسم'].name, 'الخريف');
+  assert.equal(by['الطالع'].name, 'الوسم');
+  assert.deepEqual([by['المنزلة'].name, by['المنزلة'].n, by['المنزلة'].of], ['السماك', 12, 13]);
+  assert.equal(dayCounts('2028-12-31')[0].of, 366); // كبيسة
+  assert.equal(dayCounts('2027-01-01')[0].n, 1);
 });
