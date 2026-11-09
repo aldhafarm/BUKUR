@@ -653,3 +653,31 @@ button { font: inherit; cursor: pointer; }
 .pl-rvform textarea { resize: vertical; }
 .pl-rvform .pl-rvscale { grid-template-columns: 1fr auto; align-items: center; }
 button.pl-sttag { border: 0; cursor: pointer; font: inherit; font-size: 10px; font-weight: 700; }
+
+/* ── المخطط: عرض «الجهد» — مهام × أيام، ومراحل ٨–١٨–٢٨ بأطوالها، ومربّع متعدد الضغطات لكل مهمة في كل يوم */
+.ef { overflow-x: auto; }
+.ef-grid { display: grid; min-width: calc(120px + var(--n) * 18px); row-gap: 2px; font-size: 11px; }
+.ef-bandrow, .ef-headrow, .ef-row { display: contents; }
+.ef-corner { grid-column: 1; align-self: end; padding: 2px 6px; color: var(--muted); font-weight: 700; }
+.ef-phase { grid-row: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 4px; padding: 3px 5px; margin-inline: 1px; border-radius: 6px 6px 0 0; background: color-mix(in srgb, var(--c) 16%, #fff); border-top: 3px solid var(--c); overflow: hidden; white-space: nowrap; }
+.ef-phase b { color: var(--c); font-size: 11px; }
+.ef-phase small { color: var(--muted); font-size: 10px; }
+.ef-day { grid-row: 2; display: grid; justify-items: center; padding: 2px 0; background: #fff; border-bottom: 1px solid var(--beige-300); }
+.ef-day b { font-size: 11px; color: var(--ink); }
+.ef-day s { text-decoration: none; font-size: 9px; color: var(--muted); }
+.ef-day.ef-st b { color: var(--st); font-weight: 800; }
+.ef-day.ef-st { box-shadow: inset 0 -3px 0 var(--st); }
+.ef-now b { display: inline-grid; place-items: center; min-width: 17px; height: 17px; border-radius: 50%; background: #e0393e; color: #fff !important; }
+.ef-wk { background: #f4ede1 !important; }
+.ef-bal { outline: 1px dashed #0f766e; outline-offset: -2px; }
+.ef-name { grid-column: 1; display: grid; align-content: center; padding: 2px 6px; border-inline-start: 4px solid var(--c, var(--green-700)); background: #fff; min-width: 0; }
+.ef-name button { all: unset; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ef-name small { color: var(--muted); font-size: 10px; }
+.ef-total { border-inline-start-color: var(--muted); font-weight: 700; color: var(--muted); }
+.ef-off { background: #faf6ef; }
+.ef-cell { display: grid; place-items: center; padding: 1px; border: 0; background: #fff; cursor: pointer; }
+.ef-cell svg { width: 100%; max-width: 22px; aspect-ratio: 1; }
+.ef-cell:hover { background: #f1ead9; }
+.ef-load { position: relative; display: grid; align-items: end; justify-items: center; min-height: 26px; background: #fff; border-top: 1px solid var(--beige-300); }
+.ef-load i { position: absolute; inset-inline: 3px; bottom: 0; height: var(--h); background: color-mix(in srgb, var(--green-700) 35%, #fff); border-radius: 3px 3px 0 0; }
+.ef-load small { position: relative; font-size: 10px; font-weight: 700; color: var(--green-800); }
