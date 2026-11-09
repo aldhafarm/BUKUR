@@ -7,6 +7,8 @@ import {
   INTERESTS, activeProjects, archive, archivedProjects, filterTasks, interestsOf, makeProject, projectOf,
   projectProgress, projectRange, restore, taskColor,
 } from './projects.js';
+import { reviewPanel } from './review-view.js';
+import { monthKey, setReviewField, stageFor } from './reviews.js';
 import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
   CATEGORIES, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
@@ -39,7 +41,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, balanceDay: 5, grid: null, view: 'cal', projects: [], project: null, lastProject: '', goals: [] }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, balanceDay: 5, grid: null, view: 'cal', projects: [], project: null, lastProject: '', goals: [], reviews: {} }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -148,6 +150,20 @@ export default {
     // ── المشاريع: مشروع ← خطته (جانت) ← مهامه؛ الاهتمامات وسوم؛ والمنتهي إلى الأرشيف
     let showProjects = false;
     let showGoals = true;
+    // مراجعات ٨–١٨–٢٨: الشهر والصفحة المفتوحان (null = مغلقة)
+    let review = null; // {mk, stage}
+    function reviewBox(all) {
+      if (!review) return '';
+      const [y, m] = review.mk.split('-').map(Number);
+      const mr = { start: `${review.mk}-01`, end: key(new Date(y, m, 0)) };
+      const live = filterTasks(all.tasks, all.projects, {});
+      const inMonth = tasksIn(live, mr);
+      const projects = activeProjects(all.projects).map((p) => ({ p, sc: projectScore(p, all.goals ?? [], all.tasks) })).filter((x) => x.sc)
+        .map(({ p, sc }) => ({ name: p.name, score: sc.score, threshold: sc.threshold, status: sc.status, goals: sc.rows.map((r) => ({ name: r.goal.name, progress: r.progress, weight: r.weight })) }));
+      return reviewPanel(all.reviews ?? {}, review.mk, review.stage, {
+        monthProgress: rangeProgress(live, mr), tasksTotal: inMonth.length, tasksDone: inMonth.filter((t) => t.progress >= 100).length, projects,
+      });
+    }
     /** إنجاز المشروع: درجة أهدافه الموزونة إن كانت له أهداف، وإلا نسبة مهامه (موزونة بالأيام). */
     const scoreOf = (all, p) => projectScore(p, all.goals ?? [], all.tasks)?.score ?? projectProgress(all.tasks, p.id);
 
@@ -256,7 +272,7 @@ export default {
         const list = tasksIn(s.tasks, { start: k, end: k });
         const m = marks(s, k);
         return `<li data-day="${k}" style="${m.style.slice(1)}" class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}${m.cls}">
-          <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span>${m.st ? `<em class="pl-sttag" ${tip(m.st.hint)}>${m.st.label} ${m.st.from}</em>` : ''}${m.cls.includes('pl-bal') ? `<em class="pl-baltag">توازن وتخطيط</em>` : ''}</b>
+          <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span>${m.st ? `<button type="button" class="pl-sttag" data-review="${k}" ${tip(`${m.st.hint} — افتح صفحة المراجعة`)}>${m.st.label} ${m.st.from}</button>` : ''}${m.cls.includes('pl-bal') ? `<em class="pl-baltag">توازن وتخطيط</em>` : ''}</b>
           ${list.map((t) => `<button type="button" draggable="true" class="pl-chipt" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%" ${tip(`${t.name} · ${t.progress}٪`)}>${esc(t.name)}<em>${t.progress}٪</em></button>`).join('') || '<small>—</small>'}
         </li>`;
       }).join('')}</ol>`;
@@ -368,12 +384,14 @@ export default {
             <b>${esc(r.label)}</b>
             <button type="button" class="pl-btn" data-act="next" ${tip('التالي')}>${icon('chevron_left')}</button>
             <button type="button" class="pl-btn" data-act="today" ${tip('اليوم')}>${icon('today')}</button>
+            <button type="button" class="pl-btn" data-act="review" aria-expanded="${Boolean(review)}" ${tip('مراجعة الشهر: انطلاق ٨ · مراجعة ١٨ · ختام ٢٨')}>${icon('rate_review')}</button>
             <button type="button" class="pl-btn" data-act="projects" aria-expanded="${showProjects}" ${tip('المشاريع والأرشيف')}>${icon('folder')}<span>${activeProjects(all.projects).length}</span></button>
             <button type="button" class="pl-btn" data-act="settings" aria-expanded="${showSettings}" ${tip('الإعدادات: عطلة نهاية الأسبوع')}>${icon('settings')}</button>
           </span>
           ${prog == null ? '' : `<span class="pl-chip" ${tip('إنجاز المهام في هذا النطاق (موزون بالأيام)')}>${prog}٪</span>`}
         </div>
         ${settings(s)}
+        ${reviewBox(all)}
         ${projectsPanel(all)}
         ${openProject ? `<div class="pl-pbanner" style="--c:${INTERESTS.find((c) => c.id === openProject.interests[0])?.color ?? 'var(--green-700)'}">
           ${icon('folder_open')}<b>${esc(openProject.name)}</b>${openProject.status === 'archived' ? '<small>(مؤرشف)</small>' : ''}
@@ -409,6 +427,8 @@ export default {
         store.set({ goals: (st.goals ?? []).filter((g) => g.id !== id), tasks: st.tasks.map(({ goal, ...t }) => (goal === id ? t : { ...t, ...(goal ? { goal } : {}) })) });
         return;
       }
+      if (pick('data-review')) { const k = pick('data-review'); review = { mk: monthKey(k), stage: stageFor(k) }; render(); return; }
+      if (pick('data-rvstage')) { review = { ...review, stage: pick('data-rvstage') }; render(); return; }
       if (pick('data-popen')) { store.set({ project: pick('data-popen'), planView: true }); return; }
       if (pick('data-parchive')) { const id = pick('data-parchive'); setP(id, (p) => archive(p, today())); if (st.project === id) store.set({ project: null }); return; }
       if (pick('data-prestore')) { setP(pick('data-prestore'), restore); return; }
@@ -440,6 +460,13 @@ export default {
       if (act === 'scope') store.set({ scope: nextScope(scopeFor(s.scope, NARROW.matches), NARROW.matches) });
       if (act === 'settings') { showSettings = !showSettings; render(); }
       if (act === 'projects') { showProjects = !showProjects; render(); }
+      if (act === 'review') { review = review ? null : { mk: monthKey(today()), stage: stageFor(today()) }; render(); }
+      if (act === 'rv-close') { review = null; render(); }
+      if (act === 'rv-prev' || act === 'rv-next') {
+        const [y, m] = review.mk.split('-').map(Number);
+        review = { ...review, mk: key(new Date(y, m - 1 + (act === 'rv-next' ? 1 : -1), 1)).slice(0, 7) };
+        render();
+      }
       if (act === 'goals-toggle') { showGoals = !showGoals; render(); }
       if (act === 'eq-weights') { const mine = new Set(goalsOf(s.goals, s.project).map((g) => g.id)); store.set({ goals: (s.goals ?? []).map((g) => (mine.has(g.id) ? equalize([g])[0] : g)) }); }
       if (act === 'pclose') store.set({ project: null });
@@ -468,9 +495,11 @@ export default {
       if (act === 'unschedule') { store.set({ tasks: s.tasks.map((t) => (t.id === editing ? unschedule(t) : t)) }); editing = null; render(); }
       if (act === 'del' && confirm('حذف المهمة؟')) { store.set({ tasks: s.tasks.filter((t) => t.id !== editing) }); editing = null; render(); }
     });
+    const st0 = () => store.get();
     el.addEventListener('change', (e) => {
       if (e.target.matches('[data-weekend-preset]') && WEEKEND_PRESETS[e.target.value]) store.set({ weekend: [...WEEKEND_PRESETS[e.target.value].days] });
       if (e.target.matches('[data-week-start]')) store.set({ weekStart: Number(e.target.value) });
+      if (e.target.dataset.rv && review) store.set({ reviews: setReviewField(st0().reviews, review.mk, review.stage, e.target.dataset.rv, e.target.value) });
       if (e.target.matches('[data-balance-day]')) store.set({ balanceDay: e.target.value === '' ? null : Number(e.target.value) });
       const st = store.get();
       const setG = (id, patch) => store.set({ goals: (st.goals ?? []).map((g) => (g.id === id ? makeGoal({ ...g, ...patch }, id) : g)) });

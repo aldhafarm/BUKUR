@@ -402,7 +402,7 @@ button { font: inherit; cursor: pointer; }
 .pl-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 2px 8px; border: 1px solid var(--beige-300); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
 .pl-btn .ic { font-size: 18px; }
 .pl-scope { background: var(--green-800); border-color: var(--green-800); color: var(--beige-50); font-weight: 700; }
-.pl-nav { display: inline-flex; align-items: center; gap: 4px; margin-inline-start: auto; }
+.pl-nav { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px; margin-inline-start: auto; max-width: 100%; }
 .pl-nav b { font-size: 13px; min-width: 70px; text-align: center; }
 .pl-chip { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--beige-100); color: var(--green-800); }
 .pl-body { overflow-x: auto; }
@@ -624,3 +624,32 @@ button { font: inherit; cursor: pointer; }
 .pl-week li.pl-st { border-inline-start: 4px solid var(--st); }
 .pl-sttag, .pl-baltag { margin-inline-start: 6px; padding: 0 6px; border-radius: 99px; font-size: 10px; font-style: normal; font-weight: 700; color: #fff; background: var(--st, #16a34a); }
 .pl-baltag { background: #0f766e; }
+
+/* ── المخطط: مراجعات الشهر ٨–١٨–٢٨ (صفحات دفتر البكور) */
+.pl-review { display: grid; gap: 8px; padding: 8px; border: 1px solid var(--beige-300); border-inline-start: 5px solid var(--rv); border-radius: 10px; background: #fff; }
+.pl-rvhead { display: flex; align-items: center; gap: 6px; }
+.pl-rvhead b { margin-inline-end: auto; font-size: 14px; }
+.pl-rvtabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.pl-rvtabs button { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border: 1px solid var(--c); border-radius: 99px; background: #fff; color: var(--c); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.pl-rvtabs button[aria-selected="true"] { background: var(--c); color: #fff; }
+.pl-rvtabs em { font-style: normal; font-size: 10px; opacity: .85; }
+.pl-rvauto { display: grid; gap: 6px; padding: 6px 8px; border-radius: 8px; background: var(--beige-50, #fbf7f0); }
+.pl-rvsum { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 2px 6px; font-size: 12px; }
+.pl-rvsum em { font-style: normal; font-weight: 700; color: var(--green-800); }
+.pl-rvsum small { color: var(--muted); }
+.pl-rvsum .pl-meter { grid-column: 1 / -1; height: 6px; }
+.pl-rvproj { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pl-rvproj > li { display: grid; grid-template-columns: 1fr auto; gap: 2px 6px; font-size: 12px; }
+.pl-rvproj > li > em { font-style: normal; font-weight: 700; color: var(--green-800); }
+.pl-rvproj > li.below > em { color: #b45309; }
+.pl-rvproj > li > .pl-meter { grid-column: 1 / -1; height: 5px; }
+.pl-rvproj ul { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0 8px 0 0; display: grid; gap: 1px; color: var(--muted); }
+.pl-rvproj ul li { display: flex; justify-content: space-between; gap: 6px; }
+.pl-rvproj ul em { font-style: normal; }
+.pl-rvform { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 10px; }
+.pl-rvform label { display: grid; gap: 2px; font-size: 11px; color: var(--muted); }
+.pl-rvform .pl-rvlong { grid-column: 1 / -1; }
+.pl-rvform input, .pl-rvform textarea, .pl-rvform select { font: inherit; font-size: 13px; color: var(--ink); padding: 4px 6px; border: 1px solid var(--beige-300); border-radius: 6px; background: #fff; }
+.pl-rvform textarea { resize: vertical; }
+.pl-rvform .pl-rvscale { grid-template-columns: 1fr auto; align-items: center; }
+button.pl-sttag { border: 0; cursor: pointer; font: inherit; font-size: 10px; font-weight: 700; }
