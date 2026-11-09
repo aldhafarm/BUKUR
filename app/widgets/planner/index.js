@@ -14,7 +14,7 @@ import { monthKey, setReviewField, stageFor } from './reviews.js';
 import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
   CATEGORIES, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
-  periodAt, rangeFor, rangeProgress, shift, tasksIn, cycleStation, isBalanceDay,
+  periodAt, rangeFor, rangeProgress, shift, tasksIn, cycleStation, isBalanceDay, dayCounts,
 } from './plan.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -393,6 +393,7 @@ export default {
           </span>
           ${prog == null ? '' : `<span class="pl-chip" ${tip('إنجاز المهام في هذا النطاق (موزون بالأيام)')}>${prog}٪</span>`}
         </div>
+        <div class="pl-count" aria-label="عدّاد الأيام">${dayCounts(today(), s.system).map((c) => `<span ${tip(`${c.label} ${c.name}: اليوم ${c.n} من ${c.of} — بقي ${c.left} يوماً`)}><b>${esc(c.name)}</b> ${c.n}/${c.of}</span>`).join('')}</div>
         ${settings(s)}
         ${reviewBox(all)}
         ${projectsPanel(all)}

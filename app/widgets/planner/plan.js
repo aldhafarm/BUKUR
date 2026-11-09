@@ -87,6 +87,26 @@ export function periodAt(system, k) {
   return null;
 }
 
+/**
+ * عدّاد الأيام (فكرة المالك): ترتيب اليوم داخل السنة الميلادية والسنة النجمية والموسم والطالع والمنزلة.
+ * كل عنصر {label, name, n, of, left} — n يبدأ من ١، وleft ما بقي بعد اليوم.
+ */
+export function dayCounts(k, system = 'star') {
+  const y = parse(k).getFullYear();
+  const row = (label, name, start, end) => {
+    const n = diffDays(start, k) + 1, of = diffDays(start, end) + 1;
+    return { label, name, n, of, left: of - n };
+  };
+  const out = [row('السنة', String(y), `${y}-01-01`, `${y}-12-31`)];
+  const sy = parse(k) < new Date(y, 8, 6) ? y - 1 : y; // السنة النجمية تبدأ ٦ سبتمبر (الجبهة)
+  out.push(row('السنة النجمية', `${sy}/${sy + 1}`, `${sy}-09-06`, addDays(`${sy + 1}-09-06`, -1)));
+  for (const [label, sys] of [['الموسم', ['star', 'astro', 'quarter'].includes(system) ? system : 'star'], ['الطالع', 'anwa'], ['المنزلة', 'manazil']]) {
+    const p = periodAt(sys, k);
+    if (p) out.push(row(label, p.name, p.start, p.end));
+  }
+  return out;
+}
+
 /** فترات النظام التي تتقاطع مع [from, to]. */
 export function periodsBetween(system, from, to) {
   const y0 = parse(from).getFullYear() - 1;
