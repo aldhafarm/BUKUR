@@ -681,3 +681,43 @@ button.pl-sttag { border: 0; cursor: pointer; font: inherit; font-size: 10px; fo
 .ef-load { position: relative; display: grid; align-items: end; justify-items: center; min-height: 26px; background: #fff; border-top: 1px solid var(--beige-300); }
 .ef-load i { position: absolute; inset-inline: 3px; bottom: 0; height: var(--h); background: color-mix(in srgb, var(--green-700) 35%, #fff); border-radius: 3px 3px 0 0; }
 .ef-load small { position: relative; font-size: 10px; font-weight: 700; color: var(--green-800); }
+
+/* ── ودجت الروتين اليومي: حلقة ٢٤ ساعة (منتصف الليل أعلى) + النوم عادةً + محرّر الكتل */
+.rt { display: grid; gap: 10px; }
+.rt-dial { position: relative; width: min(100%, 300px); margin-inline: auto; }
+.rt-svg { display: block; width: 100%; height: auto; }
+.rt-svg path { stroke: #fff; stroke-width: 1; }
+.rt-svg path.on { stroke: var(--ink, #222); stroke-width: 2; }
+.rt-lab { font-size: 7px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+.rt-lab.dark { fill: #444; }
+.rt-hr { font-size: 7px; fill: var(--muted, #888); text-anchor: middle; dominant-baseline: middle; }
+.rt-hand { stroke: #e0393e; stroke-width: 2; stroke-linecap: round; }
+.rt-hub { fill: #e0393e; }
+.rt-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 1px; pointer-events: none; }
+.rt-center b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.rt-center span { font-size: 12px; font-weight: 700; color: var(--c, var(--muted)); }
+.rt-center small { font-size: 11px; color: var(--muted); }
+.rt-totals { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 10px; justify-content: center; font-size: 11px; }
+.rt-totals li { display: inline-flex; align-items: center; gap: 4px; }
+.rt-totals i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.rt-totals li.free i { background: #fff; border: 1px dashed #aaa; }
+.rt-totals b { font-variant-numeric: tabular-nums; }
+.rt-warn, .rt-note { margin: 0; font-size: 11px; color: #92400e; display: flex; align-items: center; gap: 4px; justify-content: center; }
+.rt-sleep { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--beige-300); border-radius: 10px; background: #fff; }
+.rt-sleep h4 { margin: 0; display: flex; align-items: center; gap: 4px; font-size: 13px; }
+.rt-srow { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 12px; }
+.rt-srow input { font: inherit; padding: 2px 4px; border: 1px solid var(--beige-300); border-radius: 6px; width: 8em; }
+.rt-srow input[type="number"] { width: 4em; }
+.rt-log { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 11px; }
+.rt-log > span { margin-inline-end: 4px; color: var(--muted); }
+.rt-day { display: grid; justify-items: center; gap: 1px; padding: 0; border: 0; background: none; cursor: pointer; width: 26px; }
+.rt-day svg { width: 22px; height: 22px; }
+.rt-day s { text-decoration: none; font-size: 9px; color: var(--muted); }
+.rt-log em { font-style: normal; font-weight: 700; color: var(--green-800); margin-inline-start: auto; }
+.rt-edit summary { cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.rt-blocks { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 4px; }
+.rt-blocks li, .rt-add { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; border-inline-start: 4px solid var(--c, var(--green-700)); padding-inline-start: 6px; }
+.rt-blocks input, .rt-blocks select, .rt-add input, .rt-add select { font: inherit; font-size: 12px; padding: 2px 4px; border: 1px solid var(--beige-300); border-radius: 6px; min-width: 0; }
+.rt-blocks input[data-k="name"], .rt-add input[name="name"] { flex: 1 1 90px; }
+.rt-blocks button, .rt-add button, .rt-reset { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--beige-300); border-radius: 6px; background: #fff; cursor: pointer; font: inherit; font-size: 12px; padding: 2px 6px; }
+.rt-add button { background: var(--green-700); color: var(--beige-50); border-color: var(--green-700); }

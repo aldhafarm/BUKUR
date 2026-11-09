@@ -8,5 +8,6 @@ import quotes from './quotes/index.js';
 import vocab from './vocab/index.js';
 import habits from './habits/index.js';
 import planner from './planner/index.js';
+import routine from './routine/index.js';
 
-export const WIDGETS = [clock, proClock, focusTimer, planner, habits, quotes, vocab, starWheel, notes];
+export const WIDGETS = [clock, proClock, focusTimer, routine, planner, habits, quotes, vocab, starWheel, notes];
