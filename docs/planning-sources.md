@@ -187,6 +187,19 @@
 
 ---
 
+## خامساً: سند «سلّم التخطيط» (فكرة المالك: من رؤية ١٠ سنوات إلى كتلة في اليوم)
+المقالات الأربع التالية تحقّقنا منها في Crossref في ٩ نوفمبر ٢٠٢٦.
+- **تخيّل أفضل ذات ممكنة:** ارتبط هذا التمرين بزيادة المشاعر الإيجابية في تجربة عشوائية.
+  - Sheldon, K. M., & Lyubomirsky, S. (2006). How to increase and sustain positive emotion: The effects of expressing gratitude and visualizing best possible selves. *The Journal of Positive Psychology, 1*(2), 73–82. https://doi.org/10.1080/17439760500510676 **[ع]**
+- **استمرارية الذات المستقبلية:** من يشعر بقرب ذاته المستقبلية يميل إلى قرارات أبعد نظراً.
+  - Hershfield, H. E. (2011). Future self-continuity: How conceptions of the future self transform intertemporal choice. *Annals of the New York Academy of Sciences, 1235*(1), 30–43. https://doi.org/10.1111/j.1749-6632.2011.06201.x **[ع]**
+- **الأهداف بنية هرمية:** من الأهداف العليا المجرّدة إلى الأهداف الدنيا الملموسة.
+  - Austin, J. T., & Vancouver, J. B. (1996). Goal constructs in psychology: Structure, process, and content. *Psychological Bulletin, 120*(3), 338–375. https://doi.org/10.1037/0033-2909.120.3.338 **[ع]**
+- **نوايا التنفيذ:** ربط الخطوة بموقف أو وقت محدد يرفع احتمال تنفيذها.
+  - Gollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. *American Psychologist, 54*(7), 493–503. https://doi.org/10.1037/0003-066X.54.7.493 **[ع]**
+
+---
+
 ## ما لم يُدرج (خارج موضوع التخطيط)
 ما يلي في العرض لكنه خارج موضوع هذا المرجع، ويمكن جمعه في مرجع منفصل إن احتجته:
 - **مقاييس الشخصية والتفكير:** MBTI، DISC، HBDI هيرمان، نموذج ماكلين الثلاثي، استراتيجية شقّي الدماغ.
