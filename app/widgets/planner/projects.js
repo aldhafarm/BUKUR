@@ -8,9 +8,11 @@ export const INTERESTS = CATEGORIES; // الاسم الجديد للتصنيفا
 const INT = Object.fromEntries(INTERESTS.map((c) => [c.id, c]));
 
 /** مشروع سليم: اسم، واهتمامات معروفة فقط (بلا تكرار)، وحالة نشط/مؤرشف. */
-export function makeProject({ name, interests = [], status = 'active', archivedAt = null }, id) {
+export function makeProject({ name, interests = [], status = 'active', archivedAt = null, threshold = 70 }, id) {
   const tags = [...new Set((Array.isArray(interests) ? interests : [interests]).filter((x) => INT[x]))];
-  return { id, name: String(name ?? '').trim() || 'مشروع', interests: tags, status: status === 'archived' ? 'archived' : 'active', archivedAt: status === 'archived' ? archivedAt : null };
+  const th = Math.round(Number(threshold));
+  return { id, name: String(name ?? '').trim() || 'مشروع', interests: tags, status: status === 'archived' ? 'archived' : 'active', archivedAt: status === 'archived' ? archivedAt : null,
+    threshold: Number.isFinite(th) ? Math.min(100, Math.max(0, th)) : 70 }; // الحد الأدنى للرضا عن إنجاز المشروع (٪)
 }
 
 export const projectOf = (task, projects) => (task?.project ? (projects ?? []).find((p) => p.id === task.project) ?? null : null);

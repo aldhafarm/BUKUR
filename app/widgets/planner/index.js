@@ -7,9 +7,12 @@ import {
   INTERESTS, activeProjects, archive, archivedProjects, filterTasks, interestsOf, makeProject, projectOf,
   projectProgress, projectRange, restore, taskColor,
 } from './projects.js';
+import { reviewPanel } from './review-view.js';
+import { monthKey, setReviewField, stageFor } from './reviews.js';
+import { GOAL_KINDS, effectiveWeights, equalize, goalsOf, makeGoal, projectScore } from './goals.js';
 import {
   CATEGORIES, MONTHS, SCOPE_LABEL, SYSTEMS, addDays, barFor, diffDays, key, makeTask, nextScope, nextSystem, parse, scopeFor, twoRanges, isWeekend, WEEKEND_PRESETS, DOW, undatedTasks, scheduleOn, unschedule, monthCells, GRID_PRESETS, PRESET_IDS, SPANS, UNITS, buildGrid, gridBars, colLabel, nextCols, nextRows, nextSpan, normalizeGrid, presetOf, shiftSpan,
-  periodAt, rangeFor, rangeProgress, shift, tasksIn,
+  periodAt, rangeFor, rangeProgress, shift, tasksIn, cycleStation, isBalanceDay,
 } from './plan.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -38,7 +41,7 @@ export default {
   sizes: ['s', 'm', 'l'],
   defaultSize: 'm',
   defaultWidth: 2,
-  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, grid: null, view: 'cal', projects: [], project: null, lastProject: '' }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
+  defaults: { tasks: [], scope: 'month', anchor: null, system: 'star', hidden: [], lastCat: 'work', weekend: [5, 6], weekStart: 0, balanceDay: 5, grid: null, view: 'cal', projects: [], project: null, lastProject: '', goals: [], reviews: {} }, // projects: المشاريع؛ project: المشروع المفتوح // view: تقويم أو جانت للشهر والموسم والأسبوع // grid: {span, rows, cols, months?} للتقويم المبني // hidden: تصنيفات مطفأة · weekend: أيام العطلة الرسمية
 
   mount(el, ctx) {
     const store = ctx.store;
@@ -48,12 +51,24 @@ export default {
 
     // خانة يوم: رقمه وحرفه، وظل العطلة، وخط لون الموسم، والأحمر لليوم.
     // bare: بلا رقم ولا حرف حين يكونان في رأس العمود (رقم اليوم، أو محاذاة يوم الأسبوع لصفوف غير الأسابيع) — طلب المالك
+    // علامات منهج البكور على اليوم: محطات ٨–١٨–٢٨، ويوم التوازن والتخطيط الأسبوعي الذي يختاره المستخدم
+    function marks(s, k) {
+      const st = cycleStation(k);
+      const bal = isBalanceDay(k, s.balanceDay === undefined ? 5 : s.balanceDay);
+      return {
+        cls: `${st ? ` pl-st pl-st-${st.id}` : ''}${bal ? ' pl-bal' : ''}`,
+        style: st ? `;--st:${st.color}` : '',
+        text: `${st ? ` · ${st.label} ${st.from} (${st.en}): ${st.hint}` : ''}${bal ? ' · يوم التوازن والتخطيط' : ''}`,
+        st,
+      };
+    }
     function dayCell(s, d, t0, bare = false) {
       const k = key(d);
       const p = periodAt(s.system, k);
       const wk = s.weekend.includes(d.getDay()) ? ' pl-wkend' : '';
-      const full = `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}${p ? ` · ${p.name}` : ''}`;
-      return `<i style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${wk}${bare ? ' pl-bare' : ''}" data-day="${k}" ${tip(full)}>${bare ? '' : `<b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s>`}</i>`;
+      const m = marks(s, k);
+      const full = `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}${p ? ` · ${p.name}` : ''}${m.text}`;
+      return `<i style="--s:${p?.color ?? 'transparent'}${m.style}" class="${k === t0 ? 'pl-now' : ''}${wk}${m.cls}${bare ? ' pl-bare' : ''}" data-day="${k}" ${tip(full)}>${bare ? '' : `<b>${d.getDate()}</b><s>${DOW1[d.getDay()]}</s>`}</i>`;
     }
 
     // ── العارض العام: كل تقويم = فترة × صفوف × أعمدة (buildGrid). الخلية يوماً (رقم اليوم، يوم الأسبوع، أيام)
@@ -62,9 +77,12 @@ export default {
       if (G.months) return yearMonthsView(s, parse(range.start).getFullYear(), t0);
       const g = buildGrid(range, G.rows, G.cols, { system: s.system, weekStart: s.weekStart });
       const dayCols = G.cols === 'dayNum' || G.cols === 'weekday' || G.cols === 'day';
-      const bare = G.cols === 'dayNum' || (G.cols === 'weekday' && G.rows !== 'week');
+      // مراحل ٨–١٨–٢٨ صفوفاً: أعمدة «رقم اليوم» مواضع لا تواريخ (المرحلة تبدأ ١ أو ٨ أو ١٨ أو ٢٨)، فالخلية تحمل تاريخها بلا رأس مشترك
+      const cyc = G.rows === 'cycle';
+      if (cyc) g.header = null;
+      const bare = !cyc && (G.cols === 'dayNum' || (G.cols === 'weekday' && G.rows !== 'week'));
       const fmt = (k) => `${parse(k).getDate()} ${MONTHS[parse(k).getMonth()].slice(0, 3)}`;
-      const todayCol = G.cols === 'dayNum' && t0 >= range.start && t0 <= range.end ? parse(t0).getDate() - 1 : -1;
+      const todayCol = !cyc && G.cols === 'dayNum' && t0 >= range.start && t0 <= range.end ? parse(t0).getDate() - 1 : -1;
       // أعمدة مشتركة بين كل الصفوف (مثل أشهر الخطة العشرية): أسماؤها في الرأس، والخلايا بلا نص (طلب المالك)
       const shared = !g.header && !dayCols && g.rows.length > 1 && Array.from({ length: g.cols }, (_, i) => new Set(g.rows.map((rw) => rw.cells.find((c) => c.col === i)?.label)).size === 1).every(Boolean);
       if (shared) g.header = Array.from({ length: g.cols }, (_, i) => g.rows[0].cells.find((c) => c.col === i).label);
@@ -97,7 +115,8 @@ export default {
           const list = tasksIn(s.tasks, { start: k, end: k });
           const dots = list.slice(0, 3).map((t) => `<u style="background:${colorOf(t)}"></u>`).join('');
           const p = periodAt(s.system, k);
-          return `<button type="button" data-goto="${k}" data-day="${k}" style="--s:${p?.color ?? 'transparent'}" class="${k === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''}" ${tip(`${d.getDate()} ${name}${list.length ? ` · ${list.map((t) => t.name).join('، ')}` : ''}`)}><b>${d.getDate()}</b><span>${dots}</span></button>`;
+          const m = marks(s, k);
+          return `<button type="button" data-goto="${k}" data-day="${k}" style="--s:${p?.color ?? 'transparent'}${m.style}" class="${k === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-wkend' : ''}${m.cls}" ${tip(`${d.getDate()} ${name}${m.text}${list.length ? ` · ${list.map((t) => t.name).join('، ')}` : ''}`)}><b>${d.getDate()}</b><span>${dots}</span></button>`;
         }).join('');
         return `<section class="pl-mini"><h5>${name}</h5><div class="pl-mgrid">${Array.from({ length: 7 }, (_, i) => `<em>${DOW1[(i + s.weekStart) % 7]}</em>`).join('')}${cells}</div></section>`;
       }).join('')}</div>`;
@@ -130,12 +149,67 @@ export default {
 
     // ── المشاريع: مشروع ← خطته (جانت) ← مهامه؛ الاهتمامات وسوم؛ والمنتهي إلى الأرشيف
     let showProjects = false;
+    let showGoals = true;
+    // مراجعات ٨–١٨–٢٨: الشهر والصفحة المفتوحان (null = مغلقة)
+    let review = null; // {mk, stage}
+    function reviewBox(all) {
+      if (!review) return '';
+      const [y, m] = review.mk.split('-').map(Number);
+      const mr = { start: `${review.mk}-01`, end: key(new Date(y, m, 0)) };
+      const live = filterTasks(all.tasks, all.projects, {});
+      const inMonth = tasksIn(live, mr);
+      const projects = activeProjects(all.projects).map((p) => ({ p, sc: projectScore(p, all.goals ?? [], all.tasks) })).filter((x) => x.sc)
+        .map(({ p, sc }) => ({ name: p.name, score: sc.score, threshold: sc.threshold, status: sc.status, goals: sc.rows.map((r) => ({ name: r.goal.name, progress: r.progress, weight: r.weight })) }));
+      return reviewPanel(all.reviews ?? {}, review.mk, review.stage, {
+        monthProgress: rangeProgress(live, mr), tasksTotal: inMonth.length, tasksDone: inMonth.filter((t) => t.progress >= 100).length, projects,
+      });
+    }
+    /** إنجاز المشروع: درجة أهدافه الموزونة إن كانت له أهداف، وإلا نسبة مهامه (موزونة بالأيام). */
+    const scoreOf = (all, p) => projectScore(p, all.goals ?? [], all.tasks)?.score ?? projectProgress(all.tasks, p.id);
+
+    // ── أهداف المشروع المفتوح: أوزان مجموعها ١٠٠٪، وقياس لكل هدف، والدرجة مقابل الحد الأدنى للرضا
+    function goalsPanel(all, p) {
+      if (!showGoals) return '';
+      const sc = projectScore(p, all.goals ?? [], all.tasks);
+      const gs = goalsOf(all.goals, p.id);
+      const { weights } = effectiveWeights(gs);
+      const row = ({ goal: g, progress }) => `<li>
+        <b>${esc(g.name)}</b>
+        <label class="pl-gw" ${tip('الوزن ٪ — اتركه فارغاً ليتقاسم الباقي بالتساوي')}><input type="number" min="0" max="100" step="1" data-gweight="${esc(g.id)}" value="${g.weight ?? ''}" placeholder="${Math.round(weights[g.id] * 10) / 10}">٪</label>
+        <span class="pl-gm">${g.kind === 'done'
+          ? `<label ${tip('تمّ؟')}><input type="checkbox" data-gdone="${esc(g.id)}" ${g.current ? 'checked' : ''}> تمّ</label>`
+          : g.kind === 'tasks'
+            ? `<small>${all.tasks.filter((t) => t.goal === g.id).length} مهمة</small>`
+            : `<input type="number" step="any" data-gcur="${esc(g.id)}" value="${g.current}" aria-label="القيمة الحالية"><small>/ ${g.target} ${esc(g.unit)}</small>`}</span>
+        <span class="pl-meter" style="--p:${progress ?? 0}%;--c:var(--green-700)"><i></i></span>
+        <em>${progress == null ? '—' : `${progress}٪`}</em>
+        <button type="button" class="pl-btn" data-gdel="${esc(g.id)}" ${tip('احذف الهدف')}>${icon('delete')}</button>
+      </li>`;
+      return `<div class="pl-goals">
+        <div class="pl-gohead">
+          ${icon('flag')}<b>الأهداف</b>
+          ${sc ? `<span class="pl-score ${sc.status}" ${tip(`الإنجاز الموزون ${sc.score}٪ — الحد الأدنى للرضا ${sc.threshold}٪`)}><span style="--p:${sc.score}%;--t:${sc.threshold}%"><i></i><u></u></span>${sc.score}٪</span>` : ''}
+          <label class="pl-gth" ${tip('الحد الأدنى للرضا عن إنجاز المشروع')}>${icon('ads_click')}<input type="number" min="0" max="100" step="5" data-pthreshold="${esc(p.id)}" value="${p.threshold ?? 70}">٪</label>
+        </div>
+        ${sc && !sc.weightsOk ? `<div class="pl-gwarn">${esc(sc.msg)} <button type="button" data-act="eq-weights">${icon('balance')} وزّع بالتساوي</button></div>` : ''}
+        <ul class="pl-glist">${sc ? sc.rows.map(row).join('') : '<li class="pl-empty">لا أهداف بعد — أضف أهداف المشروع، ولكلٍّ وزنه وقياسه. الأوزان تُوزَّع بالتساوي ما لم تحدّدها.</li>'}</ul>
+        <form class="pl-gadd">
+          <input name="gname" maxlength="60" placeholder="هدف جديد…" aria-label="اسم الهدف" required>
+          <select name="kind" aria-label="طريقة القياس">${Object.entries(GOAL_KINDS).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+          <input name="baseline" type="number" step="any" placeholder="من" aria-label="قيمة البداية" ${tip('قيمة البداية (للرقم)')}>
+          <input name="target" type="number" step="any" placeholder="إلى" aria-label="المستهدف" ${tip('المستهدف (للرقم) — أصغر من البداية إن كان المطلوب خفضاً')}>
+          <input name="unit" maxlength="12" placeholder="الوحدة" aria-label="الوحدة">
+          <input name="weight" type="number" min="0" max="100" placeholder="الوزن ٪" aria-label="الوزن" ${tip('اتركه فارغاً ليتقاسم الباقي بالتساوي')}>
+          <button type="submit" ${tip('أضف الهدف')}>${icon('add')}</button>
+        </form>
+      </div>`;
+    }
     function projectsPanel(all) {
       if (!showProjects) return '';
       const fmt = (k) => `${parse(k).getDate()} ${MONTHS[parse(k).getMonth()].slice(0, 3)} ${parse(k).getFullYear()}`;
       const row = (p) => {
         const rg = projectRange(all.tasks, p.id);
-        const pr = projectProgress(all.tasks, p.id);
+        const pr = scoreOf(all, p);
         const n = all.tasks.filter((t) => t.project === p.id).length;
         return `<li class="${all.project === p.id ? 'on' : ''}">
           <button type="button" class="pl-pname" data-popen="${esc(p.id)}" ${tip('افتح خطة المشروع (جانت)')}>${esc(p.name)}</button>
@@ -169,7 +243,8 @@ export default {
         const d = parse(addDays(r.start, i));
         const lab = step === 1 ? d.getDate() : (i % step === 0 ? `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}` : '');
         const minor = step === 1 && d.getDate() !== 1 && d.getDate() % 5 !== 0 ? ' pl-minor' : ''; // يُخفى في العرض الضيق
-        return `<i data-day="${addDays(r.start, i)}" class="${addDays(r.start, i) === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-fri' : ''}${minor}">${lab}</i>`;
+        const m = marks(s, addDays(r.start, i));
+        return `<i data-day="${addDays(r.start, i)}" style="${m.style.slice(1)}" class="${addDays(r.start, i) === t0 ? 'pl-now' : ''}${s.weekend.includes(d.getDay()) ? ' pl-fri' : ''}${m.st ? ' pl-st' : minor}${m.cls.includes('pl-bal') ? ' pl-bal' : ''}" ${m.text ? tip(m.text.slice(3)) : ''}>${lab}</i>`;
       }).join('');
       const bands = Array.from({ length: n }, (_, i) => `<i style="--s:${periodAt(s.system, addDays(r.start, i))?.color ?? 'transparent'}"></i>`).join('');
       const list = tasksIn(s.tasks, r);
@@ -195,8 +270,9 @@ export default {
         const k = addDays(r.start, i);
         const d = parse(k);
         const list = tasksIn(s.tasks, { start: k, end: k });
-        return `<li data-day="${k}" class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}">
-          <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span></b>
+        const m = marks(s, k);
+        return `<li data-day="${k}" style="${m.style.slice(1)}" class="${k === t0 ? 'pl-now' : ''}${isWeekend(k, s.weekend) ? ' pl-wkend' : ''}${m.cls}">
+          <b>${DOW[d.getDay()]} <span>${d.getDate()} ${MONTHS[d.getMonth()]}</span>${m.st ? `<button type="button" class="pl-sttag" data-review="${k}" ${tip(`${m.st.hint} — افتح صفحة المراجعة`)}>${m.st.label} ${m.st.from}</button>` : ''}${m.cls.includes('pl-bal') ? `<em class="pl-baltag">توازن وتخطيط</em>` : ''}</b>
           ${list.map((t) => `<button type="button" draggable="true" class="pl-chipt" data-task="${esc(t.id)}" style="--c:${colorOf(t)};--p:${t.progress}%" ${tip(`${t.name} · ${t.progress}٪`)}>${esc(t.name)}<em>${t.progress}٪</em></button>`).join('') || '<small>—</small>'}
         </li>`;
       }).join('')}</ol>`;
@@ -234,11 +310,13 @@ export default {
           <select data-weekend-preset>${Object.entries(WEEKEND_PRESETS).map(([id, v]) => `<option value="${id}" ${id === preset ? 'selected' : ''}>${v.label}</option>`).join('')}
             <option value="custom" ${preset === 'custom' ? 'selected' : ''} disabled>مخصص</option></select></label>
         <label>بداية الأسبوع <select data-week-start>${DOW.map((n, i) => `<option value="${i}" ${i === s.weekStart ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        <label ${tip('يوم أسبوعي لإعادة التوازن والتخطيط (منهج البكور) — اختياري')}>يوم التوازن <select data-balance-day><option value="" ${s.balanceDay === null ? 'selected' : ''}>بلا</option>${DOW.map((n, i) => `<option value="${i}" ${i === (s.balanceDay === undefined ? 5 : s.balanceDay) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <div class="pl-wdays" role="group" aria-label="أيام العطلة">${DOW.map((n, i) => `<button type="button" data-wday="${i}" aria-pressed="${s.weekend.includes(i)}">${n}</button>`).join('')}</div>
       </div>`;
     }
 
     function editor(s) {
+      const all = s;
       const t = s.tasks.find((x) => x.id === editing);
       if (!t) return '';
       return `<form class="pl-edit" data-edit="${esc(t.id)}">
@@ -246,6 +324,7 @@ export default {
         <label>${icon('date_range')}<input type="date" name="start" value="${t.start ?? ''}" aria-label="البداية"><input type="date" name="end" value="${t.end ?? ''}" aria-label="النهاية"></label>
         <label class="pl-prog">${icon('check')}<input type="range" name="progress" min="0" max="100" step="5" value="${t.progress}" aria-label="نسبة الإنجاز"><output>${t.progress}٪</output></label>
         <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(s.projects).concat(projectOf(t, s.projects)?.status === 'archived' ? [projectOf(t, s.projects)] : []).map((p) => `<option value="${esc(p.id)}" ${p.id === t.project ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+        ${goalsOf(all.goals, t.project).length ? `<select name="goal" aria-label="الهدف"><option value="">بلا هدف</option>${goalsOf(all.goals, t.project).map((g) => `<option value="${esc(g.id)}" ${g.id === t.goal ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select>` : ''}
         <div class="pl-colors" role="radiogroup" aria-label="اهتمام المهمة الحرّة">${CATEGORIES.map((c) => `<label ${tip(`${c.label} (للمهمة بلا مشروع)`)}><input type="radio" name="category" value="${c.id}" ${c.id === t.category ? 'checked' : ''}><i style="background:${c.color}"></i></label>`).join('')}</div>
         <div class="pl-row">
           <button type="submit" ${tip('حفظ')}>${icon('check')}</button>
@@ -256,7 +335,16 @@ export default {
       </form>`;
     }
 
+    // حارس إعادة الدخول: استبدال innerHTML يُفقد الحقلَ المحرَّر تركيزه فيطلق «change» أثناء الرسم
+    // (تعديل وزن هدف أو قيمته) — فيُؤجَّل الرسم المتداخل ويُعاد بعد انتهاء الحالي بأحدث حالة.
+    let rendering = false, again = false;
     function render() {
+      if (rendering) { again = true; return; }
+      rendering = true;
+      try { draw(); } finally { rendering = false; }
+      if (again) { again = false; render(); }
+    }
+    function draw() {
       const all = store.get();
       all.projects = all.projects ?? [];
       currentProjects = all.projects;
@@ -296,19 +384,22 @@ export default {
             <b>${esc(r.label)}</b>
             <button type="button" class="pl-btn" data-act="next" ${tip('التالي')}>${icon('chevron_left')}</button>
             <button type="button" class="pl-btn" data-act="today" ${tip('اليوم')}>${icon('today')}</button>
+            <button type="button" class="pl-btn" data-act="review" aria-expanded="${Boolean(review)}" ${tip('مراجعة الشهر: انطلاق ٨ · مراجعة ١٨ · ختام ٢٨')}>${icon('rate_review')}</button>
             <button type="button" class="pl-btn" data-act="projects" aria-expanded="${showProjects}" ${tip('المشاريع والأرشيف')}>${icon('folder')}<span>${activeProjects(all.projects).length}</span></button>
             <button type="button" class="pl-btn" data-act="settings" aria-expanded="${showSettings}" ${tip('الإعدادات: عطلة نهاية الأسبوع')}>${icon('settings')}</button>
           </span>
           ${prog == null ? '' : `<span class="pl-chip" ${tip('إنجاز المهام في هذا النطاق (موزون بالأيام)')}>${prog}٪</span>`}
         </div>
         ${settings(s)}
+        ${reviewBox(all)}
         ${projectsPanel(all)}
         ${openProject ? `<div class="pl-pbanner" style="--c:${INTERESTS.find((c) => c.id === openProject.interests[0])?.color ?? 'var(--green-700)'}">
           ${icon('folder_open')}<b>${esc(openProject.name)}</b>${openProject.status === 'archived' ? '<small>(مؤرشف)</small>' : ''}
-          <em>${projectProgress(all.tasks, openProject.id) ?? 0}٪</em>
+          <em>${scoreOf(all, openProject) ?? 0}٪</em>
+          <button type="button" class="pl-btn" data-act="goals-toggle" aria-expanded="${showGoals}" ${tip('الأهداف ومؤشرات القياس')}>${icon('flag')}<span>${goalsOf(all.goals, openProject.id).length}</span></button>
           ${narrow ? '' : `<button type="button" class="pl-btn" data-act="plan-toggle" ${tip(planMode ? 'اعرض المشروع في التقويم' : 'اعرض خطة المشروع (جانت)')}>${icon(planMode ? 'calendar_month' : 'view_timeline')}</button>`}
           <button type="button" class="pl-btn" data-act="pclose" ${tip('أغلق المشروع — اعرض كل المشاريع')}>${icon('close')}</button>
-        </div>` : catsBar({ ...s, tasks: filterTasks(all.tasks, all.projects, {}) }, r, all.projects)}
+        </div>${goalsPanel(all, openProject)}` : catsBar({ ...s, tasks: filterTasks(all.tasks, all.projects, {}) }, r, all.projects)}
         <div class="pl-body">${body}</div>
         ${laterBox(s)}
         ${editor(all)}
@@ -317,6 +408,7 @@ export default {
           <input type="date" name="start" value="${t0}" aria-label="البداية">
           <input type="date" name="end" value="${addDays(t0, 6)}" aria-label="النهاية">
           <select name="project" aria-label="المشروع"><option value="">بلا مشروع</option>${activeProjects(all.projects).map((p) => `<option value="${esc(p.id)}" ${p.id === (openProject?.id ?? all.lastProject) ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+          ${openProject ? goalsOf(all.goals, openProject.id).length ? `<select name="goal" aria-label="الهدف"><option value="">بلا هدف</option>${goalsOf(all.goals, openProject.id).map((g) => `<option value="${esc(g.id)}" ${g.id === '' ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select>` : '' : ''}
           <select name="category" aria-label="اهتمام المهمة الحرّة" ${tip('اهتمام المهمة إن كانت بلا مشروع')}>${CATEGORIES.map((c) => `<option value="${c.id}" ${c.id === all.lastCat ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
           <button type="submit" name="when" value="dated" ${tip('أضف المهمة بتاريخيها')}>${icon('add')}</button>
           <button type="submit" name="when" value="later" class="pl-later-btn" ${tip('أضفها إلى «لاحقاً» بلا موعد')}>${icon('inbox')}</button>
@@ -330,6 +422,13 @@ export default {
       const st = store.get();
       const projects = st.projects ?? [];
       const setP = (id, fn) => store.set({ projects: projects.map((p) => (p.id === id ? fn(p) : p)) });
+      if (pick('data-gdel') && confirm('حذف الهدف؟ (مهامه تبقى)')) {
+        const id = pick('data-gdel');
+        store.set({ goals: (st.goals ?? []).filter((g) => g.id !== id), tasks: st.tasks.map(({ goal, ...t }) => (goal === id ? t : { ...t, ...(goal ? { goal } : {}) })) });
+        return;
+      }
+      if (pick('data-review')) { const k = pick('data-review'); review = { mk: monthKey(k), stage: stageFor(k) }; render(); return; }
+      if (pick('data-rvstage')) { review = { ...review, stage: pick('data-rvstage') }; render(); return; }
       if (pick('data-popen')) { store.set({ project: pick('data-popen'), planView: true }); return; }
       if (pick('data-parchive')) { const id = pick('data-parchive'); setP(id, (p) => archive(p, today())); if (st.project === id) store.set({ project: null }); return; }
       if (pick('data-prestore')) { setP(pick('data-prestore'), restore); return; }
@@ -361,6 +460,15 @@ export default {
       if (act === 'scope') store.set({ scope: nextScope(scopeFor(s.scope, NARROW.matches), NARROW.matches) });
       if (act === 'settings') { showSettings = !showSettings; render(); }
       if (act === 'projects') { showProjects = !showProjects; render(); }
+      if (act === 'review') { review = review ? null : { mk: monthKey(today()), stage: stageFor(today()) }; render(); }
+      if (act === 'rv-close') { review = null; render(); }
+      if (act === 'rv-prev' || act === 'rv-next') {
+        const [y, m] = review.mk.split('-').map(Number);
+        review = { ...review, mk: key(new Date(y, m - 1 + (act === 'rv-next' ? 1 : -1), 1)).slice(0, 7) };
+        render();
+      }
+      if (act === 'goals-toggle') { showGoals = !showGoals; render(); }
+      if (act === 'eq-weights') { const mine = new Set(goalsOf(s.goals, s.project).map((g) => g.id)); store.set({ goals: (s.goals ?? []).map((g) => (mine.has(g.id) ? equalize([g])[0] : g)) }); }
       if (act === 'pclose') store.set({ project: null });
       if (act === 'plan-toggle') store.set({ planView: s.planView === false });
       const curGrid = () => gridOf(s);
@@ -387,21 +495,38 @@ export default {
       if (act === 'unschedule') { store.set({ tasks: s.tasks.map((t) => (t.id === editing ? unschedule(t) : t)) }); editing = null; render(); }
       if (act === 'del' && confirm('حذف المهمة؟')) { store.set({ tasks: s.tasks.filter((t) => t.id !== editing) }); editing = null; render(); }
     });
+    const st0 = () => store.get();
     el.addEventListener('change', (e) => {
       if (e.target.matches('[data-weekend-preset]') && WEEKEND_PRESETS[e.target.value]) store.set({ weekend: [...WEEKEND_PRESETS[e.target.value].days] });
       if (e.target.matches('[data-week-start]')) store.set({ weekStart: Number(e.target.value) });
+      if (e.target.dataset.rv && review) store.set({ reviews: setReviewField(st0().reviews, review.mk, review.stage, e.target.dataset.rv, e.target.value) });
+      if (e.target.matches('[data-balance-day]')) store.set({ balanceDay: e.target.value === '' ? null : Number(e.target.value) });
+      const st = store.get();
+      const setG = (id, patch) => store.set({ goals: (st.goals ?? []).map((g) => (g.id === id ? makeGoal({ ...g, ...patch }, id) : g)) });
+      if (e.target.dataset.gweight) setG(e.target.dataset.gweight, { weight: e.target.value });
+      if (e.target.dataset.gcur) setG(e.target.dataset.gcur, { current: e.target.value });
+      if (e.target.dataset.gdone) setG(e.target.dataset.gdone, { current: e.target.checked });
+      if (e.target.dataset.pthreshold) store.set({ projects: (st.projects ?? []).map((p) => (p.id === e.target.dataset.pthreshold ? makeProject({ ...p, threshold: e.target.value }, p.id) : p)) });
     });
     el.addEventListener('input', (e) => {
       if (e.target.name === 'progress') e.target.nextElementSibling.textContent = `${e.target.value}٪`;
     });
     /** ربط المهمة بمشروعها: مهمة المشروع تأخذ اهتماماته (فلا تحمل اهتماماً خاصاً)، والحرّة تبقى باهتمامها. */
-    const withProject = (t, pid) => {
+    const withProject = (t, pid, goal) => {
       if (!pid) return t;
       const { category, color, ...rest } = t;
-      return { ...rest, project: pid };
+      const g = goal && (store.get().goals ?? []).some((x) => x.id === goal && x.project === pid) ? goal : undefined; // الهدف من المشروع نفسه فقط
+      return { ...rest, project: pid, ...(g ? { goal: g } : {}) };
     };
     el.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (e.target.matches('.pl-gadd')) {
+        const fd = Object.fromEntries(new FormData(e.target));
+        const st = store.get();
+        const g = makeGoal({ name: fd.gname, project: st.project, kind: fd.kind, weight: fd.weight, baseline: fd.baseline, target: fd.target, unit: fd.unit }, `g${uid()}`);
+        store.set({ goals: [...(st.goals ?? []), g] });
+        return;
+      }
       if (e.target.matches('.pl-padd')) {
         const fd = new FormData(e.target);
         const st = store.get();
@@ -413,12 +538,12 @@ export default {
       const s = store.get();
       if (e.target.matches('.pl-add')) {
         const later = e.submitter?.value === 'later';
-        const nt = withProject(makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid()), f.project);
+        const nt = withProject(makeTask({ ...f, ...(later ? { start: null, end: null } : {}), progress: 0 }, uid()), f.project, f.goal);
         store.set({ tasks: [...s.tasks, nt], lastCat: f.category, lastProject: f.project ?? '',
           hidden: (s.hidden ?? []).filter((x) => x !== f.category) }); // التصنيف المضاف إليه يظهر
       } else if (e.target.dataset.edit) {
         const id = e.target.dataset.edit;
-        store.set({ tasks: s.tasks.map((t) => (t.id === id ? withProject(makeTask(f, id), f.project) : t)) });
+        store.set({ tasks: s.tasks.map((t) => (t.id === id ? withProject(makeTask(f, id), f.project, f.goal) : t)) });
         editing = null;
         render();
       }
